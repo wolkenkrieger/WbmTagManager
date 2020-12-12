@@ -62,7 +62,7 @@ class KbaCodes extends ModelEntity {
 	private $active = TRUE;
 	
 	/**
-	 * @param \ItswCar\Models\Car[]|null $car
+	 * @param $car
 	 * @return \ItswCar\Models\KbaCodes
 	 */
 	public function setCar($car): KbaCodes {
@@ -75,9 +75,9 @@ class KbaCodes extends ModelEntity {
 	}
 	
 	/**
-	 * @return \ItswCar\Models\Car
+	 * @return \ItswCar\Models\Car|null
 	 */
-	public function getCar(): Car {
+	public function getCar(): ?Car {
 		return $this->car;
 	}
 	

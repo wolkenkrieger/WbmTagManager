@@ -301,10 +301,10 @@ class Car extends ModelEntity {
 	}
 	
 	/**
-	 * @param \ItswCar\Models\KbaCodes[]|null $codes
+	 * @param \Doctrine\Common\Collections\ArrayCollection $codes
 	 * @return \ItswCar\Models\Car
 	 */
-	public function setCodes(?array $codes): Car {
+	public function setCodes(ArrayCollection $codes): Car {
 		return $this->setOneToMany(
 			$codes,
 			KbaCodes::class,
@@ -316,7 +316,7 @@ class Car extends ModelEntity {
 	/**
 	 * @return \Doctrine\Common\Collections\ArrayCollection|null
 	 */
-	public function getCodes(): ?ArrayCollection {
+	public function getCodes() {
 		return $this->codes;
 	}
 	
