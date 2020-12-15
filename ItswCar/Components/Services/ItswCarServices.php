@@ -10,14 +10,17 @@
 
 namespace ItswCar\Components\Services;
 
-
+use ItswCar\Models\Car;
+use Shopware\Bundle\StoreFrontBundle\Gateway\DBAL\Hydrator\Hydrator;
 use Shopware\Components\DependencyInjection\Container;
 use Shopware\Components\Model\ModelManager;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 
 class ItswCarServices {
 	protected $container;
 	protected $modelManager;
+	protected $pluginLogger;
 	
 	/**
 	 * ItswCarServices constructor.
@@ -27,6 +30,7 @@ class ItswCarServices {
 	public function __construct(Container $container, ModelManager $modelManager) {
 		$this->container = $container;
 		$this->modelManager = $modelManager;
+		$this->pluginLogger = $container->get('pluginlogger');
 	}
 	
 	/**
@@ -114,5 +118,120 @@ class ItswCarServices {
 	 */
 	public function __isset($property) {
 		return isset($this->$property);
+	}
+	
+	/**
+	 * @return mixed
+	 */
+	public function setNoRender() {
+		return $this->container->get('front')->Plugins()->ViewRenderer()->setNoRender();
+	}
+	
+	/**
+	 * @return mixed
+	 */
+	public function setNeverRender() {
+		return $this->container->get('front')->Plugins()->ViewRenderer()->setNeverRender();
+	}
+	
+	/**
+	 * @param string $string
+	 * @return string
+	 */
+	public function getCleanedStringForUrl($string = ''):string {
+		$string = mb_strtolower(trim($string));
+		$umlauts = ['/ß/', '/Ä/', '/Ö/', '/Ü/', '/ä/', '/ö/', '/ü/'];
+		$umlautsReplacements = ['sz', 'Ae', 'Oe', 'Ue', 'ae', 'oe', 'ue'];
+		$patterns = [
+			'~&([a-z]{1,2})(?:acute|cedil|circ|grave|lig|orn|ring|slash|th|tilde|uml|caron);~i',
+			'/[^a-z0-9]+/i'
+		];
+		$patternsReplacements = ['$1', '-'];
+		
+		$string = preg_replace($umlauts, $umlautsReplacements, $string);
+		$string = preg_replace($patterns, $patternsReplacements, htmlentities($string, ENT_QUOTES, 'UTF-8'));
+		
+		return trim($string,' -');
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getManufacturersForCarfinder(): array {
+		$manufacturers = $this->modelManager->getRepository(\ItswCar\Models\Car::class)
+			->getManufacturersQuery([
+				'manufacturers.active = 1'
+			])
+			->getResult();
+		
+		foreach($manufacturers as $manufacturer) {
+			$return[] = [
+				'name' => $manufacturer->getName(),
+				'url' => $this->getCleanedStringForUrl($manufacturer->getName()),
+				'display' => $manufacturer->getDisplay(),
+				'id' => $manufacturer->getId()
+			];
+		}
+		
+		return $return??[];
+	}
+	
+	/**
+	 * @param int|null $manufacturerId
+	 * @return array
+	 */
+	public function getModelsForCarfinder(int $manufacturerId = NULL): array {
+		if (!$manufacturerId) {
+			throw new ParameterNotFoundException("manufacturerId");
+		}
+		
+		$models = $this->modelManager->getRepository(\ItswCar\Models\Car::class)
+			->getModelsByManufacturerIdQuery($manufacturerId, [
+				'models.active = 1',
+				'cars.active = 1'
+			])
+			->getResult();
+		
+		foreach($models as $model) {
+			$return[] = [
+				'name' => $model->getName(),
+				'url' => $this->getCleanedStringForUrl($model->getName()),
+				'display' => $model->getDisplay(),
+				'id' => $model->getId()
+			];
+		}
+		
+		return $return??[];
+	}
+	
+	/**
+	 * @param int|null $manufacturerId
+	 * @param int|null $modelId
+	 * @return array
+	 */
+	public function getTypesForCarfinder(int $manufacturerId = NULL, int $modelId = NULL): array {
+		if (!$manufacturerId) {
+			throw new ParameterNotFoundException("manufacturerId");
+		}
+		if (!$modelId) {
+			throw new ParameterNotFoundException("modelId");
+		}
+		$types = $this->modelManager->getRepository(\ItswCar\Models\Car::class)
+			->getTypesByManufacturerIdAndModelIdQuery($manufacturerId, $modelId, [
+				'types.active = 1',
+				'cars.active = 1'
+			])
+			->getResult();
+		
+		foreach($types as $type) {
+			$return[] = [
+				'name' => $type->getName(),
+				'url' => $this->getCleanedStringForUrl($type->getName()),
+				'display' => $type->getDisplay(),
+				'id' => $type->getId()
+			];
+		}
+		
+		return $return??[];
 	}
 }

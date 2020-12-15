@@ -105,11 +105,9 @@ class ItswCar extends Plugin {
 	public function onCollectPluginJavascript(\Enlight_Event_EventArgs $args) {
 		return new ArrayCollection(
 			[__DIR__ . '/Resources/frontend/vendors/select2-4.0.13/dist/js/select2.full.min.js'],
-			//[__DIR__ . '/Resources/frontend/js/jquery.fahrzeugfinder-select.js'],
-			//[__DIR__ . '/Resources/frontend/js/jquery.select-onchange.js'],
-			//[__DIR__ . '/Resources/frontend/js/jquery.trigger-button.js'],
-			//[__DIR__ . '/Resources/frontend/js/jquery.focus-next.js'],
-			//[__DIR__ . '/Resources/frontend/js/states.js']
+			[__DIR__ . '/Resources/frontend/js/jquery.carfinder.js.js'],
+			[__DIR__ . '/Resources/frontend/js/states.js'],
+			[__DIR__ . '/Resources/frontend/js/main.js']
 		);
 	}
 	
