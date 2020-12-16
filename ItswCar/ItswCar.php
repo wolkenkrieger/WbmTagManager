@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Projekt: ITSW Car
  * Autor:   Rico Wunglück <development@itsw.dev>
@@ -29,15 +29,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Shopware\Bundle\CookieBundle\CookieCollection;
 use Shopware\Bundle\CookieBundle\Structs\CookieGroupStruct;
 use Shopware\Bundle\CookieBundle\Structs\CookieStruct;
+use Shopware\Components\Theme\LessDefinition;
 
 
 class ItswCar extends Plugin {
 	/**
 	 * @param \Shopware\Components\Plugin\Context\InstallContext $context
-	 * @return array|void
-	 * @throws \Exception
 	 */
-	public function install(InstallContext $context) {
+	public function install(InstallContext $context): void {
 		try {
 			$this->createAttributes();
 			$this->updateSchemas();
@@ -48,9 +47,8 @@ class ItswCar extends Plugin {
 	
 	/**
 	 * @param \Shopware\Components\Plugin\Context\UpdateContext $context
-	 * @return array|void
 	 */
-	public function update(UpdateContext $context) {
+	public function update(UpdateContext $context): void {
 		try {
 			$this->createAttributes();
 			$this->updateSchemas();
@@ -62,7 +60,7 @@ class ItswCar extends Plugin {
 	/**
 	 * @param \Shopware\Components\Plugin\Context\ActivateContext $context
 	 */
-	public function activate(ActivateContext $context) {
+	public function activate(ActivateContext $context): void {
 		try {
 		$this->createAttributes();
 		$this->updateSchemas();
@@ -74,21 +72,21 @@ class ItswCar extends Plugin {
 	/**
 	 * @param \Shopware\Components\Plugin\Context\DeactivateContext $context
 	 */
-	public function deactivate(DeactivateContext $context) {
+	public function deactivate(DeactivateContext $context): void {
 		$context->scheduleClearCache(DeactivateContext::CACHE_LIST_ALL);
 	}
 	
 	/**
 	 * @param \Shopware\Components\Plugin\Context\UninstallContext $context
 	 */
-	public function uninstall(UninstallContext $context) {
+	public function uninstall(UninstallContext $context): void {
 		$context->scheduleClearCache(UninstallContext::CACHE_LIST_ALL);
 	}
 	
 	/**
 	 * @return string[]
 	 */
-	public static function getSubscribedEvents() {
+	public static function getSubscribedEvents(): array {
 		return [
 			'Theme_Inheritance_Template_Directories_Collected' => 'onCollectTemplateDir',
 			'Theme_Compiler_Collect_Plugin_Less' => 'onCollectPluginLess',
@@ -102,7 +100,7 @@ class ItswCar extends Plugin {
 	 * @param \Enlight_Event_EventArgs $args
 	 * @return \Doctrine\Common\Collections\ArrayCollection
 	 */
-	public function onCollectPluginJavascript(\Enlight_Event_EventArgs $args) {
+	public function onCollectPluginJavascript(\Enlight_Event_EventArgs $args): ArrayCollection {
 		return new ArrayCollection(
 			[__DIR__ . '/Resources/frontend/vendors/select2-4.0.13/dist/js/select2.full.min.js'],
 			[__DIR__ . '/Resources/frontend/js/jquery.carfinder.js.js'],
@@ -115,7 +113,7 @@ class ItswCar extends Plugin {
 	 * @param \Enlight_Event_EventArgs $args
 	 * @return \Doctrine\Common\Collections\ArrayCollection
 	 */
-	public function onCollectPluginCss(\Enlight_Event_EventArgs $args) {
+	public function onCollectPluginCss(\Enlight_Event_EventArgs $args): ArrayCollection {
 		return new ArrayCollection(
 			[__DIR__ . '/Resources/frontend/vendors/select2-4.0.13/dist/css/select2.min.css']
 		);
@@ -125,8 +123,8 @@ class ItswCar extends Plugin {
 	 * @param \Enlight_Event_EventArgs $args
 	 * @return \Shopware\Components\Theme\LessDefinition
 	 */
-	public function onCollectPluginLess(\Enlight_Event_EventArgs $args) {
-		return new \Shopware\Components\Theme\LessDefinition(
+	public function onCollectPluginLess(\Enlight_Event_EventArgs $args): LessDefinition {
+		return new LessDefinition(
 			[],
 			[__DIR__ . '/Resources/frontend/less/all.less']
 		);
@@ -135,8 +133,7 @@ class ItswCar extends Plugin {
 	/**
 	 * @param \Enlight_Event_EventArgs $args
 	 */
-	public function onCollectTemplateDir(\Enlight_Event_EventArgs $args)
-	{
+	public function onCollectTemplateDir(\Enlight_Event_EventArgs $args): void {
 		$dirs = $args->getReturn();
 		$dirs[] = __DIR__.'/Resources/views/';
 		
@@ -146,8 +143,7 @@ class ItswCar extends Plugin {
 	/**
 	 *
 	 */
-	
-	protected function createAttributes() {
+	protected function createAttributes(): void {
 		$service = Shopware()->Container()->get('shopware_attribute.crud_service');
 		$service->update('s_categories_attributes', 'ebay_category_id', 'float', [
 			'label' => 'eBay Category ID',
@@ -199,7 +195,7 @@ class ItswCar extends Plugin {
 	/**
 	 *
 	 */
-	public function updateSchemas() {
+	public function updateSchemas(): void {
 		$entityManager = Shopware()->Container()->get('models');
 		$schemaTool = new SchemaTool($entityManager);
 		$classes = [

@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 /**
  * Projekt: ITSW Car
  * Autor:   Rico Wunglück <development@itsw.dev>
@@ -147,5 +146,36 @@ class ArticleCarLinks extends ModelEntity {
 	 */
 	public function getActive(): bool {
 		return $this->active;
+	}
+	
+	/**
+	 * @param $property
+	 * @return mixed
+	 */
+	public function __get($property) {
+		if (property_exists($this, $property)) {
+			return $this->$property;
+		}
+	}
+	
+	/**
+	 * @param $property
+	 * @param $value
+	 * @return mixed
+	 */
+	public function __set($property, $value) {
+		if (property_exists($this, $property)) {
+			$this->$property = $value;
+			
+			return $this->$property;
+		}
+	}
+	
+	/**
+	 * @param $property
+	 * @return bool
+	 */
+	public function __isset($property): bool {
+		return isset($this->$property);
 	}
 }

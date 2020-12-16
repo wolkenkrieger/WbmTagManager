@@ -80,7 +80,7 @@ class Car extends ModelEntity {
 	 *     cascade={"persist", "remove"}
 	 * )
 	 */
-	private $codes;
+	protected $codes;
 	
 	/**
 	 * @var \Doctrine\Common\Collections\ArrayCollection<\ItswCar\Models\ArticleCarLinks>|null
@@ -91,74 +91,94 @@ class Car extends ModelEntity {
 	 *     cascade={"persist", "remove"}
 	 * )
 	 */
-	private $articleLinks;
+	protected $articleLinks;
 	
 	/**
 	 * @var int
 	 * @ORM\Id
 	 * @ORM\Column(name="tecdoc_id", type="integer", nullable=false, unique=true)
 	 */
-	private $tecdocId;
+	protected $tecdocId;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="manufacturer_id", type="integer", nullable=false)
 	 */
-	private $manufacturerId;
+	protected $manufacturerId;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="model_id", type="integer", nullable=false)
 	 */
-	private $modelId;
+	protected $modelId;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="type_id", type="integer", nullable=false)
 	 */
-	private $typeId;
+	protected $typeId;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="platform_id", type="integer", nullable=false)
 	 */
-	private $platformId;
+	protected $platformId;
 	
 	/**
 	 * @var \DateTimeImmutable
 	 * @ORM\Column(name="build_from", type="datetime_immutable", nullable=false)
 	 */
-	private $buildFrom;
+	protected $buildFrom;
 	
 	/**
 	 * @var \DateTimeImmutable
 	 * @ORM\Column(name="build_to", type="datetime_immutable", nullable=true)
 	 */
-	private $buildTo;
+	protected $buildTo;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="ccm", type="integer", nullable=false)
 	 */
-	private $ccm;
+	protected $ccm;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="kw", type="integer", nullable=false)
 	 */
-	private $kw;
+	protected $kw;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="ps", type="integer", nullable=false)
 	 */
-	private $ps;
+	protected $ps;
 	
 	/**
 	 * @var bool
 	 * @ORM\Column(name="active", type="boolean", nullable=false)
 	 */
-	private $active = TRUE;
+	protected $active = TRUE;
+	
+	/**
+	 * @var string
+	 */
+	protected $buildFromMonth;
+	
+	/**
+	 * @var string
+	 */
+	protected $buildFromYear;
+	
+	/**
+	 * @var string
+	 */
+	protected $buildToMonth;
+	
+	/**
+	 * @var string
+	 */
+	protected $buildToYear;
 	
 	public function __construct() {
 		$this->codes = new ArrayCollection();
@@ -379,14 +399,18 @@ class Car extends ModelEntity {
 	 * @return string
 	 */
 	public function getBuildFromMonth(): string {
-		return $this->buildFrom->format("m");
+		$this->buildFromMonth = $this->buildFrom->format("m");
+		
+		return $this->buildFromMonth;
 	}
 	
 	/**
 	 * @return string
 	 */
 	public function getBuildFromYear(): string {
-		return $this->buildFrom->format("Y");
+		$this->buildFromYear = $this->buildFrom->format("Y");
+		
+		return $this->buildFromYear;
 	}
 	
 	/**
@@ -410,14 +434,18 @@ class Car extends ModelEntity {
 	 * @return string
 	 */
 	public function getBuildToMonth(): string {
-		return $this->buildTo?$this->buildTo->format("m"):'';
+		$this->buildToMonth = $this->buildTo?$this->buildTo->format("m"):'';
+		
+		return $this->buildToMonth;
 	}
 	
 	/**
 	 * @return string
 	 */
 	public function getBuildToYear(): string {
-		return $this->buildTo?$this->buildTo->format("Y"):'';
+		$this->buildToYear = $this->buildTo?$this->buildTo->format("Y"):'';
+		
+		return $this->buildToYear;
 	}
 	
 	/**
@@ -493,5 +521,36 @@ class Car extends ModelEntity {
 	 */
 	public function toArray(): array {
 		return get_object_vars($this);
+	}
+	
+	/**
+	 * @param $property
+	 * @return mixed
+	 */
+	public function __get($property) {
+		if (property_exists($this, $property)) {
+			return $this->$property;
+		}
+	}
+	
+	/**
+	 * @param $property
+	 * @param $value
+	 * @return mixed
+	 */
+	public function __set($property, $value) {
+		if (property_exists($this, $property)) {
+			$this->$property = $value;
+			
+			return $this->$property;
+		}
+	}
+	
+	/**
+	 * @param $property
+	 * @return bool
+	 */
+	public function __isset($property): bool {
+		return isset($this->$property);
 	}
 }

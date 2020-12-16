@@ -106,10 +106,10 @@
                             dataType: 'json'
                         }).done(function (response) {
                            var content = response.data;
-                           console.log(content);
                            $.modal.open(content, {
-                               title: 'Fahrezugauswahl',
-                               sizing: 'content'
+                               title: 'Fahrzugauswahl',
+                               sizing: 'content',
+                               width: '800'
                            })
                         });
                     }

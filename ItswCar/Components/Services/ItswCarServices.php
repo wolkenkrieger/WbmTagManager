@@ -239,6 +239,8 @@ class ItswCarServices {
 			])
 			->getResult();
 		
+		
+		
 		foreach($types as $type) {
 			$return[] = [
 				'name' => $type->getName(),
@@ -271,10 +273,32 @@ class ItswCarServices {
 		$cars = $this->modelManager->getRepository(\ItswCar\Models\Car::class)
 			->getCarsByManufacturerIdAndModelIdAndTypeIdQuery($manufacturerId, $modelId, $typeId, [
 				'cars.active = 1'
+			], [
+				'cars.buildFrom' => 'ASC',
+				'cars.buildTo' => 'ASC'
 			])
 			->getResult();
 		
-		return $cars??[];
+		foreach($cars as $car) {
+			$codes = [];
+			foreach($car->getCodes() as $kbaCodes) {
+				$codes[] = [
+					'hsn' => $kbaCodes->getHsn(),
+					'tsn' => $kbaCodes->getTsn()
+				];
+			}
+			$result[] = array_merge($car->toArray(), [
+				'manufacturer' => $car->getManufacturer()->toArray(),
+				'model' => $car->getModel()->toArray(),
+				'type' => $car->getType()->toArray(),
+				'platform' => $car->getPlatform()->toArray(),
+				'codes' => $codes,
+				'buildFrom' => $car->getBuildFrom()->format('m/Y'),
+				'buildTo' => $car->getBuildTo()?$car->getBuildTo()->format('m/Y') : '---'
+			]);
+		}
+		
+		return $result??[];
 	}
 	
 	/**
