@@ -13,7 +13,7 @@ namespace ItswCar\Components\Subscribers;
 
 use Enlight\Event\SubscriberInterface;
 use ItswCar\Components\Eventhandlers\Eventhandlers as Eventhandler;
-use ItswCar\Components\Services\ItswCarServices;
+use ItswCar\Components\Services\Services;
 use Shopware\Components\DependencyInjection\Container;
 
 
@@ -27,16 +27,16 @@ class Subscribers implements SubscriberInterface {
 	 */
 	protected $container;
 	/**
-	 * @var \ItswCar\Components\Services\ItswCarServices
+	 * @var \ItswCar\Components\Services\Services
 	 */
 	protected $service;
 	
 	/**
 	 * Subscribers constructor.
 	 * @param \Shopware\Components\DependencyInjection\Container $container
-	 * @param \ItswCar\Components\Services\ItswCarServices       $service
+	 * @param \ItswCar\Components\Services\Services              $service
 	 */
-	public function __construct(Container $container, ItswCarServices $service) {
+	public function __construct(Container $container, Services $service) {
 		$this->container = $container;
 		$this->service = $service;
 		

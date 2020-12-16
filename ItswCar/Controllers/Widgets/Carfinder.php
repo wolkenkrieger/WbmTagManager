@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 /**
  * Projekt: ITSW Car
  * Autor:   Rico Wunglück <development@itsw.dev>

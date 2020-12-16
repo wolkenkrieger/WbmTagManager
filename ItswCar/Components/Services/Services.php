@@ -5,7 +5,7 @@ declare(strict_types=1);
  * Autor:   Rico Wunglück <development@itsw.dev>
  * Datum:   12.12.2020
  * Zeit:    16:06
- * Datei:   ItswCarServices.php
+ * Datei:   Services.php
  * @package ItswCar\Components\Services
  */
 
@@ -17,7 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\HttpFoundation\Cookie;
 
-class ItswCarServices {
+class Services {
 	protected $container;
 	protected $modelManager;
 	protected $pluginLogger;
@@ -29,7 +29,7 @@ class ItswCarServices {
 	protected $rootCategoryId = 5;
 	
 	/**
-	 * ItswCarServices constructor.
+	 * Services constructor.
 	 * @param \Shopware\Components\DependencyInjection\Container $container
 	 * @param \Shopware\Components\Model\ModelManager            $modelManager
 	 */

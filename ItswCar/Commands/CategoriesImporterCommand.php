@@ -28,9 +28,9 @@ class CategoriesImporterCommand extends ShopwareCommand {
 	
 	/**
 	 * CategoriesImporterCommand constructor.
-	 * @param \ItswCar\Components\Services\ItswCarServices $itswCarServices
+	 * @param \ItswCar\Components\Services\Services $itswCarServices
 	 */
-	public function __construct(\ItswCar\Components\Services\ItswCarServices $itswCarServices) {
+	public function __construct(\ItswCar\Components\Services\Services $itswCarServices) {
 		$this->itswCarServices = $itswCarServices;
 		
 		$this->setContainer($itswCarServices->getContainer());

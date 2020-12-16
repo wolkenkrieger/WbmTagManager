@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 /**
  * Projekt: ITSW Car
  * Autor:   Rico Wunglück <development@itsw.dev>
@@ -12,19 +11,19 @@ declare(strict_types=1);
 namespace ItswCar\Components\Eventhandlers;
 
 
-use ItswCar\Components\Services\ItswCarServices;
+use ItswCar\Components\Services\Services;
 
 class Eventhandlers {
 	/**
-	 * @var \ItswCar\Components\Services\ItswCarServices
+	 * @var \ItswCar\Components\Services\Services
 	 */
 	protected $service;
 	
 	/**
 	 * Eventhandlers constructor.
-	 * @param \ItswCar\Components\Services\ItswCarServices $service
+	 * @param \ItswCar\Components\Services\Services $service
 	 */
-	public function __construct(ItswCarServices $service) {
+	public function __construct(Services $service) {
 		$this->service = $service;
 	}
 	

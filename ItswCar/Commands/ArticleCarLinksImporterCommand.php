@@ -11,7 +11,7 @@
 namespace ItswCar\Commands;
 
 
-use ItswCar\Components\Services\ItswCarServices;
+use ItswCar\Components\Services\Services;
 use ItswCar\Models\ArticleCarLinks;
 use ItswCar\Models\Car;
 use Shopware\Commands\ShopwareCommand;
@@ -29,9 +29,9 @@ class ArticleCarLinksImporterCommand extends ShopwareCommand {
 	
 	/**
 	 * ArticleCarLinksImporterCommand constructor.
-	 * @param \ItswCar\Components\Services\ItswCarServices $itswCarServices
+	 * @param \ItswCar\Components\Services\Services $itswCarServices
 	 */
-	public function __construct(ItswCarServices $itswCarServices) {
+	public function __construct(Services $itswCarServices) {
 		$this->itswCarServices = $itswCarServices;
 		$this->setContainer($itswCarServices->getContainer());
 		$this->entityManager = $itswCarServices->getModelManager();
