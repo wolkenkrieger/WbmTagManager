@@ -7,8 +7,8 @@
  *}
 
 {if $cars}
-	<div class="itsw">
-		<div class="table modal--container">
+	<div class="itsw modal--container">
+		<div class="table">
 			<div class="table--head">
 				<div class="table--cell">Hersteller</div>
 				<div class="table--cell">Modell</div>
