@@ -10,43 +10,27 @@
         {block name="itsw_carfinder_widget__container"}
 			<div class="carfinder-widget--container">
 				<select id="manufacturers"
-						name="manufacturers"
+						name="manufacturer"
 						aria-label="Testlabel"
 						data-no-fancy-select="true"
 						disabled
-						data-itsw_getter="/widgets/carfinder/get-manufacturers"
-						data-itsw_setter="/widgets/carfinder/set-manufacturer"
-						data-itsw_trigger="models"
+						data-itsw-trigger="models"
 				>
-					<option selected value="1">Punkt 1</option>
-					<option value="2">Punkt 2</option>
 				</select>
 				<select id="models"
-						name="models"
+						name="model"
 						aria-label="Testlabel"
 						data-no-fancy-select="true"
 						disabled
-						data-itsw_getter="/widgets/carfinder/get-models"
-						data-itsw_setter="/widgets/carfinder/set-model"
-						data-itsw_manufacturer=""
-						data-itsw_trigger="types"
+						data-itsw-trigger="types"
 				>
-					<option selected value="1">Punkt 1</option>
-					<option value="2">Punkt 2</option>
 				</select>
 				<select id="types"
-						name="types"
+						name="type"
 						aria-label="Testlabel"
 						data-no-fancy-select="true"
 						disabled
-						data-itsw_getter="/widgets/carfinder/get-types"
-						data-itsw_setter="/wifgets/carfinder/set-type"
-						data-itsw_manufacturer=""
-						data-itsw_model=""
-						data-itsw_trigger=""
 				>
-					<option selected value="1">Punkt 1</option>
-					<option value="2">Punkt 2</option>
 				</select>
 			</div>
         {/block}

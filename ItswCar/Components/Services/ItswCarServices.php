@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Projekt: ITSW Car
  * Autor:   Rico Wunglück <development@itsw.dev>
@@ -10,17 +11,22 @@
 
 namespace ItswCar\Components\Services;
 
-use ItswCar\Models\Car;
-use Shopware\Bundle\StoreFrontBundle\Gateway\DBAL\Hydrator\Hydrator;
 use Shopware\Components\DependencyInjection\Container;
 use Shopware\Components\Model\ModelManager;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
+use Symfony\Component\HttpFoundation\Cookie;
 
 class ItswCarServices {
 	protected $container;
 	protected $modelManager;
 	protected $pluginLogger;
+	protected $front;
+	protected $basePath;
+	protected $cache;
+	protected $session;
+	
+	protected $rootCategoryId = 5;
 	
 	/**
 	 * ItswCarServices constructor.
@@ -30,7 +36,17 @@ class ItswCarServices {
 	public function __construct(Container $container, ModelManager $modelManager) {
 		$this->container = $container;
 		$this->modelManager = $modelManager;
-		$this->pluginLogger = $container->get('pluginlogger');
+		$this->pluginLogger = $this->container->get('pluginlogger');
+		$this->front = $this->container->get('front');
+		$this->cache = $this->container->get('shopware.cache_manager');
+		$this->session = $this->container->get('session');
+		$this->basePath = $this->container->get('shop')->getBasePath();
+		
+		if ($this->basePath === null || $this->basePath === '') {
+			$this->basePath = '/';
+		}
+		
+		$this->setSessionData($this->getSessionData());
 	}
 	
 	/**
@@ -233,5 +249,110 @@ class ItswCarServices {
 		}
 		
 		return $return??[];
+	}
+	
+	/**
+	 * @param int|null $manufacturerId
+	 * @param int|null $modelId
+	 * @param int|null $typeId
+	 * @return array
+	 */
+	public function getCarsForCarfinder(int $manufacturerId = NULL, int $modelId = NULL, int $typeId = NULL): array {
+		if (!$manufacturerId) {
+			throw new ParameterNotFoundException("manufacturerId");
+		}
+		if (!$modelId) {
+			throw new ParameterNotFoundException("modelId");
+		}
+		if (!$typeId) {
+			throw new ParameterNotFoundException("typeId");
+		}
+		
+		$cars = $this->modelManager->getRepository(\ItswCar\Models\Car::class)
+			->getCarsByManufacturerIdAndModelIdAndTypeIdQuery($manufacturerId, $modelId, $typeId, [
+				'cars.active = 1'
+			])
+			->getResult();
+		
+		return $cars??[];
+	}
+	
+	/**
+	 * @param array $data
+	 * @param bool  $full
+	 * @return array
+	 */
+	public function setSessionData(array $data = [], bool $full = FALSE): array {
+		if (!$full) {
+			$tmp = [
+				'manufacturer' => $data['manufacturer'],
+				'model' => $data['model'],
+				'type' => $data['type'],
+				'car' => $data['car']??NULL
+			];
+			
+			$data = $tmp;
+		}
+		
+		if ($dataEncoded = json_encode($data)) {
+			$expire = new \DateTime();
+			$expire->modify('+7 day');
+			$this->front->Response()->headers->setCookie(
+				new Cookie(
+					'itsw_cache',
+					$dataEncoded,
+					0,
+					$this->basePath,
+					NULL,
+					FALSE,
+					FALSE,
+					TRUE
+				)
+			);
+		}
+		
+		return $this->getSessionData(TRUE);
+	}
+	
+	/**
+	 * @param bool $full
+	 * @return array
+	 */
+	public function getSessionData(bool $full = FALSE): array {
+		if ($cookieData = $this->front->Request()->getCookie('itsw_cache')) {
+			$sessionData = json_decode($cookieData, TRUE);
+			$this->session->offsetSet('itsw-session-data', $sessionData);
+		}
+		
+		if ($this->session->offsetExists('itsw-session-data')) {
+			$sessionData = $this->session->offsetGet('itsw-session-data');
+			if ($full) {
+				return $sessionData;
+			} else {
+				return [
+					'manufacturer' => $sessionData['manufacturer'],
+					'model' => $sessionData['model'],
+					'type' => $sessionData['type'],
+					'car' => $sessionData['car']??NULL
+				];
+			}
+		}
+		
+		return [];
+	}
+	
+	/**
+	 * @param array $url
+	 * @return mixed
+	 */
+	public function getUrl(array $url) {
+		return $this->container->get('router')->assemble($url);
+	}
+	
+	/**
+	 * @return int
+	 */
+	public function getRootCategoryId(): int {
+		return $this->rootCategoryId;
 	}
 }

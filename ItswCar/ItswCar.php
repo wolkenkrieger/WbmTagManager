@@ -223,7 +223,7 @@ class ItswCar extends Plugin {
 		$collection = new CookieCollection();
 		
 		$collection->add(new CookieStruct(
-			'technical',
+			'itswCache',
 			'/^itsw_cache$/',
 			'Modul "ITSW Car" - techn. Daten',
 			CookieGroupStruct::TECHNICAL

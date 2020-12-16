@@ -10,7 +10,7 @@
 	<option
 			data-id="{$manufacturer.id}"
 			value="{$manufacturer.id}"
-            {if $manufacturer.selected}selected="selected"{/if}
+            {if $manufacturer.id === $session.manufacturer}selected="selected"{/if}
 	>
         {$manufacturer.display}
 	</option>

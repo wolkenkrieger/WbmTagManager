@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Projekt: ITSW Car
  * Autor:   Rico Wunglück <development@itsw.dev>
@@ -211,5 +212,54 @@ class Repository extends ModelRepository {
 	 */
 	public function getTypesByManufacturerIdAndModelIdQuery(int $manufacturerId, int $modelId, array $filters = [], array $sortings = []): Query {
 		return $this->getTypesByManufacturerIdAndModelIdQueryBuilder($manufacturerId, $modelId, $filters, $sortings)->getQuery();
+	}
+	
+	/**
+	 * @param int   $manufacturerId
+	 * @param int   $modelId
+	 * @param int   $typeId
+	 * @param array $filters
+	 * @param array $sortings
+	 * @return \Doctrine\ORM\QueryBuilder
+	 */
+	public function getCarsByManufacturerIdAndModelIdAndTypeIdQueryBuilder(int $manufacturerId, int $modelId, int $typeId, array $filters = [], array $sortings = []): QueryBuilder {
+		$builder = $this->getEntityManager()->createQueryBuilder();
+		$builder->select([
+			'cars'
+		])
+			->from(Car::class, 'cars')
+			->distinct(TRUE)
+			->where('cars.manufacturerId = :manufacturerId AND cars.modelId = :modelId AND cars.typeId = :typeId')
+			->setParameters(new ArrayCollection([
+				new Query\Parameter('manufacturerId', $manufacturerId),
+				new Query\Parameter('modelId', $modelId),
+				new Query\Parameter('typeId', $typeId)
+			]));
+		
+		foreach($filters as $filter) {
+			$builder->andWhere($filter);
+		}
+		
+		if (!empty($sortings)) {
+			foreach ($sortings as $sort => $order) {
+				$builder->addOrderBy($sort, $order);
+			}
+		} else {
+			$builder->addOrderBy('cars.tecdocId', 'ASC');
+		}
+		
+		return $builder;
+	}
+	
+	/**
+	 * @param int   $manufacturerId
+	 * @param int   $modelId
+	 * @param int   $typeId
+	 * @param array $filters
+	 * @param array $sortings
+	 * @return \Doctrine\ORM\Query
+	 */
+	public function getCarsByManufacturerIdAndModelIdAndTypeIdQuery(int $manufacturerId, int $modelId, int $typeId, array $filters = [], array $sortings = []): Query {
+		return $this->getCarsByManufacturerIdAndModelIdAndTypeIdQueryBuilder($manufacturerId, $modelId, $typeId, $filters, $sortings)->getQuery();
 	}
 }
