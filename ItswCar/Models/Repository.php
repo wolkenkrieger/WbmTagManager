@@ -55,6 +55,49 @@ class Repository extends ModelRepository {
 	}
 	
 	/**
+	 * @param array $conditions
+	 * @param array $sortings
+	 * @return \Doctrine\ORM\QueryBuilder
+	 */
+	public function getCarsQueryBuilder(array $conditions = [], array $sortings = []): QueryBuilder {
+		$builder = $this->getEntityManager()->createQueryBuilder()
+			->select([
+				'cars'
+			])
+			->from(Car::class, 'cars');
+		
+		$parameterCount = 1;
+		foreach($conditions as $condition => $value) {
+			if (is_numeric($condition)) {
+				$builder->andWhere($value);
+			} else if (strpos($condition, ' =') !== FALSE) {
+				$builder->andWhere($condition . ' ?' . $parameterCount)
+					->setParameter($parameterCount++, $value);
+			} else {
+				$builder->andWhere($condition . ' = ?' . $parameterCount)
+					->setParameter($parameterCount++, $value);
+			}
+		}
+		
+		if (!empty($sortings)) {
+			foreach ($sortings as $sort => $order) {
+				$builder->addOrderBy($sort, $order);
+			}
+		}
+		
+		return $builder;
+	}
+	
+	/**
+	 * @param array $conditions
+	 * @param array $sortings
+	 * @return \Doctrine\ORM\Query
+	 */
+	public function getCarsQuery(array $conditions = [], array $sortings = []): Query {
+		return $this->getCarsQueryBuilder($conditions, $sortings)->getQuery();
+	}
+	
+	/**
 	 * @param array $filters
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */

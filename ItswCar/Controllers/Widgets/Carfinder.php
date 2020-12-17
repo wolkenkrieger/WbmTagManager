@@ -20,7 +20,16 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	
 	public function indexAction(): void {
 		$sessionData = $this->service->getSessionData();
-		$this->View()->assign('showSelect', !(bool)$sessionData['car']);
+		$carSet = (bool)$sessionData['car'];
+		$this->View()->assign('showSelect', !$carSet);
+		
+		if ($carSet) {
+			$car = $this->service->getCarsForCarfinder([
+				'cars.tecdocId' => $sessionData['car']
+			], []);
+			
+			$this->View()->assign('car', reset($car));
+		}
 	}
 	
 	/**
@@ -275,7 +284,15 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				throw new \RuntimeException('typeId');
 			}
 			
-			$cars = $this->service->getCarsForCarfinder($manufacturerId, $modelId, $typeId);
+			$cars = $this->service->getCarsForCarfinder([
+				'cars.manufacturerId' => $manufacturerId,
+				'cars.modelId' => $modelId,
+				'cars.typeId' => $typeId,
+				'cars.active' => 1
+			], [
+				'cars.buildFrom' => 'ASC',
+				'cars.buildTo' => 'ASC'
+			]);
 			
 			$rendered = $this->View()
 				->loadTemplate('widgets/carfinder/render/get_cars_modal.tpl')

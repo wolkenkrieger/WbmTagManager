@@ -9,7 +9,7 @@
 {if $cars}
 	<div class="itsw modal--container">
 		<div class="table toggle">
-			<div class="table--head">
+			<div class="table--header">
 				<div class="table--cell">Bezeichnung</div>
 				<div class="table--cell">Motor</div>
 				<div class="table--cell">Baujahr</div>

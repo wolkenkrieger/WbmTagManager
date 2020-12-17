@@ -262,30 +262,12 @@ class Services {
 	}
 	
 	/**
-	 * @param int|null $manufacturerId
-	 * @param int|null $modelId
-	 * @param int|null $typeId
+	 * @param array $conditions
+	 * @param array $sortings
 	 * @return array
 	 */
-	public function getCarsForCarfinder(int $manufacturerId = NULL, int $modelId = NULL, int $typeId = NULL): array {
-		if (!$manufacturerId) {
-			throw new ParameterNotFoundException("manufacturerId");
-		}
-		if (!$modelId) {
-			throw new ParameterNotFoundException("modelId");
-		}
-		if (!$typeId) {
-			throw new ParameterNotFoundException("typeId");
-		}
-		
-		$cars = $this->modelManager->getRepository(Car::class)
-			->getCarsByManufacturerIdAndModelIdAndTypeIdQuery($manufacturerId, $modelId, $typeId, [
-				'cars.active = 1'
-			], [
-				'cars.buildFrom' => 'ASC',
-				'cars.buildTo' => 'ASC'
-			])
-			->getResult();
+	public function getCarsForCarfinder(array $conditions = [], array $sortings = []): array {
+		$cars = $this->getCars($conditions, $sortings);
 		
 		foreach($cars as $car) {
 			$codes = [];
@@ -307,6 +289,17 @@ class Services {
 		}
 		
 		return $result??[];
+	}
+	
+	/**
+	 * @param array $conditions
+	 * @param array $sortings
+	 * @return mixed
+	 */
+	public function getCars(array $conditions = [], array $sortings = []) {
+		return $this->modelManager->getRepository(Car::class)
+			->getCarsQuery($conditions, $sortings)
+			->getResult();
 	}
 	
 	/**
