@@ -95,8 +95,7 @@
             }).done(function (response) {
                 if (response.success === true) {
                     $('#' + me.opts.trigger).trigger('init');
-                    
-                    if (response.url) {
+                    if (response.type) {
                         var url = me.opts.baseUrl + me.opts.carGetter +
                             '/manufacturer/' + me.opts.manufacturer +
                             '/model/' + me.opts.model +
@@ -105,12 +104,12 @@
                             url: url,
                             dataType: 'json'
                         }).done(function (response) {
-                           var content = response.data;
-                           $.modal.open(content, {
-                               title: 'Fahrzugauswahl',
-                               sizing: 'content',
-                               width: '800'
-                           })
+                            var content = response.data;
+                            $.modal.open(content, {
+                                title: 'Fahrzugauswahl',
+                                sizing: 'content',
+                                width: '900'
+                            })
                         });
                     }
                 }

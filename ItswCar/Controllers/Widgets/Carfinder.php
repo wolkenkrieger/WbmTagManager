@@ -19,6 +19,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	}
 	
 	public function indexAction(): void {
+		$sessionData = $this->service->getSessionData();
+		$this->View()->assign('showSelect', !(bool)$sessionData['car']);
 	}
 	
 	/**
@@ -106,8 +108,10 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'data' => $rendered,
 				'manufacturer' => $manufacturerId,
 				'model' => $modelId,
-				'type' => NULL
+				'type' => NULL,
+				'car' => NULL
 			];
+			
 		} catch (\Exception $e) {
 			$this->setLog($e);
 			
@@ -148,7 +152,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'data' => NULL,
 				'manufacturer' => $manufacturerId,
 				'model' => $modelId,
-				'type' => $typeId
+				'type' => $typeId,
+				'car' => NULL
 			];
 			
 			$this->service->setSessionData($result);
@@ -192,7 +197,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'data' => NULL,
 				'manufacturer' => $manufacturerId,
 				'model' => $modelId,
-				'type' => $typeId
+				'type' => $typeId,
+				'car' => NULL
 			];
 			
 			$this->service->setSessionData($result);
@@ -233,17 +239,9 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'manufacturer' => $manufacturerId,
 				'model' => $modelId,
 				'type' => $typeId,
+				'car' => NULL
 			];
 			$this->service->setSessionData($result);
-			
-			$result['url'] = $this->service->getUrl([
-				'controller' => 'cat',
-				'module' => 'frontend',
-				'action' => 'index',
-				'sCategory' => $this->service->getRootCategoryId(),
-				'rewriteUrl' => 1
-			]);
-			
 		} catch (\Exception $e) {
 			$this->setLog($e);
 			
@@ -262,7 +260,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	public function getCarsAction(): void {
 		try {
 			$this->Request()->setHeader('Content-Type', 'application/json');
-			$this->service->setNoRender();
+			$this->service->setNeverRender();
 			$manufacturerId = (int)$this->Request()->getParam('manufacturer');
 			$modelId = (int)$this->Request()->getParam('model');
 			$typeId = (int)$this->Request()->getParam('type');
@@ -291,6 +289,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'manufacturer' => $manufacturerId,
 				'model' => $modelId,
 				'type' => $typeId,
+				'car' => NULL
 			];
 			
 		} catch (\Exception $e) {
@@ -303,6 +302,87 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 		}
 		
 		$this->Response()->setBody(json_encode($result));
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function setCarAction(): bool {
+		try {
+			$tecdocId = (int)$this->Request()->getParam('car');
+			$manufacturerId = (int)$this->Request()->getParam('manufacturer');
+			$modelId = (int)$this->Request()->getParam('model');
+			$typeId = (int)$this->Request()->getParam('type');
+			
+			if (!$tecdocId) {
+				throw new \RuntimeException('id');
+			}
+			
+			if (!$manufacturerId || !$modelId || $typeId) {
+				$ids = $this->service->getIdsByTecdocId($tecdocId);
+				$manufacturerId = $ids['manufacturerId'];
+				$modelId = $ids['modelId'];
+				$typeId = $ids['typeId'];
+			}
+			
+			$result = [
+				'success' => TRUE,
+				'manufacturer' => $manufacturerId,
+				'model' => $modelId,
+				'type' => $typeId,
+				'car' => $tecdocId
+			];
+			
+			$this->service->setSessionData($result);
+			
+			$url = $this->service->getUrl([
+				'controller' => 'cat',
+				'module' => 'frontend',
+				'action' => 'index',
+				//'sCategory' => $this->service->getRootCategoryId(),
+				'sCategory' => 6,
+				'rewriteUrl' => 1
+			]);
+			
+			$this->redirect($url);
+			
+		} catch (\Exception $e) {
+			$this->setLog($e);
+		}
+		
+		return TRUE;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function unsetCarAction(): bool {
+		try {
+			$result = [
+				'success' => TRUE,
+				'manufacturer' => NULL,
+				'model' => NULL,
+				'type' => NULL,
+				'car' => NULL
+			];
+			
+			$this->service->setSessionData($result);
+			
+			$url = $this->service->getUrl([
+				'controller' => 'cat',
+				'module' => 'frontend',
+				'action' => 'index',
+				//'sCategory' => $this->service->getRootCategoryId(),
+				'sCategory' => 6,
+				'rewriteUrl' => 1
+			]);
+			
+			$this->redirect($url);
+		} catch (\Exception $e) {
+			$this->setLog($e);
+		}
+		
+		return TRUE;
 	}
 	
 	/**

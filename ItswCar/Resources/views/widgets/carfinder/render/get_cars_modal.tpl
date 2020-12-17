@@ -8,29 +8,23 @@
 
 {if $cars}
 	<div class="itsw modal--container">
-		<div class="table">
+		<div class="table toggle">
 			<div class="table--head">
-				<div class="table--cell">Hersteller</div>
-				<div class="table--cell">Modell</div>
-				<div class="table--cell">Typ</div>
+				<div class="table--cell">Bezeichnung</div>
+				<div class="table--cell">Motor</div>
+				<div class="table--cell">Baujahr</div>
 				<div class="table--cell">Platform</div>
-				<div class="table--cell">kW</div>
-				<div class="table--cell">PS</div>
-				<div class="table--cell">ccm&sup3;</div>
-				<div class="table--cell">Bauzeitraum</div>
 				<div class="table--cell">HSN/TSN</div>
+				<div class="table--cell"></div>
 			</div>
             {foreach $cars as $car}
 				<div class="table--row">
-					<div class="table--cell">{$car.manufacturer.display}</div>
-					<div class="table--cell">{$car.model.display}</div>
-					<div class="table--cell">{$car.type.display}</div>
-					<div class="table--cell">{$car.platform.display}</div>
-					<div class="table--cell">{$car.kw}</div>
-					<div class="table--cell">{$car.ps}</div>
-					<div class="table--cell">{$car.ccm}</div>
-					<div class="table--cell">{$car.buildFrom} - {$car.buildTo}</div>
-					<div class="table--cell">{foreach name=codes item=code from=$car.codes}{$code.hsn}/{$code.tsn}{if !$smarty.foreach.codes.last}&nbsp;{/if}{/foreach}</div>
+					<div class="table--cell min-width--80">{$car.manufacturer.display}&nbsp;{$car.model.display}&nbsp;{$car.type.display}</div>
+					<div class="table--cell min-width--80">{$car.ccm}&nbsp;cm&sup3;, {$car.ps}&nbsp;PS, {$car.kw}&nbsp;kW</div>
+					<div class="table--cell min-width--80">{$car.buildFrom} - {$car.buildTo}</div>
+					<div class="table--cell min-width--80">{$car.platform.display}</div>
+					<div class="table--cell min-width--80">{foreach name=codes item=code from=$car.codes}{$code.hsn}/{$code.tsn}{if !$smarty.foreach.codes.last} {/if}{/foreach}</div>
+					<div class="table--cell is--right"><a class="btn is--icon-right is--small is--primary" href="{url controller="carfinder" module="widgets" action="set-car" manufacturer=$car.manufacturer.id model=$car.model.id type=$car.type.id car=$car.tecdocId}">Wählen<i class="icon--check"></i></a></div>
 				</div>
             {/foreach}
 		</div>

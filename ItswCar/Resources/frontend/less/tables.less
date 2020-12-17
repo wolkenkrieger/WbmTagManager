@@ -10,16 +10,46 @@
   display: table;
   width: 100%;
 
+  &.toggle {
+      .table--row:nth-child(even) {
+        background-color: @table-row-highlight-bg;
+      }
+  }
+
   &--head {
+    width: 100%;
     display: table-header-group;
+    background-color: @table-header-bg;
+    color: @table-header-color;
+    .unitize(padding, @table--header-padding);
+
+    .table--cell {
+      .unitize(padding, @table--header-padding);
+    }
   }
 
   &--row {
+    with: 100%;
+    display: table-row;
+    background-color: @table-row-bg;
+    color: @table-row-color;
+  }
+
+  &--content {
+    width: 100%;
     display: table-row-group;
   }
 
   &--cell {
     display: table-cell;
-    padding: 2px;
+    .unitize(padding, @table--cell-padding);
+
+    &.is--right {
+      text-align: right;
+    }
+
+    &.min-width--80 {
+      .unitize(min-width, 80);
+    }
   }
 }

@@ -262,4 +262,48 @@ class Repository extends ModelRepository {
 	public function getCarsByManufacturerIdAndModelIdAndTypeIdQuery(int $manufacturerId, int $modelId, int $typeId, array $filters = [], array $sortings = []): Query {
 		return $this->getCarsByManufacturerIdAndModelIdAndTypeIdQueryBuilder($manufacturerId, $modelId, $typeId, $filters, $sortings)->getQuery();
 	}
+	
+	/**
+	 * @param int   $tecdocId
+	 * @param array $filters
+	 * @param array $sortings
+	 * @return \Doctrine\ORM\QueryBuilder
+	 */
+	public function getIdsByTecdocIdQueryBuilder(int $tecdocId, array $filters = [], array $sortings = []): QueryBuilder {
+		$builder = $this->getEntityManager()->createQueryBuilder();
+		$builder->select([
+			'cars.tecdocId',
+			'cars.manufacturerId',
+			'cars.modelId',
+			'cars.typeId',
+			'cars.platformId'
+		])
+			->from(Car::class, 'cars')
+			->where('cars.tecdocId = :tecdocId')
+			->setParameter('tecdocId', $tecdocId);
+		
+		foreach($filters as $filter) {
+			$builder->andWhere($filter);
+		}
+		
+		if (!empty($sortings)) {
+			foreach ($sortings as $sort => $order) {
+				$builder->addOrderBy($sort, $order);
+			}
+		} else {
+			$builder->addOrderBy('cars.tecdocId', 'ASC');
+		}
+		
+		return $builder;
+	}
+	
+	/**
+	 * @param int   $tecdocId
+	 * @param array $filters
+	 * @param array $sortings
+	 * @return \Doctrine\ORM\Query
+	 */
+	public function getIdsByTecdocIdQuery(int $tecdocId, array $filters = [], array $sortings = []): Query {
+		return $this->getIdsByTecdocIdQueryBuilder($tecdocId, $filters, $sortings)->getQuery();
+	}
 }

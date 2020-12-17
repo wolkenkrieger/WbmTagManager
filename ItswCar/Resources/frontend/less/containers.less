@@ -6,3 +6,7 @@
  * Datei:   containers.less
  * @package 
  */
+.modal--container, &.modal--container {
+  .unitize-width(@modal--container-width);
+  .unitize(padding, @modal--container-padding);
+}

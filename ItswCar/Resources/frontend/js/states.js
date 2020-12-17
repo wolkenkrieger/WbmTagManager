@@ -8,6 +8,6 @@
  */
 (function($, window) {
     window.StateManager
-        .addPlugin('.carfinder-widget--container select', 'itswCarFinder')
+        .addPlugin('select[data-itsw-select="true"]', 'itswCarFinder')
     ;
 })(jQuery, window);

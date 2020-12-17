@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace ItswCar\Components\Services;
 
+use ItswCar\Models\Car;
 use Shopware\Components\DependencyInjection\Container;
 use Shopware\Components\Model\ModelManager;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -151,6 +152,13 @@ class Services {
 	}
 	
 	/**
+	 * @return mixed
+	 */
+	public function setJsonRender() {
+		return $this->container->get('front')->Plugins()->Json()->setRenderer();
+	}
+	
+	/**
 	 * @param string $string
 	 * @return string
 	 */
@@ -174,7 +182,7 @@ class Services {
 	 * @return array
 	 */
 	public function getManufacturersForCarfinder(): array {
-		$manufacturers = $this->modelManager->getRepository(\ItswCar\Models\Car::class)
+		$manufacturers = $this->modelManager->getRepository(Car::class)
 			->getManufacturersQuery([
 				'manufacturers.active = 1'
 			])
@@ -201,7 +209,7 @@ class Services {
 			throw new ParameterNotFoundException("manufacturerId");
 		}
 		
-		$models = $this->modelManager->getRepository(\ItswCar\Models\Car::class)
+		$models = $this->modelManager->getRepository(Car::class)
 			->getModelsByManufacturerIdQuery($manufacturerId, [
 				'models.active = 1',
 				'cars.active = 1'
@@ -232,7 +240,7 @@ class Services {
 		if (!$modelId) {
 			throw new ParameterNotFoundException("modelId");
 		}
-		$types = $this->modelManager->getRepository(\ItswCar\Models\Car::class)
+		$types = $this->modelManager->getRepository(Car::class)
 			->getTypesByManufacturerIdAndModelIdQuery($manufacturerId, $modelId, [
 				'types.active = 1',
 				'cars.active = 1'
@@ -270,7 +278,7 @@ class Services {
 			throw new ParameterNotFoundException("typeId");
 		}
 		
-		$cars = $this->modelManager->getRepository(\ItswCar\Models\Car::class)
+		$cars = $this->modelManager->getRepository(Car::class)
 			->getCarsByManufacturerIdAndModelIdAndTypeIdQuery($manufacturerId, $modelId, $typeId, [
 				'cars.active = 1'
 			], [
@@ -378,5 +386,21 @@ class Services {
 	 */
 	public function getRootCategoryId(): int {
 		return $this->rootCategoryId;
+	}
+	
+	/**
+	 * @param int $tecdocId
+	 * @return array
+	 */
+	public function getIdsByTecdocId(int $tecdocId): array {
+		$ids = $this->modelManager->getRepository(Car::class)
+			->getIdsByTecdocIdQuery($tecdocId)
+			->getArrayResult();
+		
+		if (!empty($ids)) {
+			return reset($ids);
+		}
+		
+		return [];
 	}
 }
