@@ -32,7 +32,6 @@ class CategoriesImporterCommand extends ShopwareCommand {
 	 */
 	public function __construct(\ItswCar\Components\Services\Services $itswCarServices) {
 		$this->itswCarServices = $itswCarServices;
-		
 		$this->setContainer($itswCarServices->getContainer());
 		$this->entityManager = $itswCarServices->getModelManager();
 		$this->environment = $itswCarServices->getEnvironment();

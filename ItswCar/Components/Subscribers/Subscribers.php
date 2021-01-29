@@ -13,6 +13,7 @@ namespace ItswCar\Components\Subscribers;
 
 use Enlight\Event\SubscriberInterface;
 use ItswCar\Components\Eventhandlers\Eventhandlers as Eventhandler;
+use ItswCar\Components\Eventhandlers\CategoryConditionHandler;
 use ItswCar\Components\Services\Services;
 use Shopware\Components\DependencyInjection\Container;
 
@@ -49,6 +50,7 @@ class Subscribers implements SubscriberInterface {
 	public static function getSubscribedEvents(): array {
 		return [
 			'Enlight_Controller_Action_PostDispatchSecure_Frontend'         => 'onPostDispatchSecureFrontend',
+			'Shopware_SearchBundleDBAL_Collect_Condition_Handlers'          => 'onCollectConditionHandlers'
 		];
 	}
 	
@@ -57,5 +59,12 @@ class Subscribers implements SubscriberInterface {
 	 */
 	public function onPostDispatchSecureFrontend(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
 		$this->eventHandler->onPostDispatchSecureFrontend($actionEventArgs);
+	}
+	
+	/**
+	 * @return \ItswCar\Components\Eventhandlers\CategoryConditionHandler
+	 */
+	public function onCollectConditionHandlers(): CategoryConditionHandler {
+		return new CategoryConditionHandler($this->service);
 	}
 }
