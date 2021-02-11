@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 /**
  * Projekt: ITSW Car
  * Autor:   Rico Wunglück <development@itsw.dev>
@@ -40,14 +39,14 @@ class Services {
 		$this->pluginLogger = $this->container->get('pluginlogger');
 		$this->front = $this->container->get('front');
 		$this->cache = $this->container->get('shopware.cache_manager');
-		$this->session = $this->container->get('session');
-		$this->basePath = $this->container->get('shop')->getBasePath();
+		
+		if ($this->container->has('shop')) {
+			$this->basePath = $this->container->get('shop')->getBasePath();
+		}
 		
 		if ($this->basePath === null || $this->basePath === '') {
 			$this->basePath = '/';
 		}
-		
-		$this->setSessionData($this->getSessionData());
 	}
 	
 	/**
@@ -344,6 +343,10 @@ class Services {
 	 * @return array
 	 */
 	public function getSessionData(bool $full = FALSE): array {
+		if (!is_object($this->session)) {
+			$this->session = $this->container->get('session');
+		}
+		
 		if ($cookieData = $this->front->Request()->getCookie('itsw_cache')) {
 			$sessionData = json_decode($cookieData, TRUE);
 			$this->session->offsetSet('itsw-session-data', $sessionData);

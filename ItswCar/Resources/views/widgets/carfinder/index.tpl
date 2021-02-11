@@ -75,9 +75,7 @@
 						</div>
 					</div>
 				</div>
-
             {/block}
 		</div>
 	{/block}
-	{debug}
 {/block}

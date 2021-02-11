@@ -59,6 +59,49 @@ class Repository extends ModelRepository {
 	 * @param array $sortings
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */
+	public function getCarLinksQueryBuilder(array $conditions = [], array $sortings = []): QueryBuilder {
+		$builder = $this->getEntityManager()->createQueryBuilder()
+			->select([
+				'articleCarLinks'
+			])
+			->from(ArticleCarLinks::class, 'articleCarLinks');
+		
+		$parameterCount = 1;
+		foreach($conditions as $condition => $value) {
+			if (is_numeric($condition)) {
+				$builder->andWhere($value);
+			} else if (strpos($condition, ' =') !== FALSE) {
+				$builder->andWhere($condition . ' ?' . $parameterCount)
+					->setParameter($parameterCount++, $value);
+			} else {
+				$builder->andWhere($condition . ' = ?' . $parameterCount)
+					->setParameter($parameterCount++, $value);
+			}
+		}
+		
+		if (!empty($sortings)) {
+			foreach ($sortings as $sort => $order) {
+				$builder->addOrderBy($sort, $order);
+			}
+		}
+		
+		return $builder;
+	}
+	
+	/**
+	 * @param array $conditions
+	 * @param array $sortings
+	 * @return \Doctrine\ORM\Query
+	 */
+	public function getCarLinksQuery(array $conditions = [], array $sortings = []): Query {
+		return $this->getCarLinksQueryBuilder($conditions, $sortings)->getQuery();
+	}
+	
+	/**
+	 * @param array $conditions
+	 * @param array $sortings
+	 * @return \Doctrine\ORM\QueryBuilder
+	 */
 	public function getCarsQueryBuilder(array $conditions = [], array $sortings = []): QueryBuilder {
 		$builder = $this->getEntityManager()->createQueryBuilder()
 			->select([

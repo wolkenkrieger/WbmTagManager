@@ -39,26 +39,25 @@ class ArticleCarLinks extends ModelEntity {
 	 * @ORM\Id
 	 * @ORM\Column(name="article_details_id", type="integer", nullable=false)
 	 */
-	private $articleDetailsId;
+	protected $articleDetailsId;
 	
 	/**
 	 * @var int
-	 * @ORM\Id
 	 * @ORM\Column(name="tecdoc_id", type="integer", nullable=false)
 	 */
-	private $tecdocId;
+	protected $tecdocId;
 	
 	/**
 	 * @var string
 	 * @ORM\Column(name="restriction", type="string", nullable=false, length=1024)
 	 */
-	private $restriction = '';
+	protected $restriction = '';
 	
 	/**
 	 * @var bool
 	 * @ORM\Column(name="active", type="boolean", nullable=false)
 	 */
-	private $active = TRUE;
+	protected $active = TRUE;
 	
 	/**
 	 * @param $car
