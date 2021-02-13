@@ -10,6 +10,7 @@
 
 namespace ItswCar\Components\Api\Resource;
 
+use Shopware\Components\Api\Exception as ApiException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\ORMException;
 use Shopware\Components\Api\Resource\Category as CategoryResource;
@@ -19,11 +20,12 @@ use Shopware\Components\Api\Resource\Translation;
 use Shopware\Components\Api\Resource\Variant;
 use Shopware\Components\Model\QueryBuilder;
 use Shopware\Models\Article\Article as ProductModel;
-use Shopware\Models\Article\Configurator\Set;
+use Shopware\Models\Article\Configurator;
 use Shopware\Models\Article\Detail;
 use Shopware\Models\Article\Download;
 use Shopware\Models\Article\Image;
 use Shopware\Models\Article\Link;
+use Shopware\Models\Article\Repository;
 use Shopware\Models\Article\SeoCategory;
 use Shopware\Models\Article\Supplier;
 use Shopware\Models\Category\Category;
@@ -34,30 +36,29 @@ use Shopware\Models\Property\Option;
 use Shopware\Models\Property\Value;
 use Shopware\Models\Shop\Shop;
 use Shopware\Models\Tax\Tax;
-use Shopware\Models\Attribute\Category as CategoryAttribute;
 use ItswCar\Models\ArticleCarLinks as CarLinks;
 
 class ExtendedArticle extends Resource {
 	/**
-	 * @var Shopware_Components_Translation
+	 * @var \Shopware_Components_Translation
 	 */
 	private $translationComponent;
 	
-	public function __construct(Shopware_Components_Translation $translationComponent = null) {
+	public function __construct(\Shopware_Components_Translation $translationComponent = null) {
 		$this->translationComponent = $translationComponent ?: Shopware()->Container()->get('translation');
 	}
 	
 	/**
 	 * @return \Shopware\Models\Article\Repository
 	 */
-	public function getRepository(): \Shopware\Models\Article\Repository {
+	public function getRepository(): Repository {
 		return $this->getManager()->getRepository(ProductModel::class);
 	}
 	
 	/**
 	 * @return \Shopware\Models\Article\Repository
 	 */
-	public function getDetailRepository(): \Shopware\Models\Article\Repository {
+	public function getDetailRepository(): Repository {
 		return $this->getManager()->getRepository(Detail::class);
 	}
 	
@@ -71,6 +72,8 @@ class ExtendedArticle extends Resource {
 	/**
 	 * @param $number
 	 * @return int
+	 * @throws \Shopware\Components\Api\Exception\NotFoundException
+	 * @throws \Shopware\Components\Api\Exception\ParameterMissingException
 	 */
 	public function getIdFromNumber($number): int {
 		if (empty($number)) {
@@ -90,14 +93,15 @@ class ExtendedArticle extends Resource {
 	}
 	
 	/**
-	 * Convenience method to get a product by number
-	 *
-	 * @param string $number
-	 *
-	 * @return array|ProductModel
+	 * @param       $number
+	 * @param array $options
+	 * @return array
+	 * @throws \Doctrine\ORM\NonUniqueResultException
+	 * @throws \Shopware\Components\Api\Exception\NotFoundException
+	 * @throws \Shopware\Components\Api\Exception\ParameterMissingException
+	 * @throws \Shopware\Components\Api\Exception\PrivilegeException
 	 */
-	public function getOneByNumber($number, array $options = [])
-	{
+	public function getOneByNumber($number, array $options = []): array {
 		$id = $this->getIdFromNumber($number);
 		
 		return $this->getOne($id, $options);
@@ -108,9 +112,11 @@ class ExtendedArticle extends Resource {
 	 * @param array $options
 	 * @return array
 	 * @throws \Doctrine\ORM\NonUniqueResultException
+	 * @throws \Shopware\Components\Api\Exception\NotFoundException
+	 * @throws \Shopware\Components\Api\Exception\ParameterMissingException
 	 * @throws \Shopware\Components\Api\Exception\PrivilegeException
 	 */
-	public function getOne($id, array $options = []) {
+	public function getOne($id, array $options = []): array {
 		$this->checkPrivilege('read');
 		
 		if (empty($id)) {
@@ -176,6 +182,7 @@ class ExtendedArticle extends Resource {
 						$product['tax']['tax']
 					);
 				}
+				unset($detail);
 			}
 			
 			$query = $this->getManager()->createQuery('SELECT shop FROM Shopware\Models\Shop\Shop as shop');
@@ -208,18 +215,15 @@ class ExtendedArticle extends Resource {
 	/**
 	 * Helper function which calculates formats the variant prices for each customer group.
 	 * If the customer group configured "taxInput" as true, the price will be formatted as gross.
-	 *
 	 * @param array $prices  Array of the variant prices
 	 * @param float $taxRate Float value of the product tax (example: 19.00)
-	 *
 	 * @return array
 	 */
-	public function getTaxPrices(array $prices, $taxRate)
-	{
+	public function getTaxPrices(array $prices, float $taxRate): array {
 		foreach ($prices as &$price) {
 			$price['net'] = $price['price'];
 			if ($price['customerGroup'] && $price['customerGroup']['taxInput']) {
-				$price['price'] = $price['price'] * (($taxRate + 100) / 100);
+				$price['price'] *= (($taxRate + 100) / 100);
 			}
 		}
 		
@@ -257,9 +261,9 @@ class ExtendedArticle extends Resource {
 		
 		$products = $paginator->getIterator()->getArrayCopy();
 		
-		if ($this->getResultMode() === self::HYDRATE_ARRAY
-			&& isset($options['language'])
-			&& !empty($options['language'])) {
+		if (isset($options['language'])
+			&& !empty($options['language'])
+			&& $this->getResultMode() === self::HYDRATE_ARRAY) {
 			/** @var Shop $shop */
 			$shop = $this->findEntityByConditions(Shop::class, [
 				['id' => $options['language']],
@@ -277,13 +281,20 @@ class ExtendedArticle extends Resource {
 	}
 	
 	/**
-	 * @throws ApiException\CustomValidationException
+	 * @param array $params
+	 * @return \Shopware\Models\Article\Article
+	 * @throws \Doctrine\DBAL\DBALException
+	 * @throws \Doctrine\ORM\ORMException
+	 * @throws \Doctrine\ORM\OptimisticLockException
+	 * @throws \Doctrine\ORM\TransactionRequiredException
+	 * @throws \Shopware\Components\Api\Exception\CustomValidationException
+	 * @throws \Shopware\Components\Api\Exception\NotFoundException
+	 * @throws \Shopware\Components\Api\Exception\OrmException
+	 * @throws \Shopware\Components\Api\Exception\ParameterMissingException
+	 * @throws \Shopware\Components\Api\Exception\PrivilegeException
 	 * @throws \Shopware\Components\Api\Exception\ValidationException
-	 *
-	 * @return ProductModel
 	 */
-	public function create(array $params)
-	{
+	public function create(array $params): ProductModel {
 		$this->checkPrivilege('create');
 		
 		$product = new ProductModel();
@@ -292,6 +303,14 @@ class ExtendedArticle extends Resource {
 		if (!empty($params['translations'])) {
 			$translations = $params['translations'];
 			unset($params['translations']);
+		}
+		
+		$carLinks = [];
+		if (!empty($params['carLinks'])) {
+			$carLinks = $params['carLinks'];
+			unset($params['carLinks']);
+		} else {
+			throw new ApiException\CustomValidationException('Validation error - carLinks: This value should not be blank.', 400);
 		}
 		
 		$params = $this->prepareAssociatedData($params, $product);
@@ -310,38 +329,44 @@ class ExtendedArticle extends Resource {
 			$this->writeTranslations($product->getId(), $translations);
 		}
 		
+		if (!empty($carLinks)) {
+			$this->writeCarLinks($carLinks, $product);
+		}
+		
 		return $product;
 	}
 	
 	/**
-	 * Convenience method to update a article by number
-	 *
 	 * @param string $number
-	 *
-	 * @throws \Shopware\Components\Api\Exception\ValidationException
+	 * @param array  $params
+	 * @return \Shopware\Models\Article\Article|null
+	 * @throws \Doctrine\ORM\NonUniqueResultException
+	 * @throws \Shopware\Components\Api\Exception\CustomValidationException
 	 * @throws \Shopware\Components\Api\Exception\NotFoundException
+	 * @throws \Shopware\Components\Api\Exception\OrmException
 	 * @throws \Shopware\Components\Api\Exception\ParameterMissingException
-	 *
-	 * @return ProductModel
+	 * @throws \Shopware\Components\Api\Exception\PrivilegeException
+	 * @throws \Shopware\Components\Api\Exception\ValidationException
 	 */
-	public function updateByNumber($number, array $params)
-	{
+	public function updateByNumber(string $number, array $params): ?ProductModel {
 		$id = $this->getIdFromNumber($number);
 		
 		return $this->update($id, $params);
 	}
 	
 	/**
-	 * @param int $id
-	 *
-	 * @throws \Shopware\Components\Api\Exception\ValidationException
+	 * @param       $id
+	 * @param array $params
+	 * @return \Shopware\Models\Article\Article|null
+	 * @throws \Doctrine\ORM\NonUniqueResultException
+	 * @throws \Shopware\Components\Api\Exception\CustomValidationException
 	 * @throws \Shopware\Components\Api\Exception\NotFoundException
+	 * @throws \Shopware\Components\Api\Exception\OrmException
 	 * @throws \Shopware\Components\Api\Exception\ParameterMissingException
-	 *
-	 * @return ProductModel
+	 * @throws \Shopware\Components\Api\Exception\PrivilegeException
+	 * @throws \Shopware\Components\Api\Exception\ValidationException
 	 */
-	public function update($id, array $params)
-	{
+	public function update($id, array $params): ?ProductModel {
 		$this->checkPrivilege('update');
 		
 		if (empty($id)) {
@@ -405,7 +430,7 @@ class ExtendedArticle extends Resource {
 	 */
 	public function deleteByNumber($number)
 	{
-		throw new RuntimeException('Deleting products by number isn\'t possible, yet.');
+		throw new \RuntimeException('Deleting products by number isn\'t possible, yet.');
 	}
 	
 	/**
@@ -489,12 +514,11 @@ class ExtendedArticle extends Resource {
 	}
 	
 	/**
-	 * Generate the main thumbnails of an product
-	 *
-	 * @param bool $force Force to regenerate main thumbnails
+	 * @param \Shopware\Models\Article\Article $article
+	 * @param false                            $force
+	 * @throws \Exception
 	 */
-	public function generateMainThumbnails(ProductModel $article, $force = false)
-	{
+	public function generateMainThumbnails(ProductModel $article, $force = false): void {
 		/** @var \Shopware\Components\Thumbnail\Manager $generator */
 		$generator = $this->getContainer()->get('thumbnail_manager');
 		
@@ -701,7 +725,7 @@ class ExtendedArticle extends Resource {
 	{
 		$builder = $this->getManager()->createQueryBuilder();
 		$builder->select(['configuratorSet', 'groups'])
-			->from(Set::class, 'configuratorSet')
+			->from(Configurator\Set::class, 'configuratorSet')
 			->innerJoin('configuratorSet.articles', 'article')
 			->leftJoin('configuratorSet.groups', 'groups')
 			->addOrderBy('groups.position', 'ASC')
@@ -776,13 +800,11 @@ class ExtendedArticle extends Resource {
 	 * Helper function which selects all categories of the passed product id.
 	 * This function returns only the directly assigned categories.
 	 * To prevent a big data, this function selects only the category name and id.
-	 *
 	 * @param int $articleId
-	 *
 	 * @return array
+	 * @throws \Exception
 	 */
-	protected function getArticleCategories($articleId)
-	{
+	protected function getArticleCategories($articleId): array {
 		$builder = $this->getManager()->createQueryBuilder();
 		$builder->select(['categories.id', 'categories.name', 'attribute.ebayCategoryId'])
 			->from(Category::class, 'categories')
@@ -914,13 +936,20 @@ class ExtendedArticle extends Resource {
 	}
 	
 	/**
-	 * @param array $data
-	 *
+	 * @param                                  $data
+	 * @param \Shopware\Models\Article\Article $article
 	 * @return array
+	 * @throws \Doctrine\DBAL\DBALException
+	 * @throws \Doctrine\ORM\ORMException
+	 * @throws \Doctrine\ORM\OptimisticLockException
+	 * @throws \Doctrine\ORM\TransactionRequiredException
+	 * @throws \Shopware\Components\Api\Exception\CustomValidationException
+	 * @throws \Shopware\Components\Api\Exception\NotFoundException
+	 * @throws \Shopware\Components\Api\Exception\ParameterMissingException
+	 * @throws \Shopware\Components\Api\Exception\ValidationException
 	 */
-	protected function prepareAssociatedData($data, ProductModel $article)
-	{
-		$data = $this->prepareArticleAssociatedData($data, $article);
+	protected function prepareAssociatedData($data, ProductModel $article): array {
+		$data = $this->prepareArticleAssociatedData($data);
 		$data = $this->prepareCategoryAssociatedData($data, $article);
 		$data = $this->prepareSeoCategoryAssociatedData($data, $article);
 		
@@ -941,7 +970,7 @@ class ExtendedArticle extends Resource {
 		}
 		
 		$data = $this->prepareImageAssociatedData($data, $article);
-		$data = $this->prepareAttributeAssociatedData($data, $article);
+		$data = $this->prepareAttributeAssociatedData($data);
 		
 		// The mainDetail gets its initial value for lastStock from $article, so this has to be set beforehand
 		if (isset($data['lastStock'])) {
@@ -957,11 +986,13 @@ class ExtendedArticle extends Resource {
 	}
 	
 	/**
-	 * @param array $data
-	 *
-	 * @throws ApiException\CustomValidationException
-	 *
-	 * @return array
+	 * @param                                  $data
+	 * @param \Shopware\Models\Article\Article $article
+	 * @return mixed
+	 * @throws \Doctrine\ORM\ORMException
+	 * @throws \Shopware\Components\Api\Exception\NotFoundException
+	 * @throws \Shopware\Components\Api\Exception\ParameterMissingException
+	 * @throws \Shopware\Components\Api\Exception\ValidationException
 	 */
 	protected function prepareVariants($data, ProductModel $article)
 	{
@@ -1083,6 +1114,8 @@ class ExtendedArticle extends Resource {
 					break;
 				}
 			}
+			
+			unset($processedVariant);
 			
 			if (!$oldMainVariantProcessed) {
 				$oldMain = $this->getDetailRepository()->find($oldMainId);
@@ -1217,14 +1250,14 @@ class ExtendedArticle extends Resource {
 	}
 	
 	/**
-	 * @param array $data
-	 *
-	 * @throws ApiException\CustomValidationException
-	 *
-	 * @return array
+	 * @param $data
+	 * @return mixed
+	 * @throws \Doctrine\ORM\ORMException
+	 * @throws \Doctrine\ORM\OptimisticLockException
+	 * @throws \Doctrine\ORM\TransactionRequiredException
+	 * @throws \Shopware\Components\Api\Exception\CustomValidationException
 	 */
-	protected function prepareArticleAssociatedData($data, ProductModel $article)
-	{
+	protected function prepareArticleAssociatedData($data) {
 		// Check if a tax id is passed and load the tax model or set the tax parameter to null.
 		if (!empty($data['taxId'])) {
 			$data['tax'] = $this->getManager()->find(Tax::class, $data['taxId']);
@@ -1292,11 +1325,10 @@ class ExtendedArticle extends Resource {
 	}
 	
 	/**
-	 * @param array $data
-	 *
-	 * @return array
+	 * @param $data
+	 * @return mixed
 	 */
-	protected function prepareAttributeAssociatedData($data, ProductModel $article)
+	protected function prepareAttributeAssociatedData($data)
 	{
 		if (isset($data['attribute']) && !isset($data['mainDetail']['attribute'])) {
 			$data['mainDetail']['attribute'] = $data['attribute'];
@@ -1310,22 +1342,35 @@ class ExtendedArticle extends Resource {
 	}
 	
 	/**
-	 * @param array $data
-	 *
-	 * @throws ApiException\CustomValidationException
-	 *
+	 * @param array                            $data
+	 * @param \Shopware\Models\Article\Article $article
 	 * @return array
+	 * @throws \Shopware\Components\Api\Exception\CustomValidationException
+	 * @throws \Doctrine\DBAL\DBALException
 	 */
-	protected function prepareCategoryAssociatedData($data, ProductModel $article)
-	{
+	protected function prepareCategoryAssociatedData(array $data, ProductModel $article): array {
 		if (!isset($data['categories'])) {
 			return $data;
 		}
 		
 		$this->resetProductCategoryAssignment($data, $article);
 		
-		/** @var ArrayCollection<\Shopware\Models\Category\Category> $categories */
-		$categories = $article->getCategories();
+		$properties = [];
+		foreach ($data['categories'] as $categoryData) {
+			foreach($categoryData as $property => $value) {
+				array_push($properties, $property);
+			}
+		}
+		
+		if (count($properties = array_unique($properties)) > 1) {
+			throw new ApiException\CustomValidationException('Validation error - categories: The properties must be unique.', 400);
+		}
+		
+		if (reset($properties) === 'ebayCategoryId') {
+			$categories = $this->getCategoriesByEbayCategoryIds($data);
+		} else {
+			$categories = $article->getCategories();
+		}
 		
 		$categoryIds = $categories->map(function ($category) {
 			/* @var Category $category */
@@ -1866,7 +1911,7 @@ class ExtendedArticle extends Resource {
 				$options->add($available);
 			}
 			
-			if (empty($options)) {
+			if ($options->isEmpty()) {
 				throw new ApiException\CustomValidationException('No available option exists');
 			}
 			
@@ -2189,14 +2234,11 @@ class ExtendedArticle extends Resource {
 	}
 	
 	/**
-	 * Helper function to prevent duplicate source code
-	 * to get a single row of the query builder result for the current resource result mode
-	 * using the query paginator.
-	 *
-	 * @return array
+	 * @param \Shopware\Components\Model\QueryBuilder $builder
+	 * @return mixed
+	 * @throws \Exception
 	 */
-	private function getSingleResult(QueryBuilder $builder)
-	{
+	private function getSingleResult(QueryBuilder $builder)	{
 		$query = $builder->getQuery();
 		$query->setHydrationMode($this->getResultMode());
 		$paginator = $this->getManager()->createPaginator($query);
@@ -2205,14 +2247,11 @@ class ExtendedArticle extends Resource {
 	}
 	
 	/**
-	 * Helper function to prevent duplicate source code
-	 * to get the full query builder result for the current resource result mode
-	 * using the query paginator.
-	 *
+	 * @param \Shopware\Components\Model\QueryBuilder $builder
 	 * @return array
+	 * @throws \Exception
 	 */
-	private function getFullResult(QueryBuilder $builder)
-	{
+	private function getFullResult(QueryBuilder $builder): array {
 		$query = $builder->getQuery();
 		$query->setHydrationMode($this->getResultMode());
 		$paginator = $this->getManager()->createPaginator($query);
@@ -2226,9 +2265,11 @@ class ExtendedArticle extends Resource {
 	 * If the data key __options_categories => replace is set to true,
 	 * the function removes the assigned product categories from the
 	 * s_articles_categories and s_articles_categories_ro table.
+	 * @param array                            $data
+	 * @param \Shopware\Models\Article\Article $product
+	 * @throws \Doctrine\DBAL\DBALException
 	 */
-	private function resetProductCategoryAssignment(array $data, ProductModel $product)
-	{
+	private function resetProductCategoryAssignment(array $data, ProductModel $product): void {
 		if (!$product->getId()) {
 			return;
 		}
@@ -2236,7 +2277,7 @@ class ExtendedArticle extends Resource {
 		$key = '__options_categories';
 		
 		// Replacement deactivated?
-		if (isset($data[$key]) && $data[$key]['replace'] == false) {
+		if (isset($data[$key]) && $data[$key]['replace'] === false) {
 			return;
 		}
 		
@@ -2300,20 +2341,21 @@ class ExtendedArticle extends Resource {
 			$download->fromArray($downloadData);
 			$download->setArticle($product);
 		}
+		unset($downloadData);
+		
 		$data['downloads'] = $downloads;
 		
 		return $data;
 	}
 	
 	/**
-	 * Resolves the passed images data to valid Shopware\Models\Article\Image
-	 * entities.
-	 *
-	 * @param array $data
-	 *
-	 * @throws ApiException\CustomValidationException
-	 *
-	 * @return array
+	 * @param                                  $data
+	 * @param \Shopware\Models\Article\Article $product
+	 * @return mixed
+	 * @throws \Doctrine\ORM\ORMException
+	 * @throws \Doctrine\ORM\OptimisticLockException
+	 * @throws \Doctrine\ORM\TransactionRequiredException
+	 * @throws \Shopware\Components\Api\Exception\CustomValidationException
 	 */
 	private function prepareImageAssociatedData($data, ProductModel $product)
 	{
@@ -2397,6 +2439,8 @@ class ExtendedArticle extends Resource {
 			}
 		}
 		
+		unset($imageData);
+		
 		$hasMain = $this->getCollectionElementByProperty(
 			$images,
 			'main',
@@ -2413,12 +2457,9 @@ class ExtendedArticle extends Resource {
 	}
 	
 	/**
-	 * Returns all none association property of the product class.
-	 *
 	 * @return array
 	 */
-	private function getAttributeProperties()
-	{
+	private function getAttributeProperties(): array {
 		/** @var \Shopware\Bundle\AttributeBundle\Service\CrudServiceInterface $crud */
 		$crud = $this->getContainer()->get('shopware_attribute.crud_service');
 		$attributeNames = $crud->getList('s_articles_attributes');
@@ -2428,5 +2469,51 @@ class ExtendedArticle extends Resource {
 		}
 		
 		return $fields;
+	}
+	
+	/**
+	 * @param array                            $carLinks
+	 * @param \Shopware\Models\Article\Article $product
+	 * @throws \Doctrine\ORM\ORMException
+	 * @throws \Doctrine\ORM\OptimisticLockException
+	 */
+	private function writeCarLinks(array $carLinks = [], ProductModel $product): void {
+		if (empty($carLinks)) {
+			return;
+		}
+		
+		$articleDetailsId = $product->getMainDetail()->getId();
+		
+		foreach($carLinks as $data) {
+			$carLink = new CarLinks();
+			$data['articleDetailsId'] = $articleDetailsId;
+			$carLink->fromArray($data);
+			$this->getManager()->persist($carLink);
+			$this->getManager()->flush($carLink);
+		}
+	}
+	
+	/**
+	 * @param array $data
+	 * @return int|mixed|string
+	 */
+	private function getCategoriesByEbayCategoryIds(array $data) {
+		$ebayCategoryIds = [];
+		
+		foreach($data['categories'] as $categoryData) {
+			foreach($categoryData as $ebayCategoryId) {
+				array_push($ebayCategoryIds, $ebayCategoryId);
+			}
+		}
+		
+		$builder = $this->getManager()->createQueryBuilder();
+		$builder->select(['categories'])
+			->from(Category::class, 'categories')
+			->innerJoin('categories.articles', 'articles')
+			->innerJoin('categories.attribute', 'attribute')
+			->where('attribute.ebayCategoryId IN (:ebayCategoryIds)')
+			->setParameter('ebayCategoryIds', $ebayCategoryIds);
+		
+		 return new ArrayCollection($builder->getQuery()->getResult());
 	}
 }

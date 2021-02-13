@@ -53,8 +53,7 @@ class Shopware_Controllers_Api_ExtendedArticles extends Shopware_Controllers_Api
 	 *
 	 * GET /api/articles/{id}
 	 */
-	public function getAction(): void
-	{
+	public function getAction(): void {
 		$request = $this->Request();
 		$id = $request->getParam('id');
 		$useNumberAsId = (bool) $request->getParam('useNumberAsId', 0);
@@ -74,5 +73,23 @@ class Shopware_Controllers_Api_ExtendedArticles extends Shopware_Controllers_Api
 		$view = $this->View();
 		$view->assign('data', $product);
 		$view->assign('success', true);
+	}
+	
+	/**
+	 * Create new product
+	 *
+	 * POST /api/articles
+	 */
+	public function postAction(): void	{
+		$product = $this->resource->create($this->Request()->getPost());
+		
+		$location = $this->apiBaseUrl . 'articles/' . $product->getId();
+		$data = [
+			'id' => $product->getId(),
+			'location' => $location,
+		];
+		
+		$this->View()->assign(['success' => true, 'data' => $data]);
+		$this->Response()->headers->set('location', $location);
 	}
 }
