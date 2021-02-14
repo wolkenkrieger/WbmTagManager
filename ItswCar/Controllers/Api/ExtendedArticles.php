@@ -118,8 +118,7 @@ class Shopware_Controllers_Api_ExtendedArticles extends Shopware_Controllers_Api
 	 *
 	 * PUT /api/articles/{id}
 	 */
-	public function putAction(): void
-	{
+	public function putAction(): void {
 		$request = $this->Request();
 		$id = $request->getParam('id');
 		$params = $request->getPost();

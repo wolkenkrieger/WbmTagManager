@@ -305,6 +305,7 @@ class Services {
 	 * @param array $data
 	 * @param bool  $full
 	 * @return array
+	 * @throws \JsonException
 	 */
 	public function setSessionData(array $data = [], bool $full = FALSE): array {
 		if (!$full) {
@@ -318,7 +319,7 @@ class Services {
 			$data = $tmp;
 		}
 		
-		if ($dataEncoded = json_encode($data)) {
+		if ($dataEncoded = json_encode($data, JSON_THROW_ON_ERROR)) {
 			$expire = new \DateTime();
 			$expire->modify('+7 day');
 			$this->front->Response()->headers->setCookie(
