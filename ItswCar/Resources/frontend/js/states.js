@@ -8,6 +8,8 @@
  */
 (function($, window) {
     window.StateManager
-        .addPlugin('select[data-itsw-select="true"]', 'itswCarFinder')
+        .addPlugin('select[data-itsw-select="true"]', 'itswCarFinder', {
+            baseUrl: '/shop/widgets/carfinder'
+        })
     ;
 })(jQuery, window);

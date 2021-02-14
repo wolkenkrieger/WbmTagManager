@@ -41,7 +41,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			$this->service->setNeverRender();
 			$manufacturers = $this->service->getManufacturersForCarfinder();
 			$rendered = $this->View()
-				->loadTemplate('/widgets/carfinder/render/manufacturers_select_default.tpl')
+				->loadTemplate('widgets/carfinder/render/manufacturers_select_default.tpl')
 				->assign('manufacturers', $manufacturers)
 				->assign('session', $this->service->getSessionData())
 				->render();
