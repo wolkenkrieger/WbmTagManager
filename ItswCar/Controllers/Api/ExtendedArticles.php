@@ -92,4 +92,51 @@ class Shopware_Controllers_Api_ExtendedArticles extends Shopware_Controllers_Api
 		$this->View()->assign(['success' => true, 'data' => $data]);
 		$this->Response()->headers->set('location', $location);
 	}
+	
+	/**
+	 * Delete product
+	 *
+	 * DELETE /api/articles/{id}
+	 */
+	public function deleteAction(): void
+	{
+		$request = $this->Request();
+		$id = $request->getParam('id');
+		$useNumberAsId = (bool) $request->getParam('useNumberAsId', 0);
+		
+		if ($useNumberAsId) {
+			$this->resource->deleteByNumber($id);
+		} else {
+			$this->resource->delete($id);
+		}
+		
+		$this->View()->assign(['success' => true]);
+	}
+	
+	/**
+	 * Update product
+	 *
+	 * PUT /api/articles/{id}
+	 */
+	public function putAction(): void
+	{
+		$request = $this->Request();
+		$id = $request->getParam('id');
+		$params = $request->getPost();
+		$useNumberAsId = (bool) $request->getParam('useNumberAsId', 0);
+		
+		if ($useNumberAsId) {
+			$product = $this->resource->updateByNumber($id, $params);
+		} else {
+			$product = $this->resource->update($id, $params);
+		}
+		
+		$location = $this->apiBaseUrl . 'articles/' . $product->getId();
+		$data = [
+			'id' => $product->getId(),
+			'location' => $location,
+		];
+		
+		$this->View()->assign(['success' => true, 'data' => $data]);
+	}
 }

@@ -404,6 +404,12 @@ class ExtendedArticle extends Resource {
 			unset($params['translations']);
 		}
 		
+		$carLinks = [];
+		if (!empty($params['carLinks'])) {
+			$carLinks = $params['carLinks'];
+			unset($params['carLinks']);
+		}
+		
 		$params = $this->prepareAssociatedData($params, $product);
 		
 		$product->fromArray($params);
@@ -418,31 +424,61 @@ class ExtendedArticle extends Resource {
 			$this->writeTranslations($product->getId(), $translations);
 		}
 		
+		if (!empty($carLinks)) {
+			$this->writeCarLinks($carLinks, $product);
+		}
+		
 		return $product;
 	}
 	
 	/**
-	 * Convenience function to delete a product by number
-	 *
-	 * @param string $number
-	 *
-	 * @throws \Exception
+	 * @param $number
+	 * @return \Shopware\Models\Article\Article|null
+	 * @throws \Doctrine\DBAL\DBALException
+	 * @throws \Doctrine\ORM\NonUniqueResultException
+	 * @throws \Doctrine\ORM\ORMException
+	 * @throws \Shopware\Components\Api\Exception\NotFoundException
+	 * @throws \Shopware\Components\Api\Exception\OrmException
+	 * @throws \Shopware\Components\Api\Exception\ParameterMissingException
+	 * @throws \Shopware\Components\Api\Exception\PrivilegeException
 	 */
-	public function deleteByNumber($number)
-	{
-		throw new \RuntimeException('Deleting products by number isn\'t possible, yet.');
+	public function deleteByNumber($number): ?ProductModel {
+		$this->checkPrivilege('delete');
+		
+		if (empty($number)) {
+			throw new ApiException\ParameterMissingException('number');
+		}
+		
+		$builder = $this->getManager()->createQueryBuilder();
+		$builder->select([
+			'article',
+			'mainDetail'
+		])
+			->from(ProductModel::class, 'article')
+			->leftJoin('article.mainDetail', 'mainDetail')
+			->where('mainDetail.number = :number')
+			->setParameter('number', $number);
+		
+		$product = $builder->getQuery()->getOneOrNullResult();
+		
+		if (!$product instanceof ProductModel) {
+			throw new ApiException\NotFoundException(sprintf('Product by "number" %s not found', $number));
+		}
+		
+		return $this->delete($product->getId());
 	}
 	
 	/**
-	 * @param int $id
-	 *
-	 * @throws \Shopware\Components\Api\Exception\ParameterMissingException
+	 * @param $id
+	 * @return \Shopware\Models\Article\Article|null
+	 * @throws \Doctrine\DBAL\DBALException
+	 * @throws \Doctrine\ORM\ORMException
 	 * @throws \Shopware\Components\Api\Exception\NotFoundException
-	 *
-	 * @return ProductModel
+	 * @throws \Shopware\Components\Api\Exception\OrmException
+	 * @throws \Shopware\Components\Api\Exception\ParameterMissingException
+	 * @throws \Shopware\Components\Api\Exception\PrivilegeException
 	 */
-	public function delete($id)
-	{
+	public function delete($id): ?ProductModel {
 		$this->checkPrivilege('delete');
 		
 		if (empty($id)) {
@@ -468,6 +504,9 @@ class ExtendedArticle extends Resource {
 		$this->getManager()->getConnection()->executeQuery($sql, [$product->getId()]);
 		
 		$this->removeArticleDetails($product);
+		
+		$query = $this->getCarLinkRepository()->getDeleteCarLinksQuery($product->getMainDetail()->getId());
+		$query->execute();
 		
 		$this->getManager()->remove($product);
 		$this->flush();
@@ -2483,6 +2522,9 @@ class ExtendedArticle extends Resource {
 		}
 		
 		$articleDetailsId = $product->getMainDetail()->getId();
+		
+		$query = $this->getCarLinkRepository()->getDeleteCarLinksQuery($articleDetailsId);
+		$query->execute();
 		
 		foreach($carLinks as $data) {
 			$carLink = new CarLinks();

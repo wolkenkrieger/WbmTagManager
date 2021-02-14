@@ -55,6 +55,25 @@ class Repository extends ModelRepository {
 	}
 	
 	/**
+	 * @param int $articleDetailsId
+	 * @return \Doctrine\ORM\Query
+	 */
+	public function getDeleteCarLinksQuery(int $articleDetailsId): Query {
+		return $this->getDeleteCarLinksQueryBuilder($articleDetailsId)->getQuery();
+	}
+	
+	/**
+	 * @param int $articleDetailsId
+	 * @return \Doctrine\ORM\QueryBuilder
+	 */
+	public function getDeleteCarLinksQueryBuilder(int $articleDetailsId): QueryBuilder {
+		return $this->getEntityManager()->createQueryBuilder()
+			->delete(ArticleCarlinks::class, 'articleCarLinks')
+			->where('articleCarLinks.articleDetailsId = :articleDetailsId')
+			->setParameter('articleDetailsId', $articleDetailsId);
+	}
+	
+	/**
 	 * @param array $conditions
 	 * @param array $sortings
 	 * @return \Doctrine\ORM\QueryBuilder
