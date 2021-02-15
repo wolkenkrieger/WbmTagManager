@@ -30,7 +30,7 @@ class ArticleCarLinks extends ModelEntity {
 	 * @var \ItswCar\Models\Car
 	 *
 	 * @ORM\ManyToOne(targetEntity="ItswCar\Models\Car", inversedBy="articleLinks")
-	 * @ORM\JoinColumn(name="tecdoc_id", referencedColumnName="tecdoc_id")
+	 * @ORM\JoinColumn(name="tecdoc_id", referencedColumnName="tecdoc_id", nullable=false)
 	 */
 	protected $car;
 	
@@ -66,8 +66,7 @@ class ArticleCarLinks extends ModelEntity {
 	public function setCar($car): ArticleCarLinks {
 		return $this->setManyToOne(
 			$car,
-			\ItswCar\Models\Car::class,
-			'car',
+			Car::class,
 			'articleLinks'
 		);
 	}
@@ -174,7 +173,7 @@ class ArticleCarLinks extends ModelEntity {
 	 * @param $property
 	 * @return bool
 	 */
-	public function __isset($property): bool {
+	public function __isset($property) {
 		return isset($this->$property);
 	}
 }

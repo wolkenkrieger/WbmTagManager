@@ -297,8 +297,7 @@ class Services {
 	 */
 	public function getCars(array $conditions = [], array $sortings = []) {
 		return $this->modelManager->getRepository(Car::class)
-			->getCarsQuery($conditions, $sortings)
-			->getResult();
+			->getCarsQuery($conditions, $sortings)->getResult();
 	}
 	
 	/**

@@ -30,7 +30,7 @@ class KbaCodes extends ModelEntity {
 	 * @var \ItswCar\Models\Car
 	 *
 	 * @ORM\ManyToOne(targetEntity="ItswCar\Models\Car", inversedBy="codes")
-	 * @ORM\JoinColumn(name="tecdoc_id", referencedColumnName="tecdoc_id")
+	 * @ORM\JoinColumn(name="tecdoc_id", referencedColumnName="tecdoc_id", nullable=false)
 	 */
 	protected $car;
 	
@@ -68,8 +68,7 @@ class KbaCodes extends ModelEntity {
 	public function setCar($car): KbaCodes {
 		return $this->setManyToOne(
 			$car,
-			\ItswCar\Models\Car::class,
-			'car',
+			Car::class,
 			'codes'
 		);
 	}
@@ -183,7 +182,7 @@ class KbaCodes extends ModelEntity {
 	 * @param $property
 	 * @return bool
 	 */
-	public function __isset($property): bool {
+	public function __isset($property) {
 		return isset($this->$property);
 	}
 }

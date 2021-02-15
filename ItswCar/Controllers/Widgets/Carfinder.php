@@ -264,7 +264,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	}
 	
 	/**
-	 *
+	 * @throws \JsonException
 	 */
 	public function getCarsAction(): void {
 		try {
@@ -318,7 +318,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			];
 		}
 		
-		$this->Response()->setBody(json_encode($result));
+		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
 	}
 	
 	/**

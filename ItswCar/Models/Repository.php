@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 /**
  * Projekt: ITSW Car
  * Autor:   Rico Wunglück <development@itsw.dev>
@@ -11,7 +10,6 @@ declare(strict_types=1);
 
 namespace ItswCar\Models;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Shopware\Components\Model\ModelRepository;
@@ -122,12 +120,12 @@ class Repository extends ModelRepository {
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */
 	public function getCarsQueryBuilder(array $conditions = [], array $sortings = []): QueryBuilder {
-		$builder = $this->getEntityManager()->createQueryBuilder()
-			->select([
+		$builder = $this->getEntityManager()->createQueryBuilder();
+		$builder->select([
 				'cars'
 			])
 			->from(Car::class, 'cars');
-		
+	
 		$parameterCount = 1;
 		foreach($conditions as $condition => $value) {
 			if (is_numeric($condition)) {
@@ -140,13 +138,13 @@ class Repository extends ModelRepository {
 					->setParameter($parameterCount++, $value);
 			}
 		}
-		
+	
 		if (!empty($sortings)) {
 			foreach ($sortings as $sort => $order) {
 				$builder->addOrderBy($sort, $order);
 			}
 		}
-		
+	
 		return $builder;
 	}
 	
@@ -161,6 +159,7 @@ class Repository extends ModelRepository {
 	
 	/**
 	 * @param array $filters
+	 * @param array $sortings
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */
 	public function getManufacturersQueryBuilder(array $filters = [], array $sortings = []): QueryBuilder {
@@ -243,9 +242,7 @@ class Repository extends ModelRepository {
 			->distinct(TRUE)
 			->join('models.cars', 'cars')
 			->where('cars.manufacturerId = :manufacturerId')
-			->setParameters(new ArrayCollection([
-				new Query\Parameter('manufacturerId', $manufacturerId)
-			]));
+			->setParameter('manufacturerId', $manufacturerId);
 		
 		foreach($filters as $filter) {
 			$builder->andWhere($filter);
@@ -288,10 +285,8 @@ class Repository extends ModelRepository {
 			->distinct(TRUE)
 			->join('types.cars', 'cars')
 			->where('cars.manufacturerId = :manufacturerId AND cars.modelId = :modelId')
-			->setParameters(new ArrayCollection([
-				new Query\Parameter('manufacturerId', $manufacturerId),
-				new Query\Parameter('modelId', $modelId)
-			]));
+			->setParameter('manufacturerId', $manufacturerId)
+			->setParameter('modelId', $modelId);
 		
 		foreach($filters as $filter) {
 			$builder->andWhere($filter);
@@ -335,11 +330,9 @@ class Repository extends ModelRepository {
 			->from(Car::class, 'cars')
 			->distinct(TRUE)
 			->where('cars.manufacturerId = :manufacturerId AND cars.modelId = :modelId AND cars.typeId = :typeId')
-			->setParameters(new ArrayCollection([
-				new Query\Parameter('manufacturerId', $manufacturerId),
-				new Query\Parameter('modelId', $modelId),
-				new Query\Parameter('typeId', $typeId)
-			]));
+			->setParameter('manufacturerId', $manufacturerId)
+			->setParameter('modelId', $modelId)
+			->setParameter('typeId', $typeId);
 		
 		foreach($filters as $filter) {
 			$builder->andWhere($filter);

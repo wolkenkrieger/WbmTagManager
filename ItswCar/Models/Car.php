@@ -1,5 +1,4 @@
-<?php
-declare(strict_types=1);
+<?php declare(strict_types=1);
 /**
  * Projekt: ITSW Car
  * Autor:   Rico Wunglück <development@itsw.dev>
@@ -550,7 +549,7 @@ class Car extends ModelEntity {
 	 * @param $property
 	 * @return bool
 	 */
-	public function __isset($property): bool {
+	public function __isset($property) {
 		return isset($this->$property);
 	}
 }

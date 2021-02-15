@@ -155,7 +155,7 @@ class Manufacturer extends ModelEntity {
 	 * @param $property
 	 * @return bool
 	 */
-	public function __isset($property): bool {
+	public function __isset($property) {
 		return isset($this->$property);
 	}
 }
