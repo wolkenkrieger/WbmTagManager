@@ -309,8 +309,6 @@ class ExtendedArticle extends Resource {
 		if (!empty($params['carLinks'])) {
 			$carLinks = $params['carLinks'];
 			unset($params['carLinks']);
-		} else {
-			throw new ApiException\CustomValidationException('Validation error - carLinks: This value should not be blank.', 400);
 		}
 		
 		$params = $this->prepareAssociatedData($params, $product);
