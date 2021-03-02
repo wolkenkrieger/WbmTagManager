@@ -2524,13 +2524,20 @@ class ExtendedArticle extends Resource {
 		$query = $this->getCarLinkRepository()->getDeleteCarLinksQuery($articleDetailsId);
 		$query->execute();
 		
+		$carLink = NULL;
+		$tecdocIds = [];
 		foreach($carLinks as $data) {
+			if (in_array($data['tecdocId'], $tecdocIds, TRUE)) {
+				continue;
+			}
+			$tecdocIds[] = $data['tecdocId'];
 			$carLink = new CarLinks();
 			$data['articleDetailsId'] = $articleDetailsId;
 			$carLink->fromArray($data);
 			$this->getManager()->persist($carLink);
-			$this->getManager()->flush($carLink);
 		}
+		
+		$this->getManager()->flush($carLink);
 	}
 	
 	/**
