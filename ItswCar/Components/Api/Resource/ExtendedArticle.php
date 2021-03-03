@@ -2535,6 +2535,10 @@ class ExtendedArticle extends Resource {
 			if (in_array($data['tecdocId'], $tecdocIds, TRUE)) {
 				continue;
 			}
+			
+			$data['tecdocId'] = (int)$data['tecdocId'];
+			$data['restriction'] = $data['restriction']??'';
+			
 			$tecdocIds[] = $data['tecdocId'];
 			$carLink = new CarLinks();
 			$data['articleDetailsId'] = $articleDetailsId;
