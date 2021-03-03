@@ -1405,7 +1405,6 @@ class ExtendedArticle extends Resource {
 		
 		if (reset($properties) === 'ebayCategoryId') {
 			$categories = $this->getCategoriesByEbayCategoryIds($data);
-			var_dump($categories);die;
 		} else {
 			$categories = $article->getCategories();
 		}
