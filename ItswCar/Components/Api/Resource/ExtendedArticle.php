@@ -1405,6 +1405,7 @@ class ExtendedArticle extends Resource {
 		
 		if (reset($properties) === 'ebayCategoryId') {
 			$categories = $this->getCategoriesByEbayCategoryIds($data);
+			var_dump($categories);die;
 		} else {
 			$categories = $article->getCategories();
 		}
@@ -2549,14 +2550,14 @@ class ExtendedArticle extends Resource {
 		
 		foreach($data['categories'] as $categoryData) {
 			foreach($categoryData as $ebayCategoryId) {
-				array_push($ebayCategoryIds, $ebayCategoryId);
+				array_push($ebayCategoryIds, (int)$ebayCategoryId);
 			}
 		}
 		
 		$builder = $this->getManager()->createQueryBuilder();
 		$builder->select(['categories'])
 			->from(Category::class, 'categories')
-			->innerJoin('categories.articles', 'articles')
+			//->innerJoin('categories.articles', 'articles')
 			->innerJoin('categories.attribute', 'attribute')
 			->where('attribute.ebayCategoryId IN (:ebayCategoryIds)')
 			->setParameter('ebayCategoryIds', $ebayCategoryIds);
