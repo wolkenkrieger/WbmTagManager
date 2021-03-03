@@ -1065,9 +1065,14 @@ class ExtendedArticle extends Resource {
 		}
 		
 		$variants = [];
+		
+		/*
 		if (isset($data['__options_variants']) && $data['__options_variants']['replace']) {
 			$this->removeArticleDetails($article);
 		}
+		*/
+		
+		$this->removeArticleDetails($article);
 		
 		foreach ($data['variants'] as $variantData) {
 			if (isset($variantData['id'])) {
@@ -2410,7 +2415,7 @@ class ExtendedArticle extends Resource {
 		}
 		
 		$position = 1;
-		$images = $this->checkDataReplacement($product->getImages(), $data, 'images', false);
+		$images = $this->checkDataReplacement($product->getImages(), $data, 'images', TRUE);
 		
 		foreach ($data['images'] as &$imageData) {
 			/** @var Image $image */
