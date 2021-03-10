@@ -55,7 +55,8 @@
                 if (response.success === true) {
                     me.$el.html(response.data).prop('disabled', false).select2({
                         allowClear: true,
-                        width: '50%'
+                        width: '50%',
+                        placeholder: me.opts.placeholder
                     });
                     if (me.$el.val()) {
                         me.$el.trigger('change');
@@ -118,9 +119,6 @@
         
         onEmpty: function () {
             var me = this;
-            
-            console.log('onEmpty');
-            
             me.$el.empty();
             if (me.opts.trigger) {
                 $('#' + me.opts.trigger).trigger('empty');

@@ -12,6 +12,8 @@ namespace ItswCar\Components\Eventhandlers;
 
 
 use ItswCar\Components\Services\Services;
+use ItswCar\Models\ArticleCarLinks;
+use ItswCar\Models\Car;
 
 class Eventhandlers {
 	/**
@@ -34,5 +36,30 @@ class Eventhandlers {
 		$subject = $actionEventArgs->getSubject();
 		
 		$subject->View()->assign('ITSW-SESSION', $this->service->getSessionData());
+	}
+	
+	/**
+	 * @param \Enlight_Controller_ActionEventArgs $actionEventArgs
+	 */
+	public function onPostDispatchSecureFrontendDetail(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
+		$subject = $actionEventArgs->getSubject();
+		$sArticle = $subject->View()->getAssign('sArticle');
+		$articleCarLinks = $this->service->getModelManager()
+			->getRepository(ArticleCarLinks::class)
+			->getCarLinksQuery([
+				'articleCarLinks.articleDetailsId' => $sArticle['articleDetailsID'],
+				'articleCarLinks.active' => 1
+			])
+			->getArrayResult();
+		
+		foreach($articleCarLinks as $articleCarLink) {
+			$car = $this->service->getModelManager()
+				->getRepository(Car::class)
+				->getCarsQuery([
+					'cars.tecdocId' => $articleCarLink['tecdocId']
+				])
+				->getResult();
+		}
+		$subject->View()->assign('sArticle', $sArticle);
 	}
 }

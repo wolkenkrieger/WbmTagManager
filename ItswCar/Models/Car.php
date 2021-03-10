@@ -83,7 +83,7 @@ class Car extends ModelEntity {
 	
 	/**
 	 * @var \Doctrine\Common\Collections\ArrayCollection<\ItswCar\Models\ArticleCarLinks>|null
-	 * @ORM\OneToMany(
+	 * @ORM\OneToMany (
 	 *     targetEntity="ItswCar\Models\ArticleCarLinks",
 	 *     mappedBy="car",
 	 *     orphanRemoval=true,

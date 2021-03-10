@@ -50,7 +50,8 @@ class Subscribers implements SubscriberInterface {
 	public static function getSubscribedEvents(): array {
 		return [
 			'Enlight_Controller_Action_PostDispatchSecure_Frontend'         => 'onPostDispatchSecureFrontend',
-			'Shopware_SearchBundleDBAL_Collect_Condition_Handlers'          => 'onCollectConditionHandlers'
+			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
+			'Shopware_SearchBundleDBAL_Collect_Condition_Handlers'          => 'onCollectConditionHandlers',
 		];
 	}
 	
@@ -62,9 +63,18 @@ class Subscribers implements SubscriberInterface {
 	}
 	
 	/**
+	 * @param \Enlight_Controller_ActionEventArgs $actionEventArgs
+	 */
+	public function onPostDispatchSecureFrontendDetail(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
+		$this->eventHandler->onPostDispatchSecureFrontendDetail($actionEventArgs);
+	}
+	
+	/**
 	 * @return \ItswCar\Components\Eventhandlers\CategoryConditionHandler
 	 */
 	public function onCollectConditionHandlers(): CategoryConditionHandler {
 		return new CategoryConditionHandler($this->service);
 	}
+	
+	
 }

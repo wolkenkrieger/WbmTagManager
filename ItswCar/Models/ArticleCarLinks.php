@@ -23,13 +23,13 @@ use Doctrine\ORM\Mapping as ORM;
  *     @ORM\Index(name="get_by_tecdocId", columns={"tecdoc_id"}),
  *     @ORM\Index(name="group_by_articleDetailsId_tecdocId", columns={"article_details_id", "tecdoc_id"}),
  *     @ORM\Index(name="get_inactive", columns={"active"}, options={"where": "(active = 0)"}),
+ *     @ORM\Index(name="get_active", columns={"active"}, options={"where": "(active = 1)"})
  * })
  */
 class ArticleCarLinks extends ModelEntity {
 	/**
 	 * @var \ItswCar\Models\Car
-	 *
-	 * @ORM\ManyToOne(targetEntity="ItswCar\Models\Car", inversedBy="articleLinks")
+	 * @ORM\OneToOne(targetEntity="ItswCar\Models\Car", inversedBy="articleLinks")
 	 * @ORM\JoinColumn(name="tecdoc_id", referencedColumnName="tecdoc_id", nullable=false)
 	 */
 	protected $car;
