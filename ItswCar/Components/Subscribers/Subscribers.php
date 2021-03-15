@@ -50,8 +50,14 @@ class Subscribers implements SubscriberInterface {
 	public static function getSubscribedEvents(): array {
 		return [
 			'Enlight_Controller_Action_PostDispatchSecure_Frontend'         => 'onPostDispatchSecureFrontend',
-			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
+			'Enlight_Controller_Front_RouteShutdown'                        => 'onFrontRouteShutdown',
 			'Shopware_SearchBundleDBAL_Collect_Condition_Handlers'          => 'onCollectConditionHandlers',
+			'Legacy_Struct_Converter_Convert_Category'                      => 'onAfterConvertCategoryByLegacyStructConverter',
+			'sCategories::convertCategory::after'                           => 'onAfterConvertCategory',
+		
+			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
+			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
+		
 		];
 	}
 	
@@ -63,10 +69,17 @@ class Subscribers implements SubscriberInterface {
 	}
 	
 	/**
+	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
+	 */
+	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
+		$this->eventHandler->onFrontRouteShutdown($controllerEventArgs);
+	}
+	
+	/**
 	 * @param \Enlight_Controller_ActionEventArgs $actionEventArgs
 	 */
-	public function onPostDispatchSecureFrontendDetail(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
-		$this->eventHandler->onPostDispatchSecureFrontendDetail($actionEventArgs);
+	public function onPostDispatchSecureFrontendListing(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
+		$this->eventHandler->onPostDispatchSecureFrontendListing($actionEventArgs);
 	}
 	
 	/**
@@ -76,5 +89,17 @@ class Subscribers implements SubscriberInterface {
 		return new CategoryConditionHandler($this->service);
 	}
 	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 */
+	public function onAfterConvertCategoryByLegacyStructConverter(\Enlight_Event_EventArgs $eventArgs): void {
+		$this->eventHandler->onAfterConvertCategoryByLegacyStructConverter($eventArgs);
+	}
 	
+	/**
+	 * @param \Enlight_Hook_HookArgs $hookArgs
+	 */
+	public function onAfterConvertCategory(\Enlight_Hook_HookArgs $hookArgs): void {
+		$this->eventHandler->onAfterConvertCategory($hookArgs);
+	}
 }

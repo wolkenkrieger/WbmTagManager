@@ -10,10 +10,7 @@
 
 namespace ItswCar\Components\Eventhandlers;
 
-
 use ItswCar\Components\Services\Services;
-use ItswCar\Models\ArticleCarLinks;
-use ItswCar\Models\Car;
 
 class Eventhandlers {
 	/**
@@ -39,27 +36,73 @@ class Eventhandlers {
 	}
 	
 	/**
-	 * @param \Enlight_Controller_ActionEventArgs $actionEventArgs
+	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
-	public function onPostDispatchSecureFrontendDetail(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
-		$subject = $actionEventArgs->getSubject();
-		$sArticle = $subject->View()->getAssign('sArticle');
-		$articleCarLinks = $this->service->getModelManager()
-			->getRepository(ArticleCarLinks::class)
-			->getCarLinksQuery([
-				'articleCarLinks.articleDetailsId' => $sArticle['articleDetailsID'],
-				'articleCarLinks.active' => 1
-			])
-			->getArrayResult();
-		
-		foreach($articleCarLinks as $articleCarLink) {
-			$car = $this->service->getModelManager()
-				->getRepository(Car::class)
-				->getCarsQuery([
-					'cars.tecdocId' => $articleCarLink['tecdocId']
-				])
-				->getResult();
+	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
+		if ($controllerEventArgs->getRequest()->getModuleName() !== 'frontend') {
+			return;
 		}
-		$subject->View()->assign('sArticle', $sArticle);
+		
+		$urlPieces = explode('/', $controllerEventArgs->getRequest()->getRequestUri());
+		$urlPieces = array_filter($urlPieces, function ($value) {
+			return ($value !== NULL && $value !== FALSE && $value !== '');
+		});
+		
+		$parsedUrl = parse_url(end($urlPieces));
+		if (isset($parsedUrl['query']) && $parsedUrl['query']) {
+			// alles ab ? in der uri wegwerfen
+			unset($urlPieces[count($urlPieces)]);
+		}
+		
+		$parsedFirst = parse_url(reset($urlPieces));
+		$parsedFirst = $parsedFirst['path'];
+		$parsedLast = parse_url(end($urlPieces));
+		$parsedLast = $parsedLast['path'];
+		
+		try {
+			$routerParts = array_merge(
+				$controllerEventArgs->getSubject()->Router()->match($parsedFirst . '/' ),
+				$controllerEventArgs->getSubject()->Router()->match($parsedLast . '/' ));
+		} catch (\Exception $exception) {
+			$this->service->setLog($exception);
+			$routerParts = [];
+		}
+		
+		
+		//var_dump($routerParts);
+	}
+	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 */
+	public function onAfterConvertCategoryByLegacyStructConverter(\Enlight_Event_EventArgs $eventArgs): void {
+		$eventArgs->setReturn($this->setCategoryLink($eventArgs->getReturn()));
+	}
+	
+	/**
+	 * @param \Enlight_Hook_HookArgs $hookArgs
+	 */
+	public function onAfterConvertCategory(\Enlight_Hook_HookArgs $hookArgs): void {
+		$hookArgs->setReturn($this->setCategoryLink($hookArgs->getReturn()));
+	}
+	
+	public function onPostDispatchSecureFrontendListing(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
+	
+	}
+	
+	/**
+	 * @param $category
+	 * @return mixed
+	 */
+	private function setCategoryLink($category) {
+		if (!$category['external']) {
+			$seoUrl = $this->service->getCategorySeoUrl($category['id']);
+			
+			if ($seoUrl) {
+				$category['link'] = $seoUrl;
+			}
+		}
+		
+		return $category;
 	}
 }

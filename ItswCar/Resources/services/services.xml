@@ -6,6 +6,7 @@
 	
     <parameters>
         <parameter key="itswcar.services.class">ItswCar\Components\Services\Services</parameter>
+		<parameter key="itswcar.category_service.class">ItswCar\Components\Services\CategoryService</parameter>
     </parameters>
 
     <services>
@@ -13,5 +14,13 @@
             <argument type="service" id="service_container" />
 			<argument type="service" id="models" />
         </service>
+		
+		<service id="shopware_storefront.category_service_decorator"
+				 class="%itswcar.category_service.class%"
+				 decorates="shopware_storefront.category_service"
+				 public="false">
+			<argument type="service" id="shopware_storefront.category_service_decorator.inner"/>
+			<argument type="service" id="itswcar.services"/>
+		</service>
     </services>
 </container>

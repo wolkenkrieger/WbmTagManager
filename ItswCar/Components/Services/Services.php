@@ -25,6 +25,7 @@ class Services {
 	protected $basePath;
 	protected $cache;
 	protected $session;
+	protected $shopId = 1;
 	
 	protected $rootCategoryId = 5;
 	
@@ -42,6 +43,7 @@ class Services {
 		
 		if ($this->container->has('shop')) {
 			$this->basePath = $this->container->get('shop')->getBasePath();
+			$this->shopId = $this->container->get('shop')->getId();
 		}
 		
 		if ($this->basePath === null || $this->basePath === '') {
@@ -348,8 +350,18 @@ class Services {
 		}
 		
 		if ($cookieData = $this->front->Request()->getCookie('itsw_cache')) {
-			$sessionData = json_decode($cookieData, TRUE);
-			$this->session->offsetSet('itsw-session-data', $sessionData);
+			try {
+				$sessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR);
+				$this->session->offsetSet('itsw-session-data', $sessionData);
+			} catch (\JsonException $exception) {
+				$this->setLog($exception);
+				$this->session->offsetSet('itsw-session-data', [
+					'manufacturer' => NULL,
+					'model' => NULL,
+					'type' => NULL,
+					'car' => NULL
+				]);
+			}
 		}
 		
 		if ($this->session->offsetExists('itsw-session-data')) {
@@ -398,5 +410,84 @@ class Services {
 		}
 		
 		return [];
+	}
+	
+	/**
+	 * @param \Exception $e
+	 */
+	public function setLog(\Exception $e): void {
+		$this->pluginLogger->addCritical($e->getMessage(), [
+			'code' => $e->getCode(),
+			'file' => $e->getFile(),
+			'line' => $e->getLine(),
+			'trace' => $e->getTraceAsString()
+		]);
+	}
+	
+	/**
+	 * @param string $path
+	 * @return false|string|string[]
+	 */
+	public function cleanSeoPath(string $path = '') {
+		return mb_strtolower($this->container->get('modules')->RewriteTable()->sCleanupPath($path));
+	}
+	
+	/**
+	 * @return mixed
+	 */
+	public function getDbalQueryBuilder() {
+		return $this->container->get('dbal_connection')->createQueryBuilder();
+	}
+	
+	/**
+	 * @param int|null $subshopId
+	 * @return mixed
+	 */
+	public function getSeoUrlQuery(int $subshopId = NULL) {
+		$builder = $this->getDbalQueryBuilder();
+		return $builder->select([
+			'path AS seoUrl',
+			'org_path AS realUrl'
+		])
+			->from('s_core_rewrite_urls', 'r')
+			->where('r.org_path = :orgPath')
+			->andWhere('main = :main')
+			->andWhere('subshopId = :subshopId')
+			->setParameter('main', 1)
+			->setParameter('subshopId', ($subshopId ?: $this->shopId));
+	}
+	
+	/**
+	 * @param int|null $manufacturer
+	 * @param int|null $model
+	 * @return string[]
+	 */
+	public function getCarSeoUrl(int $manufacturer = NULL, int $model = NULL): array {
+		$manufacturer = $manufacturer ?: $this->getSessionData()['manufacturer'];
+		$model = $model ?: $this->getSessionData()['model'];
+		
+		return $this->getSeoUrlQuery()
+			->setParameter('orgPath', ($model? 'sViewPort=cat&m=' . $manufacturer . '&mo=' . $model : 'sViewPort=cat&m=' . $manufacturer))
+			->execute()
+			->fetch(\PDO::FETCH_ASSOC) ?: [
+				'realUrl' => '',
+				'seoUrl' => ''
+			];
+	}
+	
+	/**
+	 * @param int $categoryId
+	 * @return string|string[]|null
+	 */
+	public function getCategorySeoUrl(int $categoryId) {
+		$categoryUrl = $this->getSeoUrlQuery()
+			->setParameter('orgPath', 'sViewport=cat&sCategory=' . $categoryId)
+			->execute()
+			->fetch(\PDO::FETCH_ASSOC) ?: [
+				'realUrl' => '',
+				'seoUrl' => ''
+			];
+		
+		return preg_replace("/\/\//", '/', $this->cleanSeoPath($this->getCarSeoUrl()['seoUrl']) . $this->cleanSeoPath($categoryUrl['seoUrl']));
 	}
 }
