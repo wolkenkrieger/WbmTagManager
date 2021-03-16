@@ -54,7 +54,10 @@ class Subscribers implements SubscriberInterface {
 			'Shopware_SearchBundleDBAL_Collect_Condition_Handlers'          => 'onCollectConditionHandlers',
 			'Legacy_Struct_Converter_Convert_Category'                      => 'onAfterConvertCategoryByLegacyStructConverter',
 			'sCategories::convertCategory::after'                           => 'onAfterConvertCategory',
-		
+			'sCategories::sGetCategoriesByParent::after'                    => 'onAfterGetCategoriesByParent',
+			'sArticles::sGetArticlesByCategory::after'                      => 'onAfterGetArticleByCategory',
+			'Legacy_Struct_Converter_Convert_List_Product'                  => 'onConvertListProduct',
+			'sArticles::sGetArticleById::after'                             => 'onAfterGetArticleById',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
 		
@@ -101,5 +104,30 @@ class Subscribers implements SubscriberInterface {
 	 */
 	public function onAfterConvertCategory(\Enlight_Hook_HookArgs $hookArgs): void {
 		$this->eventHandler->onAfterConvertCategory($hookArgs);
+	}
+	
+	/**
+	 * @param \Enlight_Hook_HookArgs $hookArgs
+	 */
+	public function onAfterGetCategoriesByParent(\Enlight_Hook_HookArgs $hookArgs): void {
+		$this->eventHandler->onAfterGetCategoriesByParent($hookArgs);
+	}
+	
+	/**
+	 * @param \Enlight_Hook_HookArgs $hookArgs
+	 */
+	public function onAfterGetArticleByCategory(\Enlight_Hook_HookArgs $hookArgs): void {
+		$this->eventHandler->onAfterGetArticleByCategory($hookArgs);
+	}
+	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 */
+	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs): void {
+		$this->eventHandler->onConvertListProduct($eventArgs);
+	}
+	
+	public function onAfterGetArticleById(\Enlight_Hook_HookArgs $hookArgs): void {
+		$this->eventHandler->onAfterGetArticleById($hookArgs);
 	}
 }

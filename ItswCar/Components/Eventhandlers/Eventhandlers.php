@@ -48,9 +48,11 @@ class Eventhandlers {
 			return ($value !== NULL && $value !== FALSE && $value !== '');
 		});
 		
+		$querySave = '';
 		$parsedUrl = parse_url(end($urlPieces));
-		if (isset($parsedUrl['query']) && $parsedUrl['query']) {
-			// alles ab ? in der uri wegwerfen
+		
+		if ((isset($parsedUrl['query']) && $parsedUrl['query']) && !isset($parsedUrl['path'])) {
+			$querySave = $parsedUrl['query'];
 			unset($urlPieces[count($urlPieces)]);
 		}
 		
@@ -68,8 +70,11 @@ class Eventhandlers {
 			$routerParts = [];
 		}
 		
-		
-		//var_dump($routerParts);
+		$controllerEventArgs->getRequest()->setParams($routerParts);
+		$controllerEventArgs->getRequest()->setControllerName($routerParts['controller']);
+		$controllerEventArgs->getRequest()->setModuleName($routerParts['module']);
+		$controllerEventArgs->getRequest()->setActionName($routerParts['action']);
+		$controllerEventArgs->getRequest()->setQuery($querySave);
 	}
 	
 	/**
@@ -86,8 +91,61 @@ class Eventhandlers {
 		$hookArgs->setReturn($this->setCategoryLink($hookArgs->getReturn()));
 	}
 	
-	public function onPostDispatchSecureFrontendListing(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
+	/**
+	 * @param \Enlight_Hook_HookArgs $hookArgs
+	 */
+	public function onAfterGetCategoriesByParent(\Enlight_Hook_HookArgs $hookArgs): void {
+		$categories = $hookArgs->getReturn();
+		
+		foreach($categories as &$category) {
+			$category = $this->setCategoryLink($category);
+		}
+		
+		unset($category);
+		$hookArgs->setReturn($categories);
+	}
 	
+	/**
+	 * @param \Enlight_Hook_HookArgs $hookArgs
+	 */
+	public function onAfterGetArticleByCategory(\Enlight_Hook_HookArgs $hookArgs): void {
+		$return = $hookArgs->getReturn();
+		$articles = $return['sArticles']??[];
+		foreach($articles as &$article) {
+			$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
+		}
+		unset($article);
+		$return['sArticles'] = $articles;
+		$hookArgs->setReturn($return);
+	}
+	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 */
+	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs) {
+		$article = $eventArgs->getReturn();
+		$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
+		$eventArgs->setReturn($article);
+	}
+	
+	/**
+	 * @param \Enlight_Controller_ActionEventArgs $actionEventArgs
+	 */
+	public function onPostDispatchSecureFrontendListing(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
+		/*
+		 * @toDo: something magic :)
+		 */
+	}
+	
+	/**
+	 * @param \Enlight_Hook_HookArgs $hookArgs
+	 */
+	public function onAfterGetArticleById(\Enlight_Hook_HookArgs $hookArgs): void {
+		/*
+		$article = $hookArgs->getReturn();
+		$article['linkDetailsRewrited'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetailsRewrited']);
+		$hookArgs->setReturn($article);
+		*/
 	}
 	
 	/**
@@ -96,11 +154,7 @@ class Eventhandlers {
 	 */
 	private function setCategoryLink($category) {
 		if (!$category['external']) {
-			$seoUrl = $this->service->getCategorySeoUrl($category['id']);
-			
-			if ($seoUrl) {
-				$category['link'] = $seoUrl;
-			}
+			$category['link'] = ($this->service->getCategorySeoUrl($category['id'] ?: $category['link']));
 		}
 		
 		return $category;

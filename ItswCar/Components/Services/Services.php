@@ -10,6 +10,7 @@
 
 namespace ItswCar\Components\Services;
 
+use ItswCar\Models\ArticleCarLinks;
 use ItswCar\Models\Car;
 use Shopware\Components\DependencyInjection\Container;
 use Shopware\Components\Model\ModelManager;
@@ -489,5 +490,71 @@ class Services {
 			];
 		
 		return preg_replace("/\/\//", '/', $this->cleanSeoPath($this->getCarSeoUrl()['seoUrl']) . $this->cleanSeoPath($categoryUrl['seoUrl']));
+	}
+	
+	/**
+	 * @param int $articleId
+	 * @return string|string[]|null
+	 */
+	public function getArticleSeoUrl(int $articleId) {
+		$articleUrl = $this->getSeoUrlQuery()
+			->setParameter('orgPath', 'sViewport=detail&sArticle=' . $articleId)
+			->execute()
+			->fetch(\PDO::FETCH_ASSOC) ?: [
+				'realUrl' => '',
+				'seoUrl' => ''
+			];
+		
+		return preg_replace("/\/\//", '/', $this->cleanSeoPath($this->getCarSeoUrl()['seoUrl']) . $this->cleanSeoPath($articleUrl['seoUrl']));
+	}
+	
+	/**
+	 * @param int $tecdocId
+	 * @return array
+	 */
+	public function getVariantIdsByTecdocId(int $tecdocId): array {
+		$carLinks = $this->getModelManager()->getRepository(ArticleCarLinks::class)
+			->getCarLinksQuery([
+				'articleCarLinks.tecdocId' => $tecdocId
+			], [], [
+				'articleCarLinks.articleDetailsId'
+			])
+			->getArrayResult();
+		
+		 return array_column($carLinks, 'articleDetailsId');
+	}
+	
+	/**
+	 * @return int[]
+	 */
+	public function getVariantIdsWithoutArticleCarLink(): array {
+		$builder = $this->getDbalQueryBuilder();
+		$result = $builder
+			->select(['details.id'])
+			->from('s_articles_details', 'details')
+			->join('details', 's_articles', 'articles', 'details.id = articles.main_detail_id and articles.active = 1 and details.active = 1')
+			->leftJoin('details', 'itsw_article_car_links', 'carLinks', 'details.id = carLinks.article_details_id and carLinks.active = 1')
+			->where('carLinks.article_details_id IS NULL')
+			->execute()
+			->fetchAll(\PDO::FETCH_COLUMN);
+		
+		return array_map(static function($value) {return (int)$value;}, $result);
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getArticleIdsWithoutArticleCarLink(): array {
+		$builder = $this->getDbalQueryBuilder();
+		$result = $builder
+			->select(['details.articleID'])
+			->from('s_articles_details', 'details')
+			->join('details', 's_articles', 'articles', 'details.id = articles.main_detail_id and articles.active = 1 and details.active = 1')
+			->leftJoin('details', 'itsw_article_car_links', 'carLinks', 'details.id = carLinks.article_details_id and carLinks.active = 1')
+			->where('carLinks.article_details_id IS NULL')
+			->execute()
+			->fetchAll(\PDO::FETCH_COLUMN);
+		
+		return array_map(static function($value) {return (int)$value;}, $result);
 	}
 }

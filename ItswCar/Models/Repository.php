@@ -74,13 +74,15 @@ class Repository extends ModelRepository {
 	/**
 	 * @param array $conditions
 	 * @param array $sortings
+	 * @param array $columns
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */
-	public function getCarLinksQueryBuilder(array $conditions = [], array $sortings = []): QueryBuilder {
+	public function getCarLinksQueryBuilder(array $conditions = [], array $sortings = [], array $columns = []): QueryBuilder {
+		$select = (!empty($columns)) ? $columns : ['articleCarLinks'];
+		
 		$builder = $this->getEntityManager()->createQueryBuilder()
-			->select([
-				'articleCarLinks'
-			])
+			->select($select)
+			->where('articleCarLinks.active = 1')
 			->from(ArticleCarLinks::class, 'articleCarLinks');
 		
 		$parameterCount = 1;
@@ -108,10 +110,11 @@ class Repository extends ModelRepository {
 	/**
 	 * @param array $conditions
 	 * @param array $sortings
+	 * @param array $columns
 	 * @return \Doctrine\ORM\Query
 	 */
-	public function getCarLinksQuery(array $conditions = [], array $sortings = []): Query {
-		return $this->getCarLinksQueryBuilder($conditions, $sortings)->getQuery();
+	public function getCarLinksQuery(array $conditions = [], array $sortings = [], array $columns = []): Query {
+		return $this->getCarLinksQueryBuilder($conditions, $sortings, $columns)->getQuery();
 	}
 	
 	/**

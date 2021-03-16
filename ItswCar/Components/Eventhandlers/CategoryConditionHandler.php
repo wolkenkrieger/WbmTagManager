@@ -11,6 +11,7 @@
 namespace ItswCar\Components\Eventhandlers;
 
 
+use Doctrine\DBAL\Connection;
 use Shopware\Bundle\SearchBundle\ConditionInterface;
 use Shopware\Bundle\SearchBundleDBAL\QueryBuilder;
 use Shopware\Bundle\StoreFrontBundle\Struct\ShopContextInterface;
@@ -42,17 +43,15 @@ class CategoryConditionHandler extends \Shopware\Bundle\SearchBundleDBAL\Conditi
 	 */
 	public function generateCondition(ConditionInterface $condition, QueryBuilder $query, ShopContextInterface $context): void {
 		parent::generateCondition($condition, $query, $context);
-		
+		$this->service->getVariantIdsWithoutArticleCarLink();
 		if (array_key_exists('car', $this->sessionData) && $this->sessionData['car']) {
-			$query->innerJoin(
-				'variant',
-				'itsw_article_car_links',
-				'carLinks',
-				'(carLinks.article_details_id = variant.id AND carLinks.tecdoc_id = :tecdocId)'
-			)
-				->setParameter('tecdocId', $this->sessionData['car']);
-			
-			//var_dump($query->getSQL()); die;
+			$variantIds = array_merge($this->getVariantIds(), $this->service->getVariantIdsWithoutArticleCarLink());
+			$query->andWhere('product.main_detail_id IN (:variantIds)')
+				->setParameter('variantIds', $variantIds, Connection::PARAM_INT_ARRAY);
 		}
+	}
+	
+	private function getVariantIds(): array {
+		return $this->service->getVariantIdsByTecdocId($this->sessionData['car']);
 	}
 }
