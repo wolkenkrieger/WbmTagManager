@@ -43,15 +43,12 @@ class CategoryConditionHandler extends \Shopware\Bundle\SearchBundleDBAL\Conditi
 	 */
 	public function generateCondition(ConditionInterface $condition, QueryBuilder $query, ShopContextInterface $context): void {
 		parent::generateCondition($condition, $query, $context);
-		$this->service->getVariantIdsWithoutArticleCarLink();
+		
 		if (array_key_exists('car', $this->sessionData) && $this->sessionData['car']) {
-			$variantIds = array_merge($this->getVariantIds(), $this->service->getVariantIdsWithoutArticleCarLink());
+			
+			$variantIds = array_merge($this->service->getVariantIdsByTecdocId($this->sessionData['car']), $this->service->getVariantIdsWithoutArticleCarLink());
 			$query->andWhere('product.main_detail_id IN (:variantIds)')
 				->setParameter('variantIds', $variantIds, Connection::PARAM_INT_ARRAY);
 		}
-	}
-	
-	private function getVariantIds(): array {
-		return $this->service->getVariantIdsByTecdocId($this->sessionData['car']);
 	}
 }

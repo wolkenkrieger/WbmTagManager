@@ -25,8 +25,13 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 		
 		if ($carSet) {
 			$car = $this->service->getCarsForCarfinder([
-				'cars.tecdocId' => $sessionData['car']
-			], []);
+				'select' => [
+					'cars'
+				],
+				'conditions' => [
+					'cars.tecdocId' => $sessionData['car']
+				]
+			]);
 			
 			$this->View()->assign('car', reset($car));
 		}
@@ -285,13 +290,19 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			}
 			
 			$cars = $this->service->getCarsForCarfinder([
-				'cars.manufacturerId' => $manufacturerId,
-				'cars.modelId' => $modelId,
-				'cars.typeId' => $typeId,
-				'cars.active' => 1
-			], [
-				'cars.buildFrom' => 'ASC',
-				'cars.buildTo' => 'ASC'
+				'select' => [
+					'cars'
+				],
+				'conditions' => [
+					'cars.manufacturerId' => $manufacturerId,
+					'cars.modelId' => $modelId,
+					'cars.typeId' => $typeId,
+					'cars.active' => 1
+				],
+				'orders' => [
+					'cars.buildFrom' => 'ASC',
+					'cars.buildTo' => 'ASC'
+				]
 			]);
 			
 			$rendered = $this->View()

@@ -28,9 +28,13 @@ class Shopware_Controllers_Widgets_Restrictions extends Enlight_Controller_Actio
 		$articleCarLinks = $this->service->getModelManager()
 			->getRepository(ArticleCarLinks::class)
 			->getCarLinksQuery([
-				'articleCarLinks.articleDetailsId' => $articleDetailsId,
-				($tecdocId? 'articleCarLinks.tecdocId = ' . $tecdocId : NULL),
-				'articleCarLinks.active' => 1
+				'select' => [
+					'articleCarLinks'
+				],
+				'conditions' => [
+					'articleCarLinks.articleDetailsId' => $articleDetailsId,
+					($tecdocId? 'articleCarLinks.tecdocId = ' . $tecdocId : NULL)
+				]
 			])
 			->getArrayResult();
 		
@@ -38,8 +42,13 @@ class Shopware_Controllers_Widgets_Restrictions extends Enlight_Controller_Actio
 			if ($car = $this->service->getModelManager()
 					->getRepository(Car::class)
 					->getCarsQuery([
-						'cars.tecdocId' => $articleCarLink['tecdocId'],
-						'cars.active' => 1
+						'select' => [
+							'cars'
+						],
+						'conditions' => [
+							'cars.tecdocId' => $articleCarLink['tecdocId'],
+							'cars.active' => 1
+						]
 					])
 					->getOneOrNullResult()) {
 				$codes = [];

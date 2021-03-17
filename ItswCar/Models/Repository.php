@@ -72,162 +72,85 @@ class Repository extends ModelRepository {
 	}
 	
 	/**
-	 * @param array $conditions
-	 * @param array $sortings
-	 * @param array $columns
+	 * @param array $options
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */
-	public function getCarLinksQueryBuilder(array $conditions = [], array $sortings = [], array $columns = []): QueryBuilder {
-		$select = (!empty($columns)) ? $columns : ['articleCarLinks'];
-		
+	public function getCarLinksQueryBuilder(array $options = []): QueryBuilder {
 		$builder = $this->getEntityManager()->createQueryBuilder()
-			->select($select)
-			->where('articleCarLinks.active = 1')
+			->andWhere('articleCarLinks.active = 1')
 			->from(ArticleCarLinks::class, 'articleCarLinks');
 		
-		$parameterCount = 1;
-		foreach($conditions as $condition => $value) {
-			if (is_numeric($condition)) {
-				$builder->andWhere($value);
-			} else if (strpos($condition, ' =') !== FALSE) {
-				$builder->andWhere($condition . ' ?' . $parameterCount)
-					->setParameter($parameterCount++, $value);
-			} else {
-				$builder->andWhere($condition . ' = ?' . $parameterCount)
-					->setParameter($parameterCount++, $value);
-			}
-		}
-		
-		if (!empty($sortings)) {
-			foreach ($sortings as $sort => $order) {
-				$builder->addOrderBy($sort, $order);
-			}
-		}
+		$this->setOptions($builder, $options);
 		
 		return $builder;
 	}
 	
 	/**
-	 * @param array $conditions
-	 * @param array $sortings
-	 * @param array $columns
+	 * @param array $options
 	 * @return \Doctrine\ORM\Query
 	 */
-	public function getCarLinksQuery(array $conditions = [], array $sortings = [], array $columns = []): Query {
-		return $this->getCarLinksQueryBuilder($conditions, $sortings, $columns)->getQuery();
+	public function getCarLinksQuery(array $options = []): Query {
+		return $this->getCarLinksQueryBuilder($options)->getQuery();
 	}
 	
 	/**
-	 * @param array $conditions
-	 * @param array $sortings
+	 * @param array $options
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */
-	public function getCarsQueryBuilder(array $conditions = [], array $sortings = []): QueryBuilder {
+	public function getCarsQueryBuilder(array $options = []): QueryBuilder {
 		$builder = $this->getEntityManager()->createQueryBuilder();
-		$builder->select([
-				'cars'
-			])
-			->from(Car::class, 'cars');
-	
-		$parameterCount = 1;
-		foreach($conditions as $condition => $value) {
-			if (is_numeric($condition)) {
-				$builder->andWhere($value);
-			} else if (strpos($condition, ' =') !== FALSE) {
-				$builder->andWhere($condition . ' ?' . $parameterCount)
-					->setParameter($parameterCount++, $value);
-			} else {
-				$builder->andWhere($condition . ' = ?' . $parameterCount)
-					->setParameter($parameterCount++, $value);
-			}
-		}
-	
-		if (!empty($sortings)) {
-			foreach ($sortings as $sort => $order) {
-				$builder->addOrderBy($sort, $order);
-			}
-		}
-	
+		$builder->from(Car::class, 'cars');
+		$this->setOptions($builder, $options);
+		
 		return $builder;
 	}
 	
 	/**
-	 * @param array $conditions
-	 * @param array $sortings
+	 * @param array $options
 	 * @return \Doctrine\ORM\Query
 	 */
-	public function getCarsQuery(array $conditions = [], array $sortings = []): Query {
-		return $this->getCarsQueryBuilder($conditions, $sortings)->getQuery();
+	public function getCarsQuery(array $options = []): Query {
+		return $this->getCarsQueryBuilder($options)->getQuery();
 	}
 	
 	/**
-	 * @param array $filters
-	 * @param array $sortings
+	 * @param array $options
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */
-	public function getManufacturersQueryBuilder(array $filters = [], array $sortings = []): QueryBuilder {
+	public function getManufacturersQueryBuilder(array $options = []): QueryBuilder {
 		$builder = $this->getEntityManager()->createQueryBuilder();
-		$builder->select([
-			'manufacturers'
-		])
-			->from(Manufacturer::class, 'manufacturers');
-		
-		foreach($filters as $filter) {
-			$builder->andWhere($filter);
-		}
-		
-		if (!empty($sortings)) {
-			foreach ($sortings as $sort => $order) {
-				$builder->addOrderBy($sort, $order);
-			}
-		} else {
-			$builder->addOrderBy('manufacturers.display', 'ASC');
-		}
+		$builder->from(Manufacturer::class, 'manufacturers');
+		$this->setOptions($builder, $options);
 		
 		return $builder;
 	}
 	
 	/**
-	 * @param array $filters
+	 * @param array $options
 	 * @return \Doctrine\ORM\Query
 	 */
-	public function getManufacturersQuery(array $filters = []): Query {
-		return $this->getManufacturersQueryBuilder($filters)->getQuery();
+	public function getManufacturersQuery(array $options = []): Query {
+		return $this->getManufacturersQueryBuilder($options)->getQuery();
 	}
 	
 	/**
-	 * @param array $filters
-	 * @param array $sortings
+	 * @param array $options
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */
-	public function getModelsQueryBuilder(array $filters = [], array $sortings = []): QueryBuilder {
+	public function getModelsQueryBuilder(array $options = []): QueryBuilder {
 		$builder = $this->getEntityManager()->createQueryBuilder();
-		$builder->select([
-			'models'
-		])
-			->from(Model::class, 'models');
-		
-		foreach($filters as $filter) {
-			$builder->andWhere($filter);
-		}
-		
-		if (!empty($sortings)) {
-			foreach ($sortings as $sort => $order) {
-				$builder->addOrderBy($sort, $order);
-			}
-		} else {
-			$builder->addOrderBy('models.display', 'ASC');
-		}
+		$builder->from(Model::class, 'models');
+		$this->setOptions($builder, $options);
 		
 		return $builder;
 	}
 	
 	/**
-	 * @param array $filters
+	 * @param array $options
 	 * @return \Doctrine\ORM\Query
 	 */
-	public function getModelsQuery(array $filters = []): Query {
-		return $this->getModelsQuery($filters)->getQuery();
+	public function getModelsQuery(array $options = []): Query {
+		return $this->getModelsQueryBuilder($options)->getQuery();
 	}
 	
 	/**
@@ -406,5 +329,38 @@ class Repository extends ModelRepository {
 	 */
 	public function getIdsByTecdocIdQuery(int $tecdocId, array $filters = [], array $sortings = []): Query {
 		return $this->getIdsByTecdocIdQueryBuilder($tecdocId, $filters, $sortings)->getQuery();
+	}
+	
+	/**
+	 * @param       $builder
+	 * @param array $options
+	 */
+	private function setOptions(&$builder, array $options = []) {
+		if (empty($options)) {
+			return;
+		}
+		
+		$builder->select($options['select'] ?? []);
+		
+		$parameterCount = 1;
+		if (isset($options['conditions']) && is_array($options['conditions'])) {
+			foreach($options['conditions'] as $condition => $value) {
+				if (is_numeric($condition)) {
+					$builder->andWhere($value);
+				} else if (strpos($condition, ' =') !== FALSE) {
+					$builder->andWhere($condition . ' ?' . $parameterCount)
+						->setParameter($parameterCount++, $value);
+				} else {
+					$builder->andWhere($condition . ' = ?' . $parameterCount)
+						->setParameter($parameterCount++, $value);
+				}
+			}
+		}
+		
+		if (isset($options['orders']) && is_array($options['orders'])) {
+			foreach ($options['orders'] as $column => $order) {
+				$builder->addOrderBy($column, $order);
+			}
+		}
 	}
 }

@@ -186,7 +186,15 @@ class Services {
 	public function getManufacturersForCarfinder(): array {
 		$manufacturers = $this->modelManager->getRepository(Car::class)
 			->getManufacturersQuery([
-				'manufacturers.active = 1'
+				'select' => [
+					'manufacturers'
+				],
+				'conditions' => [
+					'manufacturers.active = 1'
+				],
+				'orders' => [
+					'manufacturers.display' => 'ASC'
+				]
 			])
 			->getResult();
 		
@@ -264,12 +272,11 @@ class Services {
 	}
 	
 	/**
-	 * @param array $conditions
-	 * @param array $sortings
+	 * @param array $options
 	 * @return array
 	 */
-	public function getCarsForCarfinder(array $conditions = [], array $sortings = []): array {
-		$cars = $this->getCars($conditions, $sortings);
+	public function getCarsForCarfinder(array $options = []): array {
+		$cars = $this->getCars($options);
 		
 		foreach($cars as $car) {
 			$codes = [];
@@ -294,13 +301,12 @@ class Services {
 	}
 	
 	/**
-	 * @param array $conditions
-	 * @param array $sortings
+	 * @param array $options
 	 * @return mixed
 	 */
-	public function getCars(array $conditions = [], array $sortings = []) {
+	public function getCars(array $options = []) {
 		return $this->modelManager->getRepository(Car::class)
-			->getCarsQuery($conditions, $sortings)->getResult();
+			->getCarsQuery($options)->getResult();
 	}
 	
 	/**
@@ -515,13 +521,16 @@ class Services {
 	public function getVariantIdsByTecdocId(int $tecdocId): array {
 		$carLinks = $this->getModelManager()->getRepository(ArticleCarLinks::class)
 			->getCarLinksQuery([
-				'articleCarLinks.tecdocId' => $tecdocId
-			], [], [
-				'articleCarLinks.articleDetailsId'
+				'select' => [
+					'articleCarLinks.articleDetailsId'
+				],
+				'conditions' => [
+					'articleCarLinks.tecdocId' => $tecdocId
+				]
 			])
 			->getArrayResult();
 		
-		 return array_column($carLinks, 'articleDetailsId');
+		return array_column($carLinks, 'articleDetailsId');
 	}
 	
 	/**
