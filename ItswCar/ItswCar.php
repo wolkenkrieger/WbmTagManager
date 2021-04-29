@@ -51,7 +51,7 @@ class ItswCar extends Plugin {
 	public function update(UpdateContext $context): void {
 		try {
 			$this->createAttributes();
-			$this->updateSchemas();
+			//$this->updateSchemas();
 		} catch (Exception $err) {}
 		
 		$context->scheduleClearCache(UpdateContext::CACHE_LIST_ALL);
@@ -63,7 +63,7 @@ class ItswCar extends Plugin {
 	public function activate(ActivateContext $context): void {
 		try {
 		$this->createAttributes();
-		$this->updateSchemas();
+		//$this->updateSchemas();
 		} catch (Exception $err) {}
 		
 		$context->scheduleClearCache(ActivateContext::CACHE_LIST_ALL);
@@ -179,6 +179,42 @@ class ItswCar extends Plugin {
 			'translatable' => FALSE,
 			'displayInBackend' => TRUE,
 			'position' => 103,
+			'custom' => TRUE
+		]);
+		$service->update('s_articles_attributes', 'position_1', 'string', [
+			'label' => 'Einbauposition 1',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'position' => 104,
+			'custom' => TRUE
+		]);
+		$service->update('s_articles_attributes', 'position_2', 'string', [
+			'label' => 'Einbauposition 2',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'position' => 105,
+			'custom' => TRUE
+		]);
+		$service->update('s_articles_attributes', 'position_3', 'string', [
+			'label' => 'Einbauposition 3',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'position' => 105,
+			'custom' => TRUE
+		]);
+		$service->update('s_articles_attributes', 'position_4', 'string', [
+			'label' => 'Einbauposition 1',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'position' => 105,
 			'custom' => TRUE
 		]);
 		

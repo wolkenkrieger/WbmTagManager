@@ -12,13 +12,22 @@ use ItswCar\Models\ArticleCarLinks;
 use ItswCar\Models\Car;
 
 class Shopware_Controllers_Widgets_Restrictions extends Enlight_Controller_Action {
+	/**
+	 * @var ItswCar\Components\Services\Services
+	 */
 	protected $service;
 	
+	/**
+	 *
+	 */
 	public function init(): void {
 		$this->service = Shopware()->Container()->get('itswcar.services');
 		$this->setContainer($this->service->getContainer());
 	}
 	
+	/**
+	 *
+	 */
 	public function indexAction(): void {
 		$sessionData = $this->service->getSessionData();
 		$tecdocId = $sessionData['car']??0;

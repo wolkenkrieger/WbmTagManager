@@ -5,7 +5,7 @@
 	<label lang="de">ITSW Car</label>
 	<label lang="en">ITSW Car</label>
 	
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<copyright>(c) by IT Service Wunglück</copyright>
 	<license>MIT</license>
 	<link>https://www.itsw.dev</link>
@@ -18,5 +18,9 @@
 	<changelog version="1.0.0">
 		<changes lang="de">Initialisierung / Erstveröffentlichung</changes>
 		<changes lang="en">Initialization / First release</changes>
+	</changelog>
+	<changelog version="1.0.1">
+		<changes lang="de">Artikelattribute Position 1 - 4 hinzugefügt</changes>
+		<changes lang="en">Article attributes Position 1 - 4 added</changes>
 	</changelog>
 </plugin>
