@@ -160,8 +160,6 @@ class ExtendedArticle extends Resource {
 		}
 		
 		if ($this->getResultMode() === self::HYDRATE_ARRAY) {
-			$product['carLinks'] = $this->getArticleCarLinks($product['mainDetailId']);
-			var_dump($product);die;
 			$product['images'] = $this->getArticleImages($id);
 			$product['configuratorSet'] = $this->getArticleConfiguratorSet($id);
 			$product['links'] = $this->getArticleLinks($id);
@@ -171,6 +169,7 @@ class ExtendedArticle extends Resource {
 			$product['related'] = $this->getArticleRelated($id);
 			$product['details'] = $this->getArticleVariants($id);
 			$product['seoCategories'] = $this->getArticleSeoCategories($id);
+			$product['carLinks'] = $this->getArticleCarLinks($product['mainDetailId']);
 			
 			if (isset($options['considerTaxInput']) && $options['considerTaxInput']) {
 				$product['mainDetail']['prices'] = $this->getTaxPrices(
