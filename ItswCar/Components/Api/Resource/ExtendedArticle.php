@@ -10,6 +10,7 @@
 
 namespace ItswCar\Components\Api\Resource;
 
+use ItswCar\Models\ArticleCarLinks;
 use Shopware\Components\Api\Exception as ApiException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\ORMException;
@@ -159,6 +160,8 @@ class ExtendedArticle extends Resource {
 		}
 		
 		if ($this->getResultMode() === self::HYDRATE_ARRAY) {
+			$product['carLinks'] = $this->getArticleCarLinks($product['mainDetailId']);
+			var_dump($product);die;
 			$product['images'] = $this->getArticleImages($id);
 			$product['configuratorSet'] = $this->getArticleConfiguratorSet($id);
 			$product['links'] = $this->getArticleLinks($id);
@@ -168,7 +171,6 @@ class ExtendedArticle extends Resource {
 			$product['related'] = $this->getArticleRelated($id);
 			$product['details'] = $this->getArticleVariants($id);
 			$product['seoCategories'] = $this->getArticleSeoCategories($id);
-			$product['carLinks'] = $this->getArticleCarLinks($product['mainDetail']['id']);
 			
 			if (isset($options['considerTaxInput']) && $options['considerTaxInput']) {
 				$product['mainDetail']['prices'] = $this->getTaxPrices(
@@ -931,12 +933,18 @@ class ExtendedArticle extends Resource {
 	/**
 	 * Helper function wich loads all linked cars of the passed
 	 * main variant id.
-	 * @param $articleDetailsId
+	 * @param int $articleDetailsId
 	 * @return array
+	 * @throws \Exception
 	 */
 	protected function getArticleCarLinks(int $articleDetailsId): array {
 		$builder = $this->getCarLinkRepository()->getCarLinksQueryBuilder([
-			'articleCarLinks.articleDetailsId' => $articleDetailsId
+			'select' => [
+				'articleCarLinks'
+			],
+			'conditions' => [
+				'articleCarLinks.articleDetailsId' => $articleDetailsId
+			]
 		]);
 		
 		return $this->getFullResult($builder);
@@ -2295,6 +2303,7 @@ class ExtendedArticle extends Resource {
 	 */
 	private function getFullResult(QueryBuilder $builder): array {
 		$query = $builder->getQuery();
+		
 		$query->setHydrationMode($this->getResultMode());
 		$paginator = $this->getManager()->createPaginator($query);
 		

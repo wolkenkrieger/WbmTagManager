@@ -209,7 +209,7 @@ class ItswCar extends Plugin {
 			'custom' => TRUE
 		]);
 		$service->update('s_articles_attributes', 'position_4', 'string', [
-			'label' => 'Einbauposition 1',
+			'label' => 'Einbauposition 4',
 			'supportText' => '',
 			'helpText' => '',
 			'translatable' => FALSE,
