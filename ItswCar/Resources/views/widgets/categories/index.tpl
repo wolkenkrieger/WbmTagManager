@@ -5,10 +5,16 @@
  * Zeit:    15:09
  * Datei:   index.tpl
  *}
-<table>
-	<tr>
-        {foreach $sMainCategories as $mainCategory}
-			<td><a href="{$mainCategory.link}">{$mainCategory.name}</a></td>
-        {/foreach}
-	</tr>
-</table>
+{block name="itsw_widget_categories"}
+	<div class="itsw">
+		{block name="itsw_widget_categories_content"}
+			<div class="table flex">
+                {foreach $sMainCategories as $mainCategory}
+					{if $mainCategory.mediaId}
+						<div class="table--cell"><a href="{$mainCategory.link}"><img src="{media path=$mainCategory.media.path}" alt="{$mainCategory.name}" class="categories--image"/> </a></div>
+					{/if}
+                {/foreach}
+			</div>
+		{/block}
+	</div>
+{/block}
