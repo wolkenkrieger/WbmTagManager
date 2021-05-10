@@ -11,6 +11,15 @@
   display: table;
   width: 100%;
 
+  &.carfinder {
+    border: 1px solid red;
+  }
+
+  &.header--navigation {
+    width: @table-header--navigation-width;
+    margin: auto;
+  }
+
   &.toggle {
       .table--row:nth-child(even) {
         background-color: @table-row-highlight-bg;
@@ -20,10 +29,17 @@
   &.flex {
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-content: space-around;
-    align-items: center;
+    justify-content: space-between;
+    align-content: space-between;
+    align-items: baseline;
     flex-wrap: wrap;
+
+    & > .table--cell {
+      .unitize(padding, 20);
+      flex-basis: 0px;
+      flex-grow: 1;
+      flex-shrink: 1;
+    }
   }
 
   &--header {
@@ -60,6 +76,14 @@
 
     &.min-width--80 {
       .unitize(min-width, 80);
+    }
+
+    .widget--select-container {
+      .unitize-width(@widget--select-container-width);
+
+      select {
+        width: 100%;
+      }
     }
   }
 }
