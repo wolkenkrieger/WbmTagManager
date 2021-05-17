@@ -55,15 +55,15 @@
 
 .widget {
   &.categories {
-    ul {
+     ul {
       overflow: hidden;
       list-style: none;
 
       li {
         float: left;
         .unitize(width, 176);
-        .unitize(min-height, 240);
-        .unitize(margin-bottom, 9);
+        /*.unitize(min-height, 200);*/
+        .unitize(margin-bottom, 20);
         .unitize(margin-left, 15);
         border: 1px solid @widget--categories-border-color;
         .unitize(padding-top, 15);
@@ -73,6 +73,16 @@
 
         &:hover {
           border-color: darken(@widget--categories-border-color, 8%);
+        }
+
+        ul > li {
+          border: none;
+          width: 100%;
+          min-height: 0;
+          margin: 0;
+          padding: 0;
+          .unitize(padding-left, 5);
+          .unitize(padding-right, 5);
         }
 
         .image {

@@ -15,7 +15,7 @@
 		{block name="itsw_widget_categories_content"}
 			<div class="widget categories">
 				<ul>
-                    {foreach $sMainCategories as $mainCategory}
+                    {foreach $sCategories as $mainCategory}
                         {if $mainCategory.mediaId}
 							<li>
 								<div class="image">
@@ -27,6 +27,20 @@
 									<span class="headline h3">
 										<a href="{$mainCategory.link}">{$mainCategory.name}</a>
 									</span>
+									{*if !empty($mainCategory.subcategories)}
+										<span class="sub text-left">
+											<ul>
+												{foreach $mainCategory.subcategories as $subCategory}
+													{if $subCategory@index > 2}
+														{break}
+													{/if}
+													<li>
+														<a href="{$subCategory.link}">{$subCategory.name}</a>
+													</li>
+												{/foreach}
+											</ul>
+										</span>
+									{/if*}
 								</div>
 							</li>
                         {/if}
