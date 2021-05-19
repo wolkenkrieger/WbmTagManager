@@ -6,7 +6,7 @@
  * Datei:   get_cars_modal.tpl
  *}
 
-{if $cars}
+{if !empty($cars)}
 	<div class="itsw modal--container">
 		<div class="table toggle">
 			<div class="table--header">
@@ -28,5 +28,9 @@
 				</div>
             {/foreach}
 		</div>
+	</div>
+{else}
+	<div class="itsw modal--container">
+		keine Fahrzeuge gefunden!
 	</div>
 {/if}

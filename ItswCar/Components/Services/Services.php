@@ -12,6 +12,7 @@ namespace ItswCar\Components\Services;
 
 use ItswCar\Models\ArticleCarLinks;
 use ItswCar\Models\Car;
+use ItswCar\Models\KbaCodes;
 use Shopware\Components\DependencyInjection\Container;
 use Shopware\Components\Model\ModelManager;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -307,6 +308,15 @@ class Services {
 	public function getCars(array $options = []) {
 		return $this->modelManager->getRepository(Car::class)
 			->getCarsQuery($options)->getResult();
+	}
+	
+	/**
+	 * @param array $options
+	 * @return mixed
+	 */
+	public function getCodes(array $options = []) {
+		return $this->modelManager->getRepository(KbaCodes::class)
+			->getCodesQuery($options)->getResult();
 	}
 	
 	/**

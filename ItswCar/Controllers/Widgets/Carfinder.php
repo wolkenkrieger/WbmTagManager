@@ -278,32 +278,69 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			$manufacturerId = (int)$this->Request()->getParam('manufacturer');
 			$modelId = (int)$this->Request()->getParam('model');
 			$typeId = (int)$this->Request()->getParam('type');
+			$hsn = $this->Request()->getParam('hsn', '');
+			$tsn = $this->Request()->getParam('tsn', '');
+			$cars = [];
 			
-			if (!$manufacturerId) {
-				throw new \RuntimeException('manufacturerId');
+			if ($hsn !== '' || $tsn !== '') {
+				$codes = $this->service->getCodes([
+					'select' => [
+						'kba_codes.tecdocId'
+					],
+					'conditions' => [
+						'kba_codes.hsn' => strtoupper($hsn),
+						'kba_codes.tsn' => strtoupper($tsn),
+						'kba_codes.active' => 1
+					]
+				]);
+				
+				if (count($codes)) {
+					$tecdocIds = [];
+					foreach ($codes as $code) {
+						$tecdocIds[] = $code['tecdocId'];
+					}
+					
+					$cars = $this->service->getCarsForCarfinder([
+						'select' => [
+							'cars'
+						],
+						'conditions' => [
+							'cars.tecdocId' => $tecdocIds,
+						'cars.active' => 1
+						],
+						'orders' => [
+							'cars.buildFrom' => 'ASC',
+							'cars.buildTo' => 'ASC'
+						]
+					]);
+				}
+			} else {
+				if (!$manufacturerId) {
+					throw new \RuntimeException('manufacturerId');
+				}
+				if (!$modelId) {
+					throw new \RuntimeException('modelId');
+				}
+				if (!$typeId) {
+					throw new \RuntimeException('typeId');
+				}
+				
+				$cars = $this->service->getCarsForCarfinder([
+					'select' => [
+						'cars'
+					],
+					'conditions' => [
+						'cars.manufacturerId' => $manufacturerId,
+						'cars.modelId' => $modelId,
+						'cars.typeId' => $typeId,
+						'cars.active' => 1
+					],
+					'orders' => [
+						'cars.buildFrom' => 'ASC',
+						'cars.buildTo' => 'ASC'
+					]
+				]);
 			}
-			if (!$modelId) {
-				throw new \RuntimeException('modelId');
-			}
-			if (!$typeId) {
-				throw new \RuntimeException('typeId');
-			}
-			
-			$cars = $this->service->getCarsForCarfinder([
-				'select' => [
-					'cars'
-				],
-				'conditions' => [
-					'cars.manufacturerId' => $manufacturerId,
-					'cars.modelId' => $modelId,
-					'cars.typeId' => $typeId,
-					'cars.active' => 1
-				],
-				'orders' => [
-					'cars.buildFrom' => 'ASC',
-					'cars.buildTo' => 'ASC'
-				]
-			]);
 			
 			$rendered = $this->View()
 				->loadTemplate('widgets/carfinder/render/get_cars_modal.tpl')

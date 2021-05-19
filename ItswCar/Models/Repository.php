@@ -117,6 +117,26 @@ class Repository extends ModelRepository {
 	 * @param array $options
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */
+	public function getCodesQueryBuilder(array $options = []): QueryBuilder {
+		$builder = $this->getEntityManager()->createQueryBuilder();
+		$builder->from(KbaCodes::class, 'kba_codes');
+		$this->setOptions($builder, $options);
+		
+		return $builder;
+	}
+	
+	/**
+	 * @param array $options
+	 * @return \Doctrine\ORM\Query
+	 */
+	public function getCodesQuery(array $options = []): Query {
+		return $this->getCodesQueryBuilder($options)->getQuery();
+	}
+	
+	/**
+	 * @param array $options
+	 * @return \Doctrine\ORM\QueryBuilder
+	 */
 	public function getManufacturersQueryBuilder(array $options = []): QueryBuilder {
 		$builder = $this->getEntityManager()->createQueryBuilder();
 		$builder->from(Manufacturer::class, 'manufacturers');
@@ -335,7 +355,7 @@ class Repository extends ModelRepository {
 	 * @param       $builder
 	 * @param array $options
 	 */
-	private function setOptions(&$builder, array $options = []) {
+	private function setOptions(&$builder, array $options = []): void {
 		if (empty($options)) {
 			return;
 		}

@@ -12,7 +12,7 @@
   width: 100%;
 
   &.carfinder {
-    border: 1px solid red;
+    .unitize-padding(0, 10);
   }
 
   &.header--navigation {
@@ -34,7 +34,7 @@
     align-items: baseline;
     flex-wrap: wrap;
 
-    & > .table--cell {
+    .table--cell {
       .unitize(padding, 20);
       flex-basis: 0px;
       flex-grow: 1;
@@ -61,6 +61,11 @@
     color: @table-row-color;
   }
 
+  &--caption {
+    display: table-caption;
+    caption-side: top;
+  }
+
   &--content {
     width: 100%;
     display: table-row-group;
@@ -69,6 +74,7 @@
   &--cell {
     display: table-cell;
     .unitize(padding, @table--cell-padding);
+    vertical-align: top;
 
     &.is--right {
       text-align: right;
@@ -79,8 +85,8 @@
     }
 
     .widget--select-container {
-      .unitize-width(@widget--select-container-width);
-
+      /*.unitize-width(@widget--select-container-width);*/
+      width: 100%;
       select {
         width: 100%;
       }

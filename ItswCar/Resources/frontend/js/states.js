@@ -11,5 +11,8 @@
         .addPlugin('select[data-itsw-select="true"]', 'itswCarFinder', {
             baseUrl: '/shop/widgets/carfinder'
         })
+        .addPlugin('.hsn-tsn--container button', 'itswCarFinder', {
+            baseUrl: '/shop/widgets/carfinder'
+        })
     ;
 })(jQuery, window);

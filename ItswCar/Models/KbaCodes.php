@@ -17,6 +17,7 @@ use Shopware\Components\Model\ModelEntity;
  * This model stores the registration codes of the Kraftfahrtbundesamt (KBA) for a car
  *
  * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="ItswCar\Models\Repository")
  * @ORM\Table(name="itsw_kba_codes",
  *     indexes={
  *     @ORM\Index(name="search_idx", columns={"tecdoc_id", "hsn", "tsn", "active"}),

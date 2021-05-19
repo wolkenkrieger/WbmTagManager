@@ -19,7 +19,9 @@
             setter: null,
             manufacturer: null,
             model: null,
-            type: null
+            type: null,
+            hsn: null,
+            tsn: null
         },
         
         init: function () {
@@ -28,6 +30,7 @@
             me._on(me.$el, 'init', $.proxy(me.onInit, me));
             me._on(me.$el, 'change', $.proxy(me.onChange, me));
             me._on(me.$el, 'empty', $.proxy(me.onEmpty, me));
+            me._on(me.$el, 'click', $.proxy(me.onClick, me));
             
             $.publish('plugin/itswCarFinder/onInit', me);
         },
@@ -63,6 +66,31 @@
                     }
                 }
             });
+        },
+        
+        onClick: function () {
+            var me = this;
+            
+            if (me.$el.is('button')) {
+                me.itswApplyDataAttributes();
+                
+                var url = me.opts.baseUrl + me.opts.carGetter +
+                    '/hsn/' + me.opts.hsn +
+                    '/tsn/' + me.opts.tsn;
+                $.ajax({
+                    url: url,
+                    dataType: 'json'
+                }).done(function (response) {
+                    var content = response.data;
+                    $.modal.open(content, {
+                        title: 'Fahrzugauswahl',
+                        sizing: 'content',
+                        width: '900'
+                    })
+                });
+            }
+            
+            
         },
         
         onChange: function () {
@@ -170,6 +198,9 @@
             
                 return true;
             });
+            
+            me.opts.hsn = $.trim($('.hsn-tsn--container #hsn').val());
+            me.opts.tsn = $.trim($('.hsn-tsn--container #tsn').val());
             
             me.opts.getter = me.opts.baseUrl + '/get-' + me.$el.attr('name');
             me.opts.setter = me.opts.baseUrl + '/set-' + me.$el.attr('name');
