@@ -23,4 +23,8 @@
 		<changes lang="de">Artikelattribute Position 1 - 4 hinzugefügt</changes>
 		<changes lang="en">Article attributes Position 1 - 4 added</changes>
 	</changelog>
+	<changelog version="1.0.2">
+		<changes lang="de">Update auf select2 4.1.0-rc.0</changes>
+		<changes lang="en">Update to select2 4.1.0-rc.0</changes>
+	</changelog>
 </plugin>
