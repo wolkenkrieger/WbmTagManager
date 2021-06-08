@@ -39,7 +39,7 @@ class ItswCar extends Plugin {
 	public function install(InstallContext $context): void {
 		try {
 			$this->createAttributes();
-			$this->updateSchemas();
+			//$this->updateSchemas();
 		} catch (Exception $err) {}
 		
 		$context->scheduleClearCache(InstallContext::CACHE_LIST_ALL);
