@@ -39,7 +39,7 @@ class Eventhandlers {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		echo $controllerEventArgs->getRequest()->getControllerName();
+		
 		if ($controllerEventArgs->getRequest()->getModuleName() !== 'frontend'
 			|| in_array($controllerEventArgs->getRequest()->getControllerName(), [
 				'custom',
