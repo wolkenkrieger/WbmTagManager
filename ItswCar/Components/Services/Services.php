@@ -204,7 +204,8 @@ class Services {
 				'name' => $manufacturer->getName(),
 				'url' => $this->getCleanedStringForUrl($manufacturer->getName()),
 				'display' => $manufacturer->getDisplay(),
-				'id' => $manufacturer->getId()
+				'id' => $manufacturer->getId(),
+				'topBrand' => $manufacturer->getTopBrand()
 			];
 		}
 		
@@ -221,18 +222,21 @@ class Services {
 		}
 		
 		$models = $this->modelManager->getRepository(Car::class)
-			->getModelsByManufacturerIdQuery($manufacturerId, [
-				'models.active = 1',
-				'cars.active = 1'
+			->getModelsForCarfinderQuery($manufacturerId, [
+				'models.active = 1'
 			])
 			->getResult();
 		
 		foreach($models as $model) {
-			$return[] = [
-				'name' => $model->getName(),
-				'url' => $this->getCleanedStringForUrl($model->getName()),
-				'display' => $model->getDisplay(),
-				'id' => $model->getId()
+			$buildFrom = \DateTime::createFromFormat('Y-m-d H:i:s', $model['buildFrom'])->format('m/Y');
+			$buildTo = \DateTime::createFromFormat('Y-m-d H:i:s', $model['buildTo'])->format('m/Y');
+			
+			$return[$model['modelDisplay']][] = [
+				'typeDisplay' => $model['typeDisplay'],
+				'buildFrom' => $buildFrom,
+				'buildTo' => $buildTo,
+				'typeId' => $model['typeId'],
+				'modelId' => $model['modelId']
 			];
 		}
 		
@@ -242,9 +246,10 @@ class Services {
 	/**
 	 * @param int|null $manufacturerId
 	 * @param int|null $modelId
+	 * @param int|null $typeId
 	 * @return array
 	 */
-	public function getTypesForCarfinder(int $manufacturerId = NULL, int $modelId = NULL): array {
+	public function getTypesForCarfinder(int $manufacturerId = NULL, int $modelId = NULL, int $typeId = NULL): array {
 		if (!$manufacturerId) {
 			throw new ParameterNotFoundException("manufacturerId");
 		}
@@ -252,22 +257,23 @@ class Services {
 			throw new ParameterNotFoundException("modelId");
 		}
 		$types = $this->modelManager->getRepository(Car::class)
-			->getTypesByManufacturerIdAndModelIdQuery($manufacturerId, $modelId, [
-				'types.active = 1',
+			->getTypesForCarfinderQuery($manufacturerId, $modelId, $typeId, [
 				'cars.active = 1'
 			])
 			->getResult();
 		
-		
-		
 		foreach($types as $type) {
 			$return[] = [
-				'name' => $type->getName(),
-				'url' => $this->getCleanedStringForUrl($type->getName()),
-				'display' => $type->getDisplay(),
-				'id' => $type->getId()
+				'tecdocId' => $type['tecdocId'],
+				'ccm' => $type['ccm'],
+				'display' => sprintf('%.1f', $type['ccm'] / 1000),
+				'ps' => $type['ps'],
+				'kw' => $type['kw'],
+				'platform' => $type['platform'],
+				'typeId' => $type['typeId']
 			];
 		}
+		
 		
 		return $return??[];
 	}

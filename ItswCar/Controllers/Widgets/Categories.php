@@ -31,7 +31,7 @@ class Shopware_Controllers_Widgets_Categories extends Enlight_Controller_Action 
 		
 		foreach($mainCategories as $mainCategoryId => $mainCategory) {
 			$return[$mainCategoryId] = $mainCategory;
-			$return[$mainCategoryId]['subcategories'] = $this->getCategoriesByParentId($mainCategoryId);
+			//$return[$mainCategoryId]['subcategories'] = $this->getCategoriesByParentId($mainCategoryId);
 		}
 		$this->View()->assign('sCategories', $return);
 	}

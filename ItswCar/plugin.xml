@@ -5,7 +5,7 @@
 	<label lang="de">ITSW Car</label>
 	<label lang="en">ITSW Car</label>
 	
-	<version>1.0.2</version>
+	<version>1.0.3</version>
 	<copyright>(c) by IT Service Wunglück</copyright>
 	<license>MIT</license>
 	<link>https://www.itsw.dev</link>
@@ -26,5 +26,9 @@
 	<changelog version="1.0.2">
 		<changes lang="de">Update auf select2 4.1.0-rc.0</changes>
 		<changes lang="en">Update to select2 4.1.0-rc.0</changes>
+	</changelog>
+	<changelog version="1.0.3">
+		<changes lang="de">Neues Feld "top_brand" in Herstellertabelle</changes>
+		<changes lang="en">New column "top_brand" in manufacturers table</changes>
 	</changelog>
 </plugin>

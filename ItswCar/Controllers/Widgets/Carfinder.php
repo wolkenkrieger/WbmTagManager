@@ -45,9 +45,21 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			$this->Request()->setHeader('Content-Type', 'application/json');
 			$this->service->setNeverRender();
 			$manufacturers = $this->service->getManufacturersForCarfinder();
+			$topBrands = [];
+			$allBrands = [];
+			
+			foreach($manufacturers as $manufacturer) {
+				if ($manufacturer['topBrand']) {
+					$topBrands[] = $manufacturer;
+				} else {
+					$allBrands[] = $manufacturer;
+				}
+			}
+			
 			$rendered = $this->View()
 				->loadTemplate('widgets/carfinder/render/manufacturers_select_default.tpl')
-				->assign('manufacturers', $manufacturers)
+				->assign('topBrands', $topBrands)
+				->assign('allBrands', $allBrands)
 				->assign('session', $this->service->getSessionData())
 				->render();
 			
@@ -70,12 +82,16 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 		$this->Response()->setBody(json_encode($result));
 	}
 	
+	/**
+	 * @throws \JsonException
+	 */
 	public function getModelAction(): void {
 		try {
 			$this->Request()->setHeader('Content-Type', 'application/json');
 			$this->service->setNeverRender();
 			$manufacturerId = (int)$this->Request()->getParam('manufacturer');
 			$models = $this->service->getModelsForCarfinder($manufacturerId);
+			
 			$rendered = $this->View()
 				->loadTemplate('widgets/carfinder/render/models_select_default.tpl')
 				->assign('models', $models)
@@ -98,19 +114,20 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			];
 		}
 		
-		$this->Response()->setBody(json_encode($result));
+		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
 	}
 	
 	/**
-	 *
+	 * @throws \JsonException
 	 */
 	public function getTypeAction(): void {
 		try {
 			$this->Request()->setHeader('Content-Type', 'application/json');
 			$this->service->setNeverRender();
-			$manufacturerId = (int)$this->Request()->getParam('manufacturer');
-			$modelId = (int)$this->Request()->getParam('model');
-			$types = $this->service->getTypesForCarfinder($manufacturerId, $modelId);
+			$manufacturerId = (int)$this->Request()->getParam('manufacturer', NULL);
+			$modelId = (int)$this->Request()->getParam('model', NULL);
+			$typeId = (int)$this->Request()->getParam('type', NULL);
+			$types = $this->service->getTypesForCarfinder($manufacturerId, $modelId, $typeId);
 			$rendered = $this->View()
 				->loadTemplate('widgets/carfinder/render/types_select_default.tpl')
 				->assign('types', $types)
@@ -122,7 +139,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'data' => $rendered,
 				'manufacturer' => $manufacturerId,
 				'model' => $modelId,
-				'type' => NULL,
+				'type' => $typeId,
 				'car' => NULL
 			];
 			
@@ -135,7 +152,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			];
 		}
 		
-		$this->Response()->setBody(json_encode($result));
+		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
 	}
 	
 	/**
@@ -151,14 +168,14 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				throw new \RuntimeException('manufacturerId');
 			}
 			
-			$modelId = $typeId = NULL;
 			$sessionData = $this->service->getSessionData();
-			if (isset($sessionData['model']) && ((int)$sessionData['manufacturer'] === $manufacturerId)) {
-				$modelId = (int)$sessionData['model'];
-			}
+			$carId = $typeId = $modelId = NULL;
 			
-			if ($modelId && isset($sessionData['type'])) {
-				$typeId = (int)$sessionData['type'];
+			if (isset($sessionData['model']) && ((int)$sessionData['manufacturer'] === $manufacturerId)) {
+				$modelId = $sessionData['model'];
+				if (isset($sessionData['type'])) {
+					$typeId = $sessionData['type'];
+				}
 			}
 			
 			$result = [
@@ -167,7 +184,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'manufacturer' => $manufacturerId,
 				'model' => $modelId,
 				'type' => $typeId,
-				'car' => NULL
+				'car' => $carId
 			];
 			
 			$this->service->setSessionData($result);
@@ -192,6 +209,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			$this->service->setNeverRender();
 			$manufacturerId = (int)$this->Request()->getParam('manufacturer');
 			$modelId = (int)$this->Request()->getParam('model');
+			$typeId = (int)$this->Request()->getParam('type');
 			
 			if (!$manufacturerId) {
 				throw new \RuntimeException('manufacturerId');
@@ -199,12 +217,12 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			if (!$modelId) {
 				throw new \RuntimeException('modelId');
 			}
-			
-			$typeId = NULL;
-			$sessionData = $this->service->getSessionData();
-			if (isset($sessionData['type']) && ((int)$sessionData['model'] === $modelId)) {
-				$typeId = (int)$sessionData['type'];
+			if (!$typeId) {
+				throw new \RuntimeException('modelId');
 			}
+			
+			$sessionData = $this->service->getSessionData();
+			$carId = NULL;
 			
 			$result = [
 				'success' => TRUE,
@@ -212,7 +230,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'manufacturer' => $manufacturerId,
 				'model' => $modelId,
 				'type' => $typeId,
-				'car' => NULL
+				'car' => $carId
 			];
 			
 			$this->service->setSessionData($result);
@@ -238,6 +256,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			$manufacturerId = (int)$this->Request()->getParam('manufacturer');
 			$modelId = (int)$this->Request()->getParam('model');
 			$typeId = (int)$this->Request()->getParam('type');
+			$tecdocId = (int)$this->Request()->getParam('car');
+			
 			if (!$manufacturerId) {
 				throw new \RuntimeException('manufacturerId');
 			}
@@ -247,13 +267,16 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			if (!$typeId) {
 				throw new \RuntimeException('typeId');
 			}
+			if (!$tecdocId) {
+				throw new \RuntimeException('carId');
+			}
 			$result = [
 				'success' => TRUE,
 				'data' => NULL,
 				'manufacturer' => $manufacturerId,
 				'model' => $modelId,
 				'type' => $typeId,
-				'car' => NULL
+				'car' => $tecdocId
 			];
 			$this->service->setSessionData($result);
 		} catch (\Exception $e) {
@@ -278,6 +301,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			$manufacturerId = (int)$this->Request()->getParam('manufacturer');
 			$modelId = (int)$this->Request()->getParam('model');
 			$typeId = (int)$this->Request()->getParam('type');
+			$tecdocId = (int)$this->Request()->getParam('car');
 			$hsn = $this->Request()->getParam('hsn', '');
 			$tsn = $this->Request()->getParam('tsn', '');
 			$cars = [];
@@ -324,6 +348,9 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				if (!$typeId) {
 					throw new \RuntimeException('typeId');
 				}
+				if (!$tecdocId) {
+					throw new \RuntimeException('tecdocId');
+				}
 				
 				$cars = $this->service->getCarsForCarfinder([
 					'select' => [
@@ -333,6 +360,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 						'cars.manufacturerId' => $manufacturerId,
 						'cars.modelId' => $modelId,
 						'cars.typeId' => $typeId,
+						'cars.tecdocId' => $tecdocId,
 						'cars.active' => 1
 					],
 					'orders' => [

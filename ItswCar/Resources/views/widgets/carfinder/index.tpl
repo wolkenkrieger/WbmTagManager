@@ -61,7 +61,6 @@
 											<div class="table--cell">
 												<select id="manufacturers"
 														name="manufacturer"
-														aria-label="Testlabel"
 														data-no-fancy-select="true"
 														disabled
 														data-itsw-select="true"
@@ -77,7 +76,6 @@
 											<div class="table--cell">
 												<select id="models"
 														name="model"
-														aria-label="Testlabel"
 														data-no-fancy-select="true"
 														disabled
 														data-itsw-select="true"
@@ -93,7 +91,6 @@
 											<div class="table--cell">
 												<select id="types"
 														name="type"
-														aria-label="Testlabel"
 														data-no-fancy-select="true"
 														data-itsw-select="true"
 														disabled

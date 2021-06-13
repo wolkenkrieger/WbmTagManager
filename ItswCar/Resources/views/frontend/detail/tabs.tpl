@@ -8,7 +8,7 @@
 
     {* ITSW Fits for cars tab *}
     {block name="itsw_frontend_detail_tabs_fitsforcars"}
-        <a href="#" class="tab--link" title="{s name='DetailTabsFitsForCars'}{/s}" data-tabName="fitsforcars">{s name='DetailTabsFitsForCars'}{/s}</a>
+        <a href="#" class="tab--link" title="{s name='DetailTabsFitsForCars'}Artikel passend für{/s}" data-tabName="fitsforcars">{s name='DetailTabsFitsForCars'}{/s}</a>
     {/block}
 
     {* Rating tab *}

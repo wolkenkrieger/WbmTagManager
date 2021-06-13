@@ -5,6 +5,7 @@
  * Zeit:    11:07
  * Datei:   models_select_default.tpl
  *}
+{*
 <option></option>
 {foreach $models as $model}
 	<option
@@ -14,4 +15,21 @@
 	>
         {$model.display}
 	</option>
+{/foreach}
+*}
+
+<option></option>
+{foreach $models as $modelDisplay => $subModels}
+	<optgroup label="{$modelDisplay}">
+		{foreach $subModels as $subModel}
+			<option
+					data-typeid="{$subModel.typeId}"
+					value="{$subModel.modelId}"
+					data-renderdata="{$subModel.buildFrom} - {$subModel.buildTo}"
+					{if $subModel.typeId === $session.type}selected="selected"{/if}
+			>
+				{$subModel.typeDisplay}
+			</option>
+		{/foreach}
+	</optgroup>
 {/foreach}

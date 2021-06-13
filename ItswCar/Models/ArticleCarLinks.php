@@ -15,7 +15,7 @@ use Shopware\Components\Model\ModelEntity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * This model stores the linkage between an article a car
+ * This model stores the linkage between an article and an car
  *
  * @ORM\Entity(repositoryClass="ItswCar\Models\Repository")
  * @ORM\Table(name="itsw_article_car_links", indexes={
@@ -27,10 +27,12 @@ use Doctrine\ORM\Mapping as ORM;
  * })
  */
 class ArticleCarLinks extends ModelEntity {
+	
+	
 	/**
 	 * @var \ItswCar\Models\Car
-	 * @ORM\OneToOne(targetEntity="ItswCar\Models\Car", inversedBy="articleLinks")
-	 * @ORM\JoinColumn(name="tecdoc_id", referencedColumnName="tecdoc_id", nullable=false)
+	 * @ORM\ManyToOne(targetEntity="ItswCar\Models\Car", inversedBy="articleLinks")
+	 * @ORM\JoinColumn(name="tecdoc_id", referencedColumnName="tecdoc_id", nullable=false, unique=false)
 	 */
 	protected $car;
 	
@@ -43,6 +45,7 @@ class ArticleCarLinks extends ModelEntity {
 	
 	/**
 	 * @var int
+	 * @ORM\Id
 	 * @ORM\Column(name="tecdoc_id", type="integer", nullable=false)
 	 */
 	protected $tecdocId;

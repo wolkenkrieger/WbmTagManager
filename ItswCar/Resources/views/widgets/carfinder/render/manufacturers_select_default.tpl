@@ -6,12 +6,25 @@
  * Datei:   manufacturers_select_default.tpl
  *}
 <option></option>
-{foreach $manufacturers as $manufacturer}
-	<option
-			data-id="{$manufacturer.id}"
-			value="{$manufacturer.id}"
-            {if $manufacturer.id === $session.manufacturer}selected="selected"{/if}
-	>
-        {$manufacturer.display}
-	</option>
-{/foreach}
+<optgroup label="{s name="ManufacturerSelectTopBrands"}Beliebte Marken{/s}">
+    {foreach $topBrands as $manufacturer}
+		{if $manufacturer.topBrand}
+			<option
+					value="{$manufacturer.id}"
+                    {if $manufacturer.id === $session.manufacturer}selected="selected"{/if}
+			>
+                {$manufacturer.display}
+			</option>
+		{/if}
+	{/foreach}
+</optgroup>
+<optgroup label="{s name="ManufacturerSelectAllBrands"}Alle Marken{/s}">
+    {foreach $allBrands as $manufacturer}
+		<option
+				value="{$manufacturer.id}"
+                {if $manufacturer.id === $session.manufacturer}selected="selected"{/if}
+		>
+            {$manufacturer.display}
+		</option>
+    {/foreach}
+</optgroup>

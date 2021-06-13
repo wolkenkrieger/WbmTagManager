@@ -57,6 +57,12 @@ class Manufacturer extends ModelEntity {
 	private $active = TRUE;
 	
 	/**
+	 * @var bool
+	 * @ORM\Column(name="top_brand", type="boolean", nullable=false)
+	 */
+	private $topBrand;
+	
+	/**
 	 * @return \Doctrine\Common\Collections\ArrayCollection
 	 */
 	public function getCars(): ArrayCollection {
@@ -117,6 +123,23 @@ class Manufacturer extends ModelEntity {
 	 */
 	public function setActive(bool $active): Manufacturer {
 		$this->active = $active;
+		
+		return $this;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getTopBrand(): bool {
+		return $this->topBrand;
+	}
+	
+	/**
+	 * @param bool $topBrand
+	 * @return $this
+	 */
+	public function setTopBrand(bool $topBrand): Manufacturer {
+		$this->topBrand = $topBrand;
 		
 		return $this;
 	}

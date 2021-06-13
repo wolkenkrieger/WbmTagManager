@@ -10,6 +10,8 @@
 
 namespace ItswCar\Models;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Shopware\Components\Model\ModelRepository;
@@ -218,11 +220,12 @@ class Repository extends ModelRepository {
 	/**
 	 * @param int   $manufacturerId
 	 * @param int   $modelId
+	 * @param int   $typeId
 	 * @param array $filters
 	 * @param array $sortings
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */
-	public function getTypesByManufacturerIdAndModelIdQueryBuilder(int $manufacturerId, int $modelId, array $filters = [], array $sortings = []): QueryBuilder {
+	public function getTypesByManufacturerIdAndModelIdQueryBuilder(int $manufacturerId, int $modelId, int $typeId, array $filters = [], array $sortings = []): QueryBuilder {
 		$builder = $this->getEntityManager()->createQueryBuilder();
 		$builder->select([
 			'types'
@@ -252,12 +255,13 @@ class Repository extends ModelRepository {
 	/**
 	 * @param int   $manufacturerId
 	 * @param int   $modelId
+	 * @param int   $typeId
 	 * @param array $filters
 	 * @param array $sortings
 	 * @return \Doctrine\ORM\Query
 	 */
-	public function getTypesByManufacturerIdAndModelIdQuery(int $manufacturerId, int $modelId, array $filters = [], array $sortings = []): Query {
-		return $this->getTypesByManufacturerIdAndModelIdQueryBuilder($manufacturerId, $modelId, $filters, $sortings)->getQuery();
+	public function getTypesByManufacturerIdAndModelIdQuery(int $manufacturerId, int $modelId, int $typeId, array $filters = [], array $sortings = []): Query {
+		return $this->getTypesByManufacturerIdAndModelIdQueryBuilder($manufacturerId, $modelId, $typeId, $filters, $sortings)->getQuery();
 	}
 	
 	/**
@@ -349,6 +353,92 @@ class Repository extends ModelRepository {
 	 */
 	public function getIdsByTecdocIdQuery(int $tecdocId, array $filters = [], array $sortings = []): Query {
 		return $this->getIdsByTecdocIdQueryBuilder($tecdocId, $filters, $sortings)->getQuery();
+	}
+	
+	/**
+	 * @param int   $manufacturerId
+	 * @param array $filters
+	 * @return \Doctrine\ORM\QueryBuilder
+	 */
+	public function getModelsForCarfinderQueryBuilder(int $manufacturerId, array $filters = []): QueryBuilder {
+		$builder = $this->getEntityManager()->createQueryBuilder();
+		$builder->select([
+			'models.display AS modelDisplay',
+			'types.display AS typeDisplay',
+			'MIN(cars.buildFrom) AS buildFrom',
+			'MAX(cars.buildTo) AS buildTo',
+			'types.id AS typeId',
+			'models.id AS modelId'
+		])
+			->from(Car::class, 'cars')
+			->join('cars.model', 'models')
+			->join('cars.type', 'types')
+			->where('cars.manufacturerId = :manufacturerId')
+			->groupBy('cars.typeId')
+			->orderBy('models.display')
+			->addOrderBy('buildFrom')
+			->addOrderBy('buildTo')
+			->setParameter('manufacturerId', $manufacturerId);
+		
+		foreach($filters as $filter) {
+			$builder->andWhere($filter);
+		}
+		
+		return $builder;
+	}
+	
+	/**
+	 * @param int   $manufacturerId
+	 * @param array $filters
+	 * @return \Doctrine\ORM\Query
+	 */
+	public function getModelsForCarfinderQuery(int $manufacturerId, array $filters = []): Query {
+		return $this->getModelsForCarfinderQueryBuilder($manufacturerId, $filters)->getQuery();
+	}
+	
+	/**
+	 * @param int   $manufacturerId
+	 * @param int   $modelId
+	 * @param int   $typeId
+	 * @param array $filters
+	 * @return \Doctrine\ORM\QueryBuilder
+	 */
+	public function getTypesForCarfinderQueryBuilder(int $manufacturerId, int $modelId, int $typeId, array $filters = []): QueryBuilder {
+		$builder = $this->getEntityManager()->createQueryBuilder();
+		
+		$builder->select([
+			'cars.tecdocId',
+			'cars.ccm',
+			'cars.kw',
+			'cars.ps',
+			'cars.typeId',
+			'platforms.display AS platform'
+		])
+			->from(Car::class, 'cars')
+			->join('cars.platform', 'platforms')
+			->where('cars.manufacturerId = :manufacturerId')
+			->andWhere('cars.modelId = :modelId')
+			->andWhere('cars.typeId = :typeId')
+			->setParameter('manufacturerId', $manufacturerId)
+			->setParameter('modelId', $modelId)
+			->setParameter('typeId', $typeId);
+		
+		foreach($filters as $filter) {
+			$builder->andWhere($filter);
+		}
+		
+		return $builder;
+	}
+	
+	/**
+	 * @param int   $manufacturerId
+	 * @param int   $modelId
+	 * @param int   $typeId
+	 * @param array $filters
+	 * @return \Doctrine\ORM\Query
+	 */
+	public function getTypesForCarfinderQuery(int $manufacturerId, int $modelId, int $typeId, array $filters = []): Query {
+		return $this->getTypesForCarfinderQueryBuilder($manufacturerId, $modelId, $typeId, $filters)->getQuery();
 	}
 	
 	/**

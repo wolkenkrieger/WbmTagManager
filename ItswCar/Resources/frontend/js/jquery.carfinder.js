@@ -20,6 +20,7 @@
             manufacturer: null,
             model: null,
             type: null,
+            car: null,
             hsn: null,
             tsn: null
         },
@@ -59,7 +60,8 @@
                     me.$el.html(response.data).prop('disabled', false).select2({
                         allowClear: true,
                         width: '50%',
-                        placeholder: me.opts.placeholder
+                        placeholder: me.opts.placeholder,
+                        templateResult: me.renderData
                     });
                     if (me.$el.val()) {
                         me.$el.trigger('change');
@@ -104,6 +106,7 @@
                 attr('data-itsw-manufacturer', me.opts.manufacturer).
                 attr('data-itsw-model', me.opts.model).
                 attr('data-itsw-type', me.opts.type).
+                attr('data-itsw-car', me.opts.car).
                 trigger('empty');
             }
     
@@ -116,7 +119,10 @@
             if (me.opts.type) {
                 me.opts.setter = me.opts.setter + '/type/' + me.opts.type;
             }
-            console.log(me.opts.setter);
+            if (me.opts.car) {
+                me.opts.setter = me.opts.setter + '/car/' + me.opts.car;
+            }
+            console.log(me.opts);
             
             $.ajax({
                 url: me.opts.setter,
@@ -124,11 +130,12 @@
             }).done(function (response) {
                 if (response.success === true) {
                     $('#' + me.opts.trigger).trigger('init');
-                    if (response.type) {
+                    if (response.car) {
                         var url = me.opts.baseUrl + me.opts.carGetter +
                             '/manufacturer/' + me.opts.manufacturer +
                             '/model/' + me.opts.model +
-                            '/type/' + me.opts.type;
+                            '/type/' + me.opts.type +
+                            '/car/' + response.car;
                         $.ajax({
                             url: url,
                             dataType: 'json'
@@ -191,10 +198,14 @@
                 attr = me.$el.attr('data-itsw-' + key);
             
                 if (typeof attr === 'undefined') {
-                    return true;
+                    attr = $('option:selected', me.$el).attr('data-' + key + 'id');
+                    if (typeof attr === 'undefined') {
+                        return true;
+                    }
                 }
             
                 me.opts[key] = attr;
+                console.log(key + ':' + attr);
             
                 return true;
             });
@@ -208,6 +219,19 @@
             $.publish('plugin/' + me._name + '/onDataAttributes', [ me.$el, me.opts ]);
         
             return me.opts;
+        },
+        
+        renderData: function(state) {
+            var renderData = $(state.element).attr('data-renderdata');
+            if (typeof renderData !== typeof undefined && renderData !== false) {
+                return $(
+                    '<div class="table">' +
+                    '<div class="select2-result_repository__text cell">' + state.text + '</div>' +
+                    '<div class="select2-result-repository__additionals cell">' + renderData + '</div>' +
+                    '</div>'
+                );
+            }
+            return state.text;
         }
     });
 })(jQuery, window);

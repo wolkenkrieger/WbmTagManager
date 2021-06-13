@@ -39,7 +39,7 @@ class ItswCar extends Plugin {
 	public function install(InstallContext $context): void {
 		try {
 			$this->createAttributes();
-			//$this->updateSchemas();
+			$this->createSchemas();
 		} catch (Exception $err) {}
 		
 		$context->scheduleClearCache(InstallContext::CACHE_LIST_ALL);
@@ -51,7 +51,7 @@ class ItswCar extends Plugin {
 	public function update(UpdateContext $context): void {
 		try {
 			$this->createAttributes();
-			//$this->updateSchemas();
+			$this->updateSchemas();
 		} catch (Exception $err) {}
 		
 		$context->scheduleClearCache(UpdateContext::CACHE_LIST_ALL);
@@ -244,7 +244,41 @@ class ItswCar extends Plugin {
 			$entityManager->getClassMetadata(ArticleCarLinks::class),
 		];
 		
+		$entityManager->getConfiguration()->getMetadataCacheImpl()->deleteAll();
+		$entityManager->regenerateProxies();
 		$schemaTool->updateSchema($classes, TRUE);
+	}
+	
+	/**
+	 *
+	 */
+	public function createSchemas(): void {
+		$entityManager = Shopware()->Container()->get('models');
+		$schemaTool = new SchemaTool($entityManager);
+		$classes = [
+			$entityManager->getClassMetadata(Manufacturer::class),
+			$entityManager->getClassMetadata(Model::class),
+			$entityManager->getClassMetadata(Type::class),
+			$entityManager->getClassMetadata(EbayPlatform::class),
+			$entityManager->getClassMetadata(KbaCodes::class),
+			$entityManager->getClassMetadata(Car::class),
+			$entityManager->getClassMetadata(ArticleCarLinks::class),
+		];
+		
+		$entityManager->getConfiguration()->getMetadataCacheImpl()->deleteAll();
+		$schemaManager = $entityManager->getConnection()->getSchemaManager();
+		foreach($classes as $schema) {
+			if (!$schemaManager->tablesExist($schema->getTableName())) {
+				try {
+					$schemaTool->createSchema([$schema]);
+				} catch (\Exception $exception) {
+					return;
+				}
+			} else {
+				$entityManager->regenerateProxies();
+				$schemaTool->updateSchema([$schema], TRUE);
+			}
+		}
 	}
 	
 	
