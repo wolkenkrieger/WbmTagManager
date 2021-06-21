@@ -58,8 +58,8 @@
             }).done(function (response) {
                 if (response.success === true) {
                     me.$el.html(response.data).prop('disabled', false).select2({
-                        allowClear: true,
-                        width: '50%',
+                        allowClear: false,
+                        width: 'calc(100% - 105px)',
                         placeholder: me.opts.placeholder,
                         templateResult: me.renderData
                     });

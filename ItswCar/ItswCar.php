@@ -115,7 +115,7 @@ class ItswCar extends Plugin {
 	 */
 	public function onCollectPluginCss(\Enlight_Event_EventArgs $args): ArrayCollection {
 		return new ArrayCollection(
-			[__DIR__ . '/Resources/frontend/vendors/select2-4.0.13/dist/css/select2.min.css']
+			[__DIR__ . '/Resources/frontend/vendors/select2-4.0.13/dist/css/select2.css']
 		);
 	}
 	

@@ -9,10 +9,10 @@
 (function($, window) {
     window.StateManager
         .addPlugin('select[data-itsw-select="true"]', 'itswCarFinder', {
-            baseUrl: '/shop/widgets/carfinder'
+            baseUrl: '/widgets/carfinder'
         })
         .addPlugin('.hsn-tsn--container button', 'itswCarFinder', {
-            baseUrl: '/shop/widgets/carfinder'
+            baseUrl: '/widgets/carfinder'
         })
     ;
 })(jQuery, window);
