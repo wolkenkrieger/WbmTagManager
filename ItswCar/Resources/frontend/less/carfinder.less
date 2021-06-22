@@ -13,9 +13,12 @@
 @desktopViewportWidth: 78.75em;         // 1260px
 */
 @input-height: 32;
+@select2-default-height: 28;
 @input-line-height: @input-height - 2;
+@info-line-height: 40;
 
 .carfinder {
+
   label {
     .unitize-min-width(100);
     .unitize-width(100);
@@ -40,10 +43,18 @@
     & .select2-selection--single .select2-selection__arrow {
       .unitize-height(@input-height);
     }
+
+    & .select2-selection--single .select2-selection__clear {
+      .unitize-height(@select2-default-height);
+      .unitize(line-height, @select2-default-height);
+    }
   }
 
   .table {
     /*border: 1px solid red;*/
+    &--caption {
+      .unitize-padding(0, 0, 5, 0);
+    }
   }
 
   .table--cell {
@@ -96,12 +107,20 @@
   }
 
   .info--container {
+    span {
+      display: block;
+
+      &.h2, &.h3, &.h4 {
+        .unitize(line-height, @input-line-height);
+      }
+    }
+
     display: none;
 
     @media only screen and (min-width: @tabletLandscapeViewportWidth) {
-      display: inherit;
+      display: table-cell;
       width: 25%;
-      .unitize-padding(0, 10, 0, 5);
+      .unitize-padding(0, 10, 0, 10);
     }
   }
 

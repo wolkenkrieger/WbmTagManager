@@ -25,10 +25,10 @@
 			<option
 					data-typeid="{$subModel.typeId}"
 					value="{$subModel.modelId}"
-					data-renderdata="{$subModel.buildFrom} - {$subModel.buildTo}"
+					data-renderdata="({$subModel.buildFrom} - {$subModel.buildTo})"
 					{if $subModel.typeId === $session.type}selected="selected"{/if}
 			>
-				{$subModel.typeDisplay}
+				{$modelDisplay}&nbsp;{$subModel.typeDisplay}
 			</option>
 		{/foreach}
 	</optgroup>

@@ -13,10 +13,10 @@
 					<div class="table--cell hsn-tsn--container">
 						<div class="table">
 							<div class="table--caption bold width--100">
-								Fahrzeugauswahl nach Schlüsselnummern
+								{s name="CARFINDER_WIDGET_HEAD_1"}Fahrzeugauswahl nach Schlüsselnummern{/s}
 							</div>
 							<div class="table--cell width--50">
-								<label for="hsn">HSN</label>
+								<label for="hsn">{s name="CARFINDER_WIDGET_HSN"}HSN{/s}</label>
 								<input id="hsn"
 									   name="hsn"
 									   type="text"
@@ -24,7 +24,7 @@
 									   minlength="4"/>
 							</div>
 							<div class="table--cell width--50">
-								<label for="tsn">TSN</label>
+								<label for="tsn">{s name="CARFINDER_WIDGET_TSN"}TSN{/s}</label>
 								<input id="tsn"
 									   name="tsn"
 									   type="text"
@@ -32,7 +32,7 @@
 									   minlength="3"/>
 							</div>
 							<div class="table--cell width--100">
-								<button class="btn is--primary is--full is--icon-right pull-right"><i class="icon--search"></i>Fahrzeug auswählen</button>
+								<button class="btn is--primary is--full is--icon-right pull-right"><i class="icon--search"></i>{s name="CARFINDER_WIDGET_CHOOSE_CAR"}Fahrzeug auswählen{/s}</button>
 							</div>
 						</div>
 					</div>
@@ -41,10 +41,10 @@
                             {block name="itsw_carfinder_widget__select-container"}
 								<div class="table">
 									<div class="table--caption bold width--100">
-										Fahrzeugauswahl nach Kriterien
+                                        {s name="CARFINDER_WIDGET_HEAD_2"}Fahrzeugauswahl nach Kriterien{/s}
 									</div>
 									<div class="table--cell width--100">
-										<label for="manufacturers">Hersteller</label>
+										<label for="manufacturers">{s name="CARFINDER_WIDGET_MANUFACTURER"}Hersteller{/s}</label>
 										<select id="manufacturers"
 												name="manufacturer"
 												data-no-fancy-select="true"
@@ -55,7 +55,7 @@
 										</select>
 									</div>
 									<div class="table--cell width--100">
-										<label for="models">Modell</label>
+										<label for="models">{s name="CARFINDER_WIDGET_MODEL"}Modell{/s}</label>
 										<select id="models"
 												name="model"
 												data-no-fancy-select="true"
@@ -66,7 +66,7 @@
 										</select>
 									</div>
 									<div class="table--cell width--100">
-										<label for="types">Typ</label>
+										<label for="types">{s name="CARFINDER_WIDGET_TYPE"}Typ/Motor{/s}</label>
 										<select id="types"
 												name="type"
 												data-no-fancy-select="true"
@@ -101,7 +101,15 @@
                             {/block}
                         {/if}
 					</div>
-					<div class="table--cell info--container">rechts</div>
+					<div class="table--cell info--container">
+						<div class="table">
+							<div class="table--cell width--100">
+								<span class="h2">{s name="CARFINDER_WIDGET_HEAD_3"}Bestell- und Servicehotline{/s}</span>
+								<span class="h3 bold">{s name="CARFINDER_WIDGET_INFO_1"}+49 - (0)3586 70 70 380{/s}</span>
+								<span class="h4">{s name="CARFINDER_WIDGET_INFO_2"}Mo.-Do. 09-17 Uhr / Fr. 09-15 Uhr{/s}</span>
+							</div>
+						</div>
+					</div>
 				</div>
             {/block}
 		</div>

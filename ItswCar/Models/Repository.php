@@ -376,8 +376,9 @@ class Repository extends ModelRepository {
 			->where('cars.manufacturerId = :manufacturerId')
 			->groupBy('cars.typeId')
 			->orderBy('models.display')
-			->addOrderBy('buildFrom')
-			->addOrderBy('buildTo')
+			//->orderBy('types.display')
+			//->addOrderBy('buildFrom')
+			//->addOrderBy('buildTo')
 			->setParameter('manufacturerId', $manufacturerId);
 		
 		foreach($filters as $filter) {

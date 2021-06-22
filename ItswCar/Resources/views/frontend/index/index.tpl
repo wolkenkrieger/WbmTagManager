@@ -26,7 +26,6 @@
 
         {* ITSW CarFinder Widget *}
         {block name="frontend_index_itsw_carfinder_widget"}
-            {* include file="widgets/carfinder/carfinder.tpl" *}
 			{action module=widgets controller=carfinder}
         {/block}
 	</div>

@@ -225,10 +225,8 @@
             var renderData = $(state.element).attr('data-renderdata');
             if (typeof renderData !== typeof undefined && renderData !== false) {
                 return $(
-                    '<div class="table">' +
-                    '<div class="select2-result_repository__text cell">' + state.text + '</div>' +
-                    '<div class="select2-result-repository__additionals cell">' + renderData + '</div>' +
-                    '</div>'
+                    '<span class="select2-result__text">' + state.text + '</span>' +
+                    '<span class="select2-result__renderdata">' + renderData + '</span>'
                 );
             }
             return state.text;

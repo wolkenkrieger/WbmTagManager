@@ -23,8 +23,9 @@
 	<option
 			data-carid="{$type.tecdocId}"
 			value="{$type.typeId}"
+			data-renderdata="({$type.ccm}&nbsp;cm&sup3;&nbsp;&nbsp;{$type.kw}&nbsp;kW&nbsp;/&nbsp;{$type.ps}&nbsp;PS)&nbsp;&nbsp;({$type.platform})"
             {if $type.tecdocId === $session.car}selected="selected"{/if}
 	>
-        {$type.display} ({$type.ccm}&nbsp;cm&sup3; {$type.kw}&nbsp;kW / {$type.ps}&nbsp;PS {$type.platform})
+        {$type.display}
 	</option>
 {/foreach}
