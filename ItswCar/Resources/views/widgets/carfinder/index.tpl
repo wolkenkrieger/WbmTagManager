@@ -118,5 +118,4 @@
             {/block}
 		</div>
 	{/block}
-	{debug}
 {/block}
