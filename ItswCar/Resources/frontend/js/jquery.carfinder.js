@@ -212,7 +212,7 @@
             });
             
             if (me.opts.basepath) {
-            
+                me.opts.baseUrl = me.opts.basepath + me.opts.baseUrl;
             }
             
             me.opts.hsn = $.trim($('.hsn-tsn--container #hsn').val());
