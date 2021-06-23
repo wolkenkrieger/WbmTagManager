@@ -9,7 +9,7 @@
 	{block name="itsw_carfinder_widget__container"}
 		<div class="itsw">
             {block name="itsw_carfinder_widget__container-inner"}
-				<div class="table carfinder header--navigation">
+				<div class="table carfinder">
 					<div class="table--cell hsn-tsn--container">
 						<div class="table">
 							<div class="table--caption bold width--100">

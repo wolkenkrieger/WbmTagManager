@@ -18,6 +18,16 @@
 @info-line-height: 40;
 
 .carfinder {
+  @media screen and (min-width: @tabletViewportWidth) {
+    .unitize-min-height(140);
+    .unitize(margin-top, 10);
+    background-color: rgba(0, 0, 0, 0.45);
+    color: #FFFFFF;
+
+    label {
+      color: #FFFFFF;
+    }
+  }
 
   label {
     .unitize-min-width(100);
@@ -64,7 +74,7 @@
 
   .hsn-tsn--container {
     width: 100%;
-    .unitize-padding(0, 10, 5, 10);
+    .unitize-padding(5, 10, 5, 10);
 
     input[type=text] {
       width: 100%;
@@ -75,7 +85,7 @@
 
     @media only screen and (min-width: @tabletViewportWidth) {
       width: 35%;
-      .unitize-padding(0, 15, 5, 10);
+      .unitize-padding(5, 15, 5, 10);
     }
 
     @media only screen and (min-width: @tabletLandscapeViewportWidth) {
@@ -89,11 +99,11 @@
 
   .select--container {
     width: 100%;
-    .unitize-padding(0, 10, 5, 10);
+    .unitize-padding(5, 10, 5, 10);
 
     @media only screen and (min-width: @tabletViewportWidth) {
       width: 65%;
-      .unitize-padding(0, 10, 5, 15);
+      .unitize-padding(5, 10, 5, 15);
     }
 
     @media only screen and (min-width: @tabletLandscapeViewportWidth) {
@@ -102,7 +112,7 @@
 
     @media only screen and (min-width: @desktopViewportWidth) {
       width: 50%;
-      .unitize-padding(0, 15);
+      .unitize-padding(5, 15, 0, 15);
     }
   }
 
@@ -120,9 +130,7 @@
     @media only screen and (min-width: @tabletLandscapeViewportWidth) {
       display: table-cell;
       width: 25%;
-      .unitize-padding(0, 10, 0, 10);
+      .unitize-padding(5, 10, 0, 10);
     }
   }
-
-
 }
