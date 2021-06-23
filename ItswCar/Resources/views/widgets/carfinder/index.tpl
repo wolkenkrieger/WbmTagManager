@@ -39,6 +39,7 @@
 					<div class="table--cell select--container">
                         {if $showSelect}
                             {block name="itsw_carfinder_widget__select-container"}
+
 								<div class="table">
 									<div class="table--caption bold width--100">
                                         {s name="CARFINDER_WIDGET_HEAD_2"}Fahrzeugauswahl nach Kriterien{/s}
@@ -51,6 +52,7 @@
 												disabled
 												data-itsw-select="true"
 												data-itsw-trigger="models"
+												data-itsw-basepath="{$basePath}"
 										>
 										</select>
 									</div>
@@ -62,6 +64,7 @@
 												disabled
 												data-itsw-select="true"
 												data-itsw-trigger="types"
+												data-itsw-basepath="{$basePath}"
 										>
 										</select>
 									</div>
@@ -71,6 +74,7 @@
 												name="type"
 												data-no-fancy-select="true"
 												data-itsw-select="true"
+												data-itsw-basepath="{$basePath}"
 												disabled
 										>
 										</select>
@@ -114,40 +118,5 @@
             {/block}
 		</div>
 	{/block}
+	{debug}
 {/block}
-
-{*
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="table--cell  hsn-tsn--container">
-	<div class="table">
-
-		<div class="table--row">
-
-		</div>
-		<div class="table">
-			<div class="table--row">
-
-			</div>
-		</div>
-	</div>
-</div>
-<div class="table--cell select--container">
-
-</div>
-<div class="table--cell">
-	rechts
-</div>
-
-*}

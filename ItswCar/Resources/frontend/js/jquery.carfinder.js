@@ -11,6 +11,7 @@
     
     $.plugin('itswCarFinder', {
         defaults: {
+            basepath: null,
             placeholder: 'Wählen ...',
             trigger: null,
             baseUrl: '/widgets/carfinder',
@@ -209,6 +210,10 @@
             
                 return true;
             });
+            
+            if (me.opts.basepath) {
+            
+            }
             
             me.opts.hsn = $.trim($('.hsn-tsn--container #hsn').val());
             me.opts.tsn = $.trim($('.hsn-tsn--container #tsn').val());

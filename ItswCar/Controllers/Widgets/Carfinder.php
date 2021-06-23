@@ -21,7 +21,10 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	public function indexAction(): void {
 		$sessionData = $this->service->getSessionData();
 		$carSet = (bool)$sessionData['car'];
+		$basePath = Shopware()->Shop()->getBasePath();
+		
 		$this->View()->assign('showSelect', !$carSet);
+		$this->View()->assign('basePath', $basePath);
 		
 		if ($carSet) {
 			$car = $this->service->getCarsForCarfinder([
