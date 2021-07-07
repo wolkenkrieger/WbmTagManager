@@ -5,6 +5,7 @@
  * Zeit:    23:06
  * Datei:   manufacturers_select_default.tpl
  *}
+{namespace name="itsw/carfinder"}
 <option></option>
 <optgroup label="{s name="ManufacturerSelectTopBrands"}Beliebte Marken{/s}">
     {foreach $topBrands as $manufacturer}

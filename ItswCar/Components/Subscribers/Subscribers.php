@@ -58,10 +58,19 @@ class Subscribers implements SubscriberInterface {
 			'sArticles::sGetArticlesByCategory::after'                      => 'onAfterGetArticleByCategory',
 			'Legacy_Struct_Converter_Convert_List_Product'                  => 'onConvertListProduct',
 			'sArticles::sGetArticleById::after'                             => 'onAfterGetArticleById',
+			
+			//'Enlight_Controller_Action_PreDispatch_Frontend'                => 'onPreDispatchFrontend',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
 		
 		];
+	}
+	
+	/**
+	 * @param \Enlight_Controller_ActionEventArgs $actionEventArgs
+	 */
+	public function onPreDispatchFrontend(\Enlight_Controller_ActionEventArgs  $actionEventArgs): void {
+		$this->eventHandler->onPreDispatchFrontend($actionEventArgs);
 	}
 	
 	/**

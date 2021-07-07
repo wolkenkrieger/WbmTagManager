@@ -116,6 +116,19 @@
     }
   }
 
+  .selected_car--container {
+    width: 100%;
+    .unitize-padding(5, 10, 5, 10);
+
+    @media only screen and (min-width: @tabletLandscapeViewportWidth) {
+      width: 75%;
+    }
+
+    @media only screen and (min-width: @desktopViewportWidth) {
+      .unitize-padding(5, 15, 5, 15);
+    }
+  }
+
   .info--container {
     span {
       display: block;

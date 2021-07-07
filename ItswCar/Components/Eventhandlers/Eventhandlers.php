@@ -32,7 +32,19 @@ class Eventhandlers {
 	public function onPostDispatchSecureFrontend(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
 		$subject = $actionEventArgs->getSubject();
 		
-		$subject->View()->assign('ITSW-SESSION', $this->service->getSessionData());
+		$subject->View()->assign('ITSW-SESSION', $this->service->getSessionData(), TRUE);
+		$subject->View()->assign('ITSW-MAINTENANCEMODE', $this->service->getServiceMode(), TRUE);
+		$subject->View()->assign('ITSW-DEVELOPMENTMODE', $this->service->getDevelopmentMode(), TRUE);
+	}
+	
+	/**
+	 * @param \Enlight_Controller_ActionEventArgs $actionEventArgs
+	 */
+	public function onPreDispatchFrontend(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
+		$subject = $actionEventArgs->getSubject();
+		
+		$subject->View()->assign('ITSW-MAINTENANCEMODE', $this->service->getServiceMode());
+		$subject->View()->assign('ITSW-DEVELOPMENTMODE', $this->service->getDevelopmentMode());
 	}
 	
 	/**
@@ -45,7 +57,8 @@ class Eventhandlers {
 				'custom',
 				'forms',
 				'campaign',
-				'newsletter'
+				'newsletter',
+				'detail'
 			], TRUE)
 		) {
 			return;
@@ -121,6 +134,12 @@ class Eventhandlers {
 		$articles = $return['sArticles']??[];
 		foreach($articles as &$article) {
 			$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
+			if ($discount = $this->service->getUserGroupDiscount()) {
+				$article['has_pseudoprice'] = TRUE;
+				$article['pseudoprice'] = $this->getPrice($article['price_numeric'], $article['tax'], $discount);
+				$article['pseudoprice_numeric'] = $this->getPriceNum($article['price_numeric'], $article['tax'], $discount);
+				$article['pseudopricePercent'] = $discount;
+			}
 		}
 		unset($article);
 		$return['sArticles'] = $articles;
@@ -149,11 +168,17 @@ class Eventhandlers {
 	 * @param \Enlight_Hook_HookArgs $hookArgs
 	 */
 	public function onAfterGetArticleById(\Enlight_Hook_HookArgs $hookArgs): void {
-		/*
 		$article = $hookArgs->getReturn();
-		$article['linkDetailsRewrited'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetailsRewrited']);
+		
+		$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
+		if ($discount = $this->service->getUserGroupDiscount()) {
+			$article['has_pseudoprice'] = TRUE;
+			$article['pseudoprice'] = $this->getPrice($article['price_numeric'], $article['tax'], $discount);
+			$article['pseudoprice_numeric'] = $this->getPriceNum($article['price_numeric'], $article['tax'], $discount);
+			$article['pseudopricePercent'] = $discount;
+		}
+		
 		$hookArgs->setReturn($article);
-		*/
 	}
 	
 	/**
@@ -166,5 +191,27 @@ class Eventhandlers {
 		}
 		
 		return $category;
+	}
+	
+	/**
+	 * @param $price
+	 * @param $tax
+	 * @param $discount
+	 * @return string
+	 */
+	private function getPrice($price, $tax, $discount) {
+		$price /= (1 - ($discount / 100));
+		return Shopware()->Modules()->Articles()->sFormatPrice($price);
+	}
+	
+	/**
+	 * @param $price
+	 * @param $tax
+	 * @param $discount
+	 * @return float|int
+	 */
+	private function getPriceNum($price, $tax, $discount) {
+		$price /= (1 - ($discount / 100));
+		return Shopware()->Modules()->Articles()->sRound($price);
 	}
 }

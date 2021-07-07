@@ -5,7 +5,7 @@
  * Zeit:    19:02
  * Datei:   get_cars_modal.tpl
  *}
-
+{namespace name="itsw/carfinder"}
 {if !empty($cars)}
 	<div class="itsw modal--container">
 		<div class="table toggle">

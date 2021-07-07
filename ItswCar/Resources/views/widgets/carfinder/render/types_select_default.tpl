@@ -17,7 +17,7 @@
 	</option>
 {/foreach}
 *}
-
+{namespace name="itsw/carfinder"}
 <option></option>
 {foreach $types as $type}
 	<option

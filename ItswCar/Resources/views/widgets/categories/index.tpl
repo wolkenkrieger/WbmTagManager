@@ -5,6 +5,7 @@
  * Zeit:    15:09
  * Datei:   index.tpl
  *}
+{namespace name="itsw/categories"}
 {block name="itsw_widget_categories"}
 	<div class="itsw">
 		{block name="itsw_widget_categories_headline"}

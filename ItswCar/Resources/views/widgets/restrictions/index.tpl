@@ -1,3 +1,4 @@
+{namespace name="itsw/restrictions"}
 {block name="itsw_widget_restriction"}
 	<div class="itsw widget restrictions">
 		{block name="itsw_widget_restriction_headline"}

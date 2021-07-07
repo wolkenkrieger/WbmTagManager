@@ -582,4 +582,38 @@ class Services {
 		
 		return array_map(static function($value) {return (int)$value;}, $result);
 	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getServiceMode(): bool {
+		$config = $this->container->get('config');
+		if (!empty($config->setOffline) && strpos($config->offlineIp, $this->front->Request()->getClientIp()) === false) {
+			return TRUE;
+		}
+		return FALSE;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getDevelopmentMode(): bool {
+		$environment = $this->container->getParameter('kernel.environment');
+		
+		if ($environment === 'dev') {
+			return TRUE;
+		}
+		return FALSE;
+	}
+	
+	/**
+	 * @return float|int
+	 */
+	public function getUserGroupDiscount() {
+		if ($this->container->get('shop')->getCustomerGroup()->getMode()) {
+			return $this->container->get('shop')->getCustomerGroup()->getDiscount();
+		}
+		
+		return 0;
+	}
 }
