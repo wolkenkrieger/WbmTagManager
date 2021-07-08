@@ -51,52 +51,58 @@ class Eventhandlers {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		if ($controllerEventArgs->getRequest()->getModuleName() !== 'frontend'
-			|| in_array($controllerEventArgs->getRequest()->getControllerName(), [
-				'custom',
-				'forms',
-				'campaign',
-				'newsletter',
-				'detail',
-				'checkout',
-				'basket'
-			], TRUE)
-		) {
+		$requestUri = $controllerEventArgs->getRequest()->getRequestUri();
+		$queryPath = parse_url($requestUri, PHP_URL_PATH);
+		
+		if (!$queryPath || $queryPath === '/') {
 			return;
 		}
 		
-		$urlPieces = explode('/', $controllerEventArgs->getRequest()->getRequestUri());
-		$urlPieces = array_filter($urlPieces, function ($value) {
+		$queryQuery = parse_url($requestUri, PHP_URL_QUERY);
+		$queryFragment = parse_url($requestUri, PHP_URL_FRAGMENT);
+		
+		$queryPaths = explode('/', $queryPath);
+		
+		$queryPaths = array_filter($queryPaths, static function ($value) {
 			return ($value !== NULL && $value !== FALSE && $value !== '');
 		});
 		
-		$querySave = '';
-		$parsedUrl = parse_url(end($urlPieces));
+		foreach($queryPaths as $index => $queryPath) {
+			$matches = $controllerEventArgs->getSubject()->Router()->match($queryPath);
+			
+			if (is_array($matches)) {
+				if (isset($macthes['m']) || isset($matches['mo'])) {
+					unset($queryPaths[$index]);
+				}
+			}
+		}
+		$uri = implode('/', $queryPaths);
 		
-		if ((isset($parsedUrl['query']) && $parsedUrl['query']) && !isset($parsedUrl['path'])) {
-			$querySave = $parsedUrl['query'];
-			unset($urlPieces[count($urlPieces)]);
+		$matches = $controllerEventArgs->getSubject()->Router()->match($uri);
+		$requestQueryAction = NULL;
+		
+		if ($queryQuery && stripos($queryQuery, 'action=') !== FALSE) {
+			$queryParts = explode('&', $queryQuery);
+			$requestQueryActions = explode('=', reset($queryParts));
+			$requestQueryAction = end($requestQueryActions);
 		}
 		
-		$parsedFirst = parse_url(reset($urlPieces));
-		$parsedFirst = $parsedFirst['path'];
-		$parsedLast = parse_url(end($urlPieces));
-		$parsedLast = $parsedLast['path'];
-		
-		try {
-			$routerParts = array_merge(
-				$controllerEventArgs->getSubject()->Router()->match($parsedFirst . '/' ),
-				$controllerEventArgs->getSubject()->Router()->match($parsedLast . '/' ));
-		} catch (\Exception $exception) {
-			$this->service->setLog($exception);
-			$routerParts = [];
+		if ($requestQueryAction) {
+			$matches['action'] = $requestQueryAction;
 		}
 		
-		$controllerEventArgs->getRequest()->setParams($routerParts);
-		$controllerEventArgs->getRequest()->setControllerName($routerParts['controller']);
-		$controllerEventArgs->getRequest()->setModuleName($routerParts['module']);
-		$controllerEventArgs->getRequest()->setActionName($routerParts['action']);
-		$controllerEventArgs->getRequest()->setQuery($querySave);
+		if ($queryQuery) {
+			if ($queryFragment) {
+				$controllerEventArgs->getRequest()->setQuery($queryQuery . '#' . $queryFragment);
+			} else {
+				$controllerEventArgs->getRequest()->setQuery($queryQuery);
+			}
+		}
+		
+		$controllerEventArgs->getRequest()->setParams($matches);
+		$controllerEventArgs->getRequest()->setControllerName($matches['controller']);
+		$controllerEventArgs->getRequest()->setModuleName($matches['module']);
+		$controllerEventArgs->getRequest()->setActionName($matches['action']);
 	}
 	
 	/**

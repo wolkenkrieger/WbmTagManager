@@ -26,7 +26,7 @@
 
         {* ITSW CarFinder Widget *}
         {block name="frontend_index_itsw_carfinder_widget"}
-			{if {controllerAction|lower} !== 'service'}
+			{if {controllerAction|lower} !== 'service' && {controllerName|lower} !== 'checkout' && {controllerName|lower} !== 'register'}
 				{action module=widgets controller=carfinder}
 			{/if}
         {/block}
