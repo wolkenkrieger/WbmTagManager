@@ -18,12 +18,15 @@ class Eventhandlers {
 	 */
 	protected $service;
 	
+	protected $pluginDir;
+	
 	/**
 	 * Eventhandlers constructor.
 	 * @param \ItswCar\Components\Services\Services $service
 	 */
-	public function __construct(Services $service) {
+	public function __construct(Services $service, $pluginDir) {
 		$this->service = $service;
+		$this->pluginDir = $pluginDir;
 	}
 	
 	/**
@@ -189,6 +192,20 @@ class Eventhandlers {
 	}
 	
 	/**
+	 * @param \Enlight_Controller_ActionEventArgs $eventArgs
+	 */
+	public function onPostDispatchSecureBackendForm(\Enlight_Controller_ActionEventArgs $eventArgs) {
+		$controller = $eventArgs->getSubject();
+		$view = $controller->View();
+		$request = $controller->Request();
+		$view->addTemplateDir($this->pluginDir . '/Resources/views');
+		
+		if ($request->getActionName() === 'load') {
+			$view->extendsTemplate('backend/extend_form/view/main/fieldgrid.js');
+		}
+	}
+	
+	/**
 	 * @param $category
 	 * @return mixed
 	 */
@@ -221,4 +238,6 @@ class Eventhandlers {
 		$price /= (1 - ($discount / 100));
 		return Shopware()->Modules()->Articles()->sRound($price);
 	}
+	
+	
 }

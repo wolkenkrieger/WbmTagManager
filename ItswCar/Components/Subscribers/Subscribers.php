@@ -32,16 +32,19 @@ class Subscribers implements SubscriberInterface {
 	 */
 	protected $service;
 	
+	protected $pluginDir;
+	
 	/**
 	 * Subscribers constructor.
 	 * @param \Shopware\Components\DependencyInjection\Container $container
 	 * @param \ItswCar\Components\Services\Services              $service
 	 */
-	public function __construct(Container $container, Services $service) {
+	public function __construct(Container $container, Services $service, $pluginDir) {
 		$this->container = $container;
 		$this->service = $service;
+		$this->pluginDir = $pluginDir;
 		
-		$this->eventHandler = new Eventhandler($this->service);
+		$this->eventHandler = new Eventhandler($this->service, $this->pluginDir);
 	}
 	
 	/**
@@ -62,6 +65,7 @@ class Subscribers implements SubscriberInterface {
 			//'Enlight_Controller_Action_PreDispatch_Frontend'                => 'onPreDispatchFrontend',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
+			'Enlight_Controller_Action_PostDispatchSecure_Backend_Form'     => 'onPostDispatchSecureBackendForm'
 		
 		];
 	}
@@ -136,7 +140,17 @@ class Subscribers implements SubscriberInterface {
 		$this->eventHandler->onConvertListProduct($eventArgs);
 	}
 	
+	/**
+	 * @param \Enlight_Hook_HookArgs $hookArgs
+	 */
 	public function onAfterGetArticleById(\Enlight_Hook_HookArgs $hookArgs): void {
 		$this->eventHandler->onAfterGetArticleById($hookArgs);
+	}
+	
+	/**
+	 * @param \Enlight_Controller_EventArgs $eventArgs
+	 */
+	public function onPostDispatchSecureBackendForm(\Enlight_Controller_ActionEventArgs $eventArgs): void {
+		$this->eventHandler->onPostDispatchSecureBackendForm($eventArgs);
 	}
 }

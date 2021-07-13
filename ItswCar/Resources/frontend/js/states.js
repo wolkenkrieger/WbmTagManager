@@ -14,5 +14,9 @@
         .addPlugin('.hsn-tsn--container button', 'itswCarFinder', {
             baseUrl: '/widgets/carfinder'
         })
+        .addPlugin('.forms--inner-form #forms_by', 'swDatePicker', {
+            allowInput: true,
+            minDate: '1960-01-01'
+        })
     ;
 })(jQuery, window);
