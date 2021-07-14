@@ -157,11 +157,4 @@ class Subscribers implements SubscriberInterface {
 	public function onPostDispatchSecureBackendForm(\Enlight_Controller_ActionEventArgs $eventArgs): void {
 		$this->eventHandler->onPostDispatchSecureBackendForm($eventArgs);
 	}
-	
-	/**
-	 * @return bool
-	 */
-	private static function isShop(): bool {
-	
-	}
 }
