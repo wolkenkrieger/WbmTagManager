@@ -38,12 +38,12 @@ class Subscribers implements SubscriberInterface {
 	 * Subscribers constructor.
 	 * @param \Shopware\Components\DependencyInjection\Container $container
 	 * @param \ItswCar\Components\Services\Services              $service
+	 * @param                                                    $pluginDir
 	 */
 	public function __construct(Container $container, Services $service, $pluginDir) {
 		$this->container = $container;
 		$this->service = $service;
 		$this->pluginDir = $pluginDir;
-		
 		$this->eventHandler = new Eventhandler($this->service, $this->pluginDir);
 	}
 	
@@ -99,10 +99,14 @@ class Subscribers implements SubscriberInterface {
 	}
 	
 	/**
-	 * @return \ItswCar\Components\Eventhandlers\CategoryConditionHandler
+	 * @return \ItswCar\Components\Eventhandlers\CategoryConditionHandler|null
 	 */
-	public function onCollectConditionHandlers(): CategoryConditionHandler {
-		return new CategoryConditionHandler($this->service);
+	public function onCollectConditionHandlers(): ?CategoryConditionHandler {
+		if ($this->container->initialized('shop')) {
+			return new CategoryConditionHandler($this->service);
+		}
+		
+		return NULL;
 	}
 	
 	/**
@@ -152,5 +156,12 @@ class Subscribers implements SubscriberInterface {
 	 */
 	public function onPostDispatchSecureBackendForm(\Enlight_Controller_ActionEventArgs $eventArgs): void {
 		$this->eventHandler->onPostDispatchSecureBackendForm($eventArgs);
+	}
+	
+	/**
+	 * @return bool
+	 */
+	private static function isShop(): bool {
+	
 	}
 }

@@ -15,6 +15,7 @@ use Doctrine\DBAL\Connection;
 use Shopware\Bundle\SearchBundle\ConditionInterface;
 use Shopware\Bundle\SearchBundleDBAL\QueryBuilder;
 use Shopware\Bundle\StoreFrontBundle\Struct\ShopContextInterface;
+use Shopware\Components\DependencyInjection\Container;
 
 use ItswCar\Components\Services\Services;
 
@@ -24,7 +25,8 @@ class CategoryConditionHandler extends \Shopware\Bundle\SearchBundleDBAL\Conditi
 	
 	/**
 	 * CategoryConditionHandler constructor.
-	 * @param \ItswCar\Components\Services\Services $service
+	 * @param \ItswCar\Components\Services\Services              $service
+	 * @param \Shopware\Components\DependencyInjection\Container $container
 	 */
 	public function __construct(Services $service) {
 		if (!$this->service) {
