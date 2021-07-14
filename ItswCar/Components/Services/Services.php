@@ -43,7 +43,7 @@ class Services {
 		$this->front = $this->container->get('front');
 		$this->cache = $this->container->get('shopware.cache_manager');
 		
-		if ($this->container->has('shop')) {
+		if ($this->container->initialized('shop')) {
 			$this->basePath = $this->container->get('shop')->getBasePath();
 			$this->shopId = $this->container->get('shop')->getId();
 		}

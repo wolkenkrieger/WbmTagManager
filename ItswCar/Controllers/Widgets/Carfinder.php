@@ -159,7 +159,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	}
 	
 	/**
-	 *
+	 * @throws \JsonException
 	 */
 	public function setManufacturerAction(): void {
 		try {
@@ -168,27 +168,30 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			$manufacturerId = (int)$this->Request()->getParam('manufacturer');
 			
 			if (!$manufacturerId) {
-				throw new \RuntimeException('manufacturerId');
-			}
-			
-			$sessionData = $this->service->getSessionData();
-			$carId = $typeId = $modelId = NULL;
-			
-			if (isset($sessionData['model']) && ((int)$sessionData['manufacturer'] === $manufacturerId)) {
-				$modelId = $sessionData['model'];
-				if (isset($sessionData['type'])) {
-					$typeId = $sessionData['type'];
+				$this->Request()->setParam('redirect', 0);
+				$this->forward('unset-car');
+				return;
+				
+			} else {
+				$sessionData = $this->service->getSessionData();
+				$carId = $typeId = $modelId = NULL;
+				
+				if (isset($sessionData['model']) && ((int)$sessionData['manufacturer'] === $manufacturerId)) {
+					$modelId = $sessionData['model'];
+					if (isset($sessionData['type'])) {
+						$typeId = $sessionData['type'];
+					}
 				}
+				
+				$result = [
+					'success' => TRUE,
+					'data' => NULL,
+					'manufacturer' => $manufacturerId,
+					'model' => $modelId,
+					'type' => $typeId,
+					'car' => $carId
+				];
 			}
-			
-			$result = [
-				'success' => TRUE,
-				'data' => NULL,
-				'manufacturer' => $manufacturerId,
-				'model' => $modelId,
-				'type' => $typeId,
-				'car' => $carId
-			];
 			
 			$this->service->setSessionData($result);
 		} catch (\Exception $e) {
@@ -200,11 +203,11 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			];
 		}
 		
-		$this->Response()->setBody(json_encode($result));
+		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
 	}
 	
 	/**
-	 *
+	 * @throws \JsonException
 	 */
 	public function setModelAction(): void {
 		try {
@@ -215,17 +218,20 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			$typeId = (int)$this->Request()->getParam('type');
 			
 			if (!$manufacturerId) {
-				throw new \RuntimeException('manufacturerId');
+				$this->Request()->setParam('redirect', 0);
+				$this->forward('unset-car');
+				return;
 			}
 			if (!$modelId) {
-				throw new \RuntimeException('modelId');
+				$this->Request()->setParam('redirect', 0);
+				$this->forward('unset-car');
+				return;
 			}
 			if (!$typeId) {
-				throw new \RuntimeException('modelId');
+				$this->Request()->setParam('redirect', 0);
+				$this->forward('unset-car');
+				return;
 			}
-			
-			$sessionData = $this->service->getSessionData();
-			$carId = NULL;
 			
 			$result = [
 				'success' => TRUE,
@@ -233,7 +239,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'manufacturer' => $manufacturerId,
 				'model' => $modelId,
 				'type' => $typeId,
-				'car' => $carId
+				'car' => NULL
 			];
 			
 			$this->service->setSessionData($result);
@@ -246,11 +252,11 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			];
 		}
 		
-		$this->Response()->setBody(json_encode($result));
+		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
 	}
 	
 	/**
-	 *
+	 * @throws \JsonException
 	 */
 	public function setTypeAction(): void {
 		try {
@@ -262,17 +268,26 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			$tecdocId = (int)$this->Request()->getParam('car');
 			
 			if (!$manufacturerId) {
-				throw new \RuntimeException('manufacturerId');
+				$this->Request()->setParam('redirect', 0);
+				$this->forward('unset-car');
+				return;
 			}
 			if (!$modelId) {
-				throw new \RuntimeException('modelId');
+				$this->Request()->setParam('redirect', 0);
+				$this->forward('unset-car');
+				return;
 			}
 			if (!$typeId) {
-				throw new \RuntimeException('typeId');
+				$this->Request()->setParam('redirect', 0);
+				$this->forward('unset-car');
+				return;
 			}
 			if (!$tecdocId) {
-				throw new \RuntimeException('carId');
+				$this->Request()->setParam('redirect', 0);
+				$this->forward('unset-car');
+				return;
 			}
+			
 			$result = [
 				'success' => TRUE,
 				'data' => NULL,
@@ -291,7 +306,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			];
 		}
 		
-		$this->Response()->setBody(json_encode($result));
+		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
 	}
 	
 	/**
@@ -343,16 +358,24 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				}
 			} else {
 				if (!$manufacturerId) {
-					throw new \RuntimeException('manufacturerId');
+					$this->Request()->setParam('redirect', 0);
+					$this->forward('unset-car');
+					return;
 				}
 				if (!$modelId) {
-					throw new \RuntimeException('modelId');
+					$this->Request()->setParam('redirect', 0);
+					$this->forward('unset-car');
+					return;
 				}
 				if (!$typeId) {
-					throw new \RuntimeException('typeId');
+					$this->Request()->setParam('redirect', 0);
+					$this->forward('unset-car');
+					return;
 				}
 				if (!$tecdocId) {
-					throw new \RuntimeException('tecdocId');
+					$this->Request()->setParam('redirect', 0);
+					$this->forward('unset-car');
+					return;
 				}
 				
 				$cars = $this->service->getCarsForCarfinder([
@@ -453,7 +476,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	 * @return bool
 	 */
 	public function unsetCarAction(): bool {
-		try {
+		try{
+			$withRedirect = (int)$this->Request()->getParam('redirect', 1);
 			$result = [
 				'success' => TRUE,
 				'manufacturer' => NULL,
@@ -464,16 +488,22 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			
 			$this->service->setSessionData($result);
 			
-			$url = $this->service->getUrl([
-				'controller' => 'cat',
-				'module' => 'frontend',
-				'action' => 'index',
-				//'sCategory' => $this->service->getRootCategoryId(),
-				'sCategory' => 6,
-				'rewriteUrl' => 1
-			]);
-			
-			$this->redirect($url);
+			if ($withRedirect) {
+				$url = $this->service->getUrl([
+					'controller' => 'cat',
+					'module' => 'frontend',
+					'action' => 'index',
+					//'sCategory' => $this->service->getRootCategoryId(),
+					'sCategory' => 6,
+					'rewriteUrl' => 1
+				]);
+				
+				$this->redirect($url);
+			} else {
+				$this->Request()->setHeader('Content-Type', 'application/json');
+				$this->service->setNeverRender();
+				$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
+			}
 		} catch (\Exception $e) {
 			$this->setLog($e);
 		}
@@ -485,7 +515,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	 * @param \Exception $e
 	 */
 	private function setLog(\Exception $e): void {
-		$this->service->pluginLogger->addCritical($e->getMessage(), [
+		$this->service->pluginLogger->addRecord($e->getMessage(), [
 			'code' => $e->getCode(),
 			'file' => $e->getFile(),
 			'line' => $e->getLine(),

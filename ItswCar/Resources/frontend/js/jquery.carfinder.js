@@ -51,7 +51,9 @@
             if (me.opts.type) {
                 me.opts.getter = me.opts.getter + '/type/' + me.opts.type;
             }
+            
             console.log(me.opts.getter);
+            
             $.ajax({
                 url: me.opts.getter,
                 dataType: 'json',
@@ -85,15 +87,21 @@
                     dataType: 'json'
                 }).done(function (response) {
                     var content = response.data;
+                    var currState = StateManager.getCurrentState();
+    
+                    switch (currState) {
+                        case 'xs':
+                        case 's' :
+                        case 'm' : var width = 'calc(100% - 15px)'; break;
+                        default: var width = 900;
+                    }
                     $.modal.open(content, {
                         title: 'Fahrzugauswahl',
                         sizing: 'content',
-                        width: '900'
+                        width: width
                     })
                 });
             }
-            
-            
         },
         
         onChange: function () {
@@ -123,7 +131,8 @@
             if (me.opts.car) {
                 me.opts.setter = me.opts.setter + '/car/' + me.opts.car;
             }
-            console.log(me.opts);
+            
+            //console.log(me.opts);
             
             $.ajax({
                 url: me.opts.setter,
@@ -142,10 +151,18 @@
                             dataType: 'json'
                         }).done(function (response) {
                             var content = response.data;
+                            var currState = StateManager.getCurrentState();
+                            
+                            switch (currState) {
+                                case 'xs':
+                                case 's' :
+                                case 'm' : var width = 'calc(100% - 15px)'; break;
+                                default: var width = 900;
+                            }
                             $.modal.open(content, {
                                 title: 'Fahrzugauswahl',
                                 sizing: 'content',
-                                width: '900'
+                                width: width
                             })
                         });
                     }
@@ -155,7 +172,9 @@
         
         onEmpty: function () {
             var me = this;
+            
             me.$el.empty();
+            
             if (me.opts.trigger) {
                 $('#' + me.opts.trigger).trigger('empty');
             }
@@ -164,6 +183,7 @@
         destroy: function () {
             var me = this;
             
+            $.unsubscribe('plugin/swModal/onClose.carfinder');
             me._destroy();
         },
         
@@ -206,7 +226,8 @@
                 }
             
                 me.opts[key] = attr;
-                console.log(key + ':' + attr);
+                
+                //console.log(key + ':' + attr);
             
                 return true;
             });

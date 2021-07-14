@@ -21,8 +21,11 @@ function triggerCarFinder() {
     }
 }
 
+function unsetCar() {
+
+}
+
 $(document).ready(function () {
     makeConsole();
     triggerCarFinder();
-    console.log('ItswCar::main.js');
 });
