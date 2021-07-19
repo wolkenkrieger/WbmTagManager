@@ -11,6 +11,7 @@
 namespace ItswCar\Components\Api\Resource;
 
 use ItswCar\Models\ArticleCarLinks;
+use Shopware\Components\Api\BatchInterface;
 use Shopware\Components\Api\Exception as ApiException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\ORMException;
@@ -39,7 +40,7 @@ use Shopware\Models\Shop\Shop;
 use Shopware\Models\Tax\Tax;
 use ItswCar\Models\ArticleCarLinks as CarLinks;
 
-class ExtendedArticle extends Resource {
+class ExtendedArticle extends Resource implements BatchInterface {
 	/**
 	 * @var \Shopware_Components_Translation
 	 */
