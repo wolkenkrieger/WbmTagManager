@@ -10,6 +10,7 @@
 
 namespace ItswCar\Components\Eventhandlers;
 
+use Doctrine\DBAL\Platforms\TrimMode;
 use ItswCar\Components\Services\Services;
 
 class Eventhandlers {
@@ -23,6 +24,7 @@ class Eventhandlers {
 	/**
 	 * Eventhandlers constructor.
 	 * @param \ItswCar\Components\Services\Services $service
+	 * @param                                       $pluginDir
 	 */
 	public function __construct(Services $service, $pluginDir) {
 		$this->service = $service;
@@ -55,7 +57,9 @@ class Eventhandlers {
 	 */
 	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
 		$requestUri = $controllerEventArgs->getRequest()->getRequestUri();
-		$queryPath = parse_url($requestUri, PHP_URL_PATH);
+		
+		//$queryPath = parse_url($requestUri, PHP_URL_PATH);
+		$queryPath = $controllerEventArgs->getRequest()->getPathInfo();
 		
 		if (!$queryPath || $queryPath === '/') {
 			return;
@@ -71,8 +75,13 @@ class Eventhandlers {
 		});
 		
 		foreach($queryPaths as $index => $queryPath) {
+			/*
+			if ($queryPath === trim($controllerEventArgs->getRequest()->getBasePath(), '/')) {
+				unset($queryPaths[$index]);
+				continue;
+			}
+			*/
 			$matches = $controllerEventArgs->getSubject()->Router()->match($queryPath);
-			
 			if (is_array($matches)) {
 				if (isset($macthes['m']) || isset($matches['mo'])) {
 					unset($queryPaths[$index]);
