@@ -9,24 +9,16 @@
  * @package ItswCar\Controllers\Api
  */
 
-use ItswCar\Components\Api\Resource\ExtendedArticle;
-use Shopware\Components\Api\Manager;
-
 class Shopware_Controllers_Api_ExtendedArticles extends Shopware_Controllers_Api_Rest {
-	protected $resource;
+	protected $resource = NULL;
 	
 	/**
 	 * Shopware_Controllers_Api_ExtendedArticles constructor.
-	 * @param \ItswCar\Components\Api\Resource\ExtendedArticle|null $extendedArticle
+	 * @param $extendedArticle
 	 */
-	public function __construct(ExtendedArticle $extendedArticle = NULL) {
-		if (NULL === $extendedArticle) {
-			$this->resource = Manager::getResource('itswcar.resource.extendedarticle');
-		} else {
-			$this->resource = $extendedArticle;
-		}
-		
+	public function __construct($extendedArticle = NULL) {
 		parent::__construct();
+		$this->resource = $extendedArticle ?: Shopware()->Container()->get('itswcar.resource.extendedarticle');
 	}
 	
 	/**

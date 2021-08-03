@@ -10,7 +10,6 @@
 
 namespace ItswCar\Components\Api\Resource;
 
-use ItswCar\Models\ArticleCarLinks;
 use Shopware\Components\Api\BatchInterface;
 use Shopware\Components\Api\Exception as ApiException;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -245,9 +244,10 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		$this->checkPrivilege('read');
 		
 		$builder = $this->getRepository()->createQueryBuilder('article')
-			->addSelect(['mainDetail', 'attribute'])
+			->addSelect(['mainDetail', 'attribute', 'mainDetailPrices'])
 			->leftJoin('article.mainDetail', 'mainDetail')
 			->leftJoin('mainDetail.attribute', 'attribute')
+			->leftJoin('mainDetail.prices', 'mainDetailPrices')
 			->addFilter($criteria)
 			->addOrderBy($orderBy)
 			->setFirstResult($offset)
@@ -1408,7 +1408,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		$properties = [];
 		foreach ($data['categories'] as $categoryData) {
 			foreach($categoryData as $property => $value) {
-				array_push($properties, $property);
+				$properties[] = $property;
 			}
 		}
 		
@@ -2567,7 +2567,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		
 		foreach($data['categories'] as $categoryData) {
 			foreach($categoryData as $ebayCategoryId) {
-				array_push($ebayCategoryIds, (int)$ebayCategoryId);
+				$ebayCategoryIds[] = (int)$ebayCategoryId;
 			}
 		}
 		
