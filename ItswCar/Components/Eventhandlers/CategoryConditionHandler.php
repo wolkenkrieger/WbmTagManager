@@ -20,13 +20,12 @@ use Shopware\Components\DependencyInjection\Container;
 use ItswCar\Components\Services\Services;
 
 class CategoryConditionHandler extends \Shopware\Bundle\SearchBundleDBAL\ConditionHandler\CategoryConditionHandler {
-	protected $service;
-	protected $sessionData = [];
+	protected ?Services $service = NULL;
+	protected array $sessionData = [];
 	
 	/**
 	 * CategoryConditionHandler constructor.
-	 * @param \ItswCar\Components\Services\Services              $service
-	 * @param \Shopware\Components\DependencyInjection\Container $container
+	 * @param \ItswCar\Components\Services\Services $service
 	 */
 	public function __construct(Services $service) {
 		if (!$this->service) {
