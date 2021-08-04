@@ -3,7 +3,7 @@
 {block name="frontend_detail_tabs_navigation_inner"}
     {* ITSW Fits for cars tab *}
     {block name="itsw_frontend_detail_tabs_fitsforcars"}
-        <a href="#" class="tab--link" title="{s name='DetailTabsFitsForCars' namespace="itsw/details"}Artikel passend für{/s}" data-tabName="fitsforcars">{s name='DetailTabsFitsForCars' namespace="itsw/details"}{/s}</a>
+        <a href="#" class="tab--link" title="{s name='DetailTabsFitsForCars' namespace="itsw/details"}Artikel passend für{/s}" data-tabName="fitsforcars">{s name='DetailTabsFitsForCars' namespace="itsw/details"}Artikel passend für{/s}</a>
     {/block}
 
     {* Rating tab *}
@@ -29,7 +29,7 @@
                 {block name="itsw_frontend_detail_tabs_content_firtsforcars_title"}
                     <div class="tab--header">
                         {block name="itsw_frontend_detail_tabs_content_fitsforcars_title_inner"}
-                            <a href="#" class="tab--title" title="{s name='DetailTabsDescription'}{/s}">{s name='DetailTabsDescription'}{/s}</a>
+                            <a href="#" class="tab--title" title="{s name='DetailTabsFitsForCars' namespace="itsw/details"}Artikel passend für{/s}">{s name='DetailTabsFitsForCars' namespace="itsw/details"}Artikel passend für{/s}</a>
                         {/block}
                     </div>
                 {/block}
