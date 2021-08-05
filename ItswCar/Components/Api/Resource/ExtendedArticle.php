@@ -10,6 +10,9 @@
 
 namespace ItswCar\Components\Api\Resource;
 
+use Doctrine\Common\Persistence\Mapping\MappingException;
+use Doctrine\DBAL\Exception;
+use Doctrine\ORM\OptimisticLockException;
 use Shopware\Components\Api\BatchInterface;
 use Shopware\Components\Api\Exception as ApiException;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -425,7 +428,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		}
 		
 		if (!empty($carLinks)) {
-			$this->writeCarLinks($carLinks, $product);
+			try {
+				$this->writeCarLinks($carLinks, $product);
+			} catch (OptimisticLockException $e) {
+			} catch (ORMException $e) {
+			}
 		}
 		
 		return $product;
@@ -2526,7 +2533,6 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 * @param array                            $carLinks
 	 * @param \Shopware\Models\Article\Article $product
 	 * @throws \Doctrine\ORM\ORMException
-	 * @throws \Doctrine\ORM\OptimisticLockException
 	 */
 	private function writeCarLinks(array $carLinks = [], ProductModel $product): void {
 		if (empty($carLinks)) {
@@ -2540,8 +2546,10 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		
 		$carLink = NULL;
 		$tecdocIds = [];
+		$em = $this->getManager();
+		
 		foreach($carLinks as $data) {
-			if (in_array($data['tecdocId'], $tecdocIds, TRUE)) {
+			if (in_array((int)$data['tecdocId'], $tecdocIds, TRUE)) {
 				continue;
 			}
 			
@@ -2551,11 +2559,19 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			$tecdocIds[] = $data['tecdocId'];
 			$carLink = new CarLinks();
 			$data['articleDetailsId'] = $articleDetailsId;
+			
 			$carLink->fromArray($data);
-			$this->getManager()->persist($carLink);
+			
+			if (!$em->isOpen()) {
+				$em = $em->create($em->getConnection(),	$em->getConfiguration());
+			}
+			
+			try {
+				$em->persist($carLink);
+				$em->flush($carLink);
+			} catch (OptimisticLockException | ORMException | Exception $e) {
+			}
 		}
-		
-		$this->getManager()->flush($carLink);
 	}
 	
 	/**

@@ -4,7 +4,7 @@
 	<label lang="de">ITSW Car</label>
 	<label lang="en">ITSW Car</label>
 	
-	<version>1.0.10</version>
+	<version>1.0.11</version>
 	<copyright>(c) by IT Service Wunglück</copyright>
 	<license>MIT</license>
 	<link>https://www.itsw.dev</link>
@@ -56,6 +56,10 @@
 	</changelog>
 	<changelog version="1.0.10">
 		<changes lang="de">Texte geändert</changes>
+		<changes lang="en">.</changes>
+	</changelog>
+	<changelog version="1.0.11">
+		<changes lang="de">Nicht vorhandene TecdocIds werden beim Anlegen der Artikel-Links ignoriert und führen nicht mehr zum Abbruch der Operation</changes>
 		<changes lang="en">.</changes>
 	</changelog>
 </plugin>

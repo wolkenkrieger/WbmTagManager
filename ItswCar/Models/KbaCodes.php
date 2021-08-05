@@ -82,6 +82,13 @@ class KbaCodes extends ModelEntity {
 	}
 	
 	/**
+	 * @return $this
+	 */
+	public function getCodes(): KbaCodes {
+		return $this;
+	}
+	
+	/**
 	 * @return int
 	 */
 	public function getTecdocId(): int {

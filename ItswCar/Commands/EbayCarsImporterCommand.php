@@ -118,6 +118,7 @@ class EbayCarsImporterCommand extends ShopwareCommand {
 	/**
 	 * @param array $data
 	 * @param bool  $forceUpdate
+	 * @throws \Doctrine\ORM\ORMException
 	 */
 	private function importData(array $data, bool $forceUpdate) {
 		$new = FALSE;
@@ -217,6 +218,7 @@ class EbayCarsImporterCommand extends ShopwareCommand {
 	
 	/**
 	 * @param $codes
+	 * @param $tecdocId
 	 * @return \Doctrine\Common\Collections\ArrayCollection
 	 */
 	private function splitCodes($codes, $tecdocId): ArrayCollection {
