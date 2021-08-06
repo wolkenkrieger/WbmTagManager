@@ -55,6 +55,19 @@ class Eventhandlers {
 	/**
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
+	public function onFrontRouterStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
+		$requestUri = $controllerEventArgs->getRequest()->getRequestUri();
+		$basePath = $controllerEventArgs->getRequest()->getBasePath();
+		
+		if ($basePath !== '') {
+			$redirectUri = mb_strcut($requestUri, mb_strlen($basePath));
+			$controllerEventArgs->getResponse()->setRedirect($redirectUri, 301);
+		}
+	}
+	
+	/**
+	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
+	 */
 	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
 		$requestUri = $controllerEventArgs->getRequest()->getRequestUri();
 		

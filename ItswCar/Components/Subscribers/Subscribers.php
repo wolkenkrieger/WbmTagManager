@@ -53,6 +53,7 @@ class Subscribers implements SubscriberInterface {
 	public static function getSubscribedEvents(): array {
 		return [
 			'Enlight_Controller_Action_PostDispatchSecure_Frontend'         => 'onPostDispatchSecureFrontend',
+			'Enlight_Controller_Front_RouteStartup'                        => 'onFrontRouteStartup',
 			'Enlight_Controller_Front_RouteShutdown'                        => 'onFrontRouteShutdown',
 			'Shopware_SearchBundleDBAL_Collect_Condition_Handlers'          => 'onCollectConditionHandlers',
 			'Legacy_Struct_Converter_Convert_Category'                      => 'onAfterConvertCategoryByLegacyStructConverter',
@@ -82,6 +83,13 @@ class Subscribers implements SubscriberInterface {
 	 */
 	public function onPostDispatchSecureFrontend(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
 		$this->eventHandler->onPostDispatchSecureFrontend($actionEventArgs);
+	}
+	
+	/**
+	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
+	 */
+	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
+		$this->eventHandler->onFrontRouterStartup($controllerEventArgs);
 	}
 	
 	/**
