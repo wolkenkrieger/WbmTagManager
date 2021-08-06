@@ -10,7 +10,6 @@
 
 namespace ItswCar\Components\Eventhandlers;
 
-use Doctrine\DBAL\Platforms\TrimMode;
 use ItswCar\Components\Services\Services;
 
 class Eventhandlers {
@@ -70,8 +69,6 @@ class Eventhandlers {
 	 */
 	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
 		$requestUri = $controllerEventArgs->getRequest()->getRequestUri();
-		
-		//$queryPath = parse_url($requestUri, PHP_URL_PATH);
 		$queryPath = $controllerEventArgs->getRequest()->getPathInfo();
 		
 		if (!$queryPath || $queryPath === '/') {
@@ -80,7 +77,6 @@ class Eventhandlers {
 		
 		$queryQuery = parse_url($requestUri, PHP_URL_QUERY);
 		$queryFragment = parse_url($requestUri, PHP_URL_FRAGMENT);
-		
 		$queryPaths = explode('/', $queryPath);
 		
 		$queryPaths = array_filter($queryPaths, static function ($value) {
@@ -88,12 +84,6 @@ class Eventhandlers {
 		});
 		
 		foreach($queryPaths as $index => $queryPath) {
-			/*
-			if ($queryPath === trim($controllerEventArgs->getRequest()->getBasePath(), '/')) {
-				unset($queryPaths[$index]);
-				continue;
-			}
-			*/
 			$matches = $controllerEventArgs->getSubject()->Router()->match($queryPath);
 			if (is_array($matches)) {
 				if (isset($macthes['m']) || isset($matches['mo'])) {
@@ -260,6 +250,4 @@ class Eventhandlers {
 		$price /= (1 - ($discount / 100));
 		return Shopware()->Modules()->Articles()->sRound($price);
 	}
-	
-	
 }
