@@ -52,7 +52,7 @@
                 me.opts.getter = me.opts.getter + '/type/' + me.opts.type;
             }
             
-            console.log(me.opts.getter);
+            //console.log(me.opts.getter);
             
             $.ajax({
                 url: me.opts.getter,
@@ -78,7 +78,7 @@
             
             if (me.$el.is('button')) {
                 me.itswApplyDataAttributes();
-                
+                console.log(me.opts);
                 var url = me.opts.baseUrl + me.opts.carGetter +
                     '/hsn/' + me.opts.hsn +
                     '/tsn/' + me.opts.tsn;
@@ -88,12 +88,13 @@
                 }).done(function (response) {
                     var content = response.data;
                     var currState = StateManager.getCurrentState();
-    
+                    var width = 900;
+                    
                     switch (currState) {
                         case 'xs':
                         case 's' :
-                        case 'm' : var width = 'calc(100% - 15px)'; break;
-                        default: var width = 900;
+                        case 'm' : width = 'calc(100% - 15px)'; break;
+                        default: width = 900;
                     }
                     $.modal.open(content, {
                         title: 'Fahrzugauswahl',
@@ -152,12 +153,13 @@
                         }).done(function (response) {
                             var content = response.data;
                             var currState = StateManager.getCurrentState();
+                            var width = 900;
                             
                             switch (currState) {
                                 case 'xs':
                                 case 's' :
-                                case 'm' : var width = 'calc(100% - 15px)'; break;
-                                default: var width = 900;
+                                case 'm' : width = 'calc(100% - 15px)'; break;
+                                default: width = 900;
                             }
                             $.modal.open(content, {
                                 title: 'Fahrzugauswahl',

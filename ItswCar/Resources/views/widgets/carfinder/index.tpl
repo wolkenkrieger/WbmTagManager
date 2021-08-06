@@ -25,7 +25,7 @@
 											   name="hsn"
 											   type="text"
 											   maxlength="4"
-											   minlength="4"/>
+											   minlength="4" />
 									</div>
 									<div class="table--cell width--50">
 										<label for="tsn">{s name="CARFINDER_WIDGET_TSN"}TSN{/s}</label>
@@ -33,10 +33,10 @@
 											   name="tsn"
 											   type="text"
 											   maxlength="3"
-											   minlength="3"/>
+											   minlength="3" />
 									</div>
 									<div class="table--cell width--100">
-										<button class="btn is--primary is--full is--icon-right pull-right"><i class="icon--search"></i>{s name="CARFINDER_WIDGET_CHOOSE_CAR"}Fahrzeug auswählen{/s}</button>
+										<button class="btn is--primary is--full is--icon-right pull-right" data-itsw-basepath="{$basePath}"><i class="icon--search"></i>{s name="CARFINDER_WIDGET_CHOOSE_CAR"}Fahrzeug auswählen{/s}</button>
 									</div>
 								</div>
 							{/block}

@@ -374,7 +374,7 @@ class Repository extends ModelRepository {
 			->join('cars.model', 'models')
 			->join('cars.type', 'types')
 			->where('cars.manufacturerId = :manufacturerId')
-			->groupBy('cars.typeId')
+			->groupBy('cars.manufacturerId, cars.modelId, cars.typeId')
 			->orderBy('models.display')
 			//->orderBy('types.display')
 			//->addOrderBy('buildFrom')
