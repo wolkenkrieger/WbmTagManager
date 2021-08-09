@@ -214,7 +214,16 @@ class ItswCar extends Plugin {
 			'helpText' => '',
 			'translatable' => FALSE,
 			'displayInBackend' => TRUE,
-			'position' => 105,
+			'position' => 106,
+			'custom' => TRUE
+		]);
+		$service->update('s_articles_attributes', 'oe_numbers', 'string', [
+			'label' => 'OE-Nummern',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'position' => 107,
 			'custom' => TRUE
 		]);
 		
