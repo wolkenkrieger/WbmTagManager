@@ -29,14 +29,14 @@ class CustomerGroupConditionHandler implements ConditionHandlerInterface {
 	 * @throws \JsonException
 	 */
 	public function generateCondition(ConditionInterface $condition, QueryBuilder $query, ShopContextInterface $context) {
-		$key = 'customerGroupIds' . md5(json_encode($condition, JSON_THROW_ON_ERROR));
+		$key = ':customerGroupIds' . md5(json_encode($condition, JSON_THROW_ON_ERROR));
 		
 		$query->leftJoin(
 			'product',
 			's_articles_avoid_customergroups',
 			'avoidCustomerGroup',
 			'avoidCustomerGroup.articleID = product.id
-             AND avoidCustomerGroup.customerGroupId IN (:' . $key . ')'
+             AND avoidCustomerGroup.customerGroupId IN (' . $key . ')'
 		);
 		
 		/* @var CustomerGroupCondition $condition */
