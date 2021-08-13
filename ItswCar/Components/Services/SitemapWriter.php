@@ -143,7 +143,7 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 		}
 		
 		$filePath = sprintf(
-			'%s/sitemap-shop-%d-%s.xml.gz',
+			'%s/sitemap-shop-%d-%.4f.xml.gz',
 			rtrim(sys_get_temp_dir(), '/'),
 			$shopId,
 			microtime(true)
