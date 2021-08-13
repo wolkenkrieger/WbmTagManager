@@ -8,6 +8,7 @@
         <parameter key="itswcar.services.class">ItswCar\Components\Services\Services</parameter>
 		<parameter key="itswcar.category_service.class">ItswCar\Components\Services\CategoryService</parameter>
 		<parameter key="itswcar.customer_group_condition_handler.class">ItswCar\SearchBundleDBAL\Condition\CustomerGroupConditionHandler</parameter>
+		<parameter key="itswcar.sitemap_writer_service.class">ItswCar\Components\Services\SitemapWriter</parameter>
     </parameters>
 
     <services>
@@ -28,6 +29,16 @@
 				 decorates="shopware_searchdbal.customer_group_condition_handler_dbal"
 				 class="%itswcar.customer_group_condition_handler.class%">
 			<tag name="condition_handler_dbal" />
+		</service>
+	
+		<service id="itsw.service.sitemap_writer"
+				 class="%itswcar.sitemap_writer_service.class%"
+				 decorates="shopware_bundle_sitemap.service.sitemap_writer"
+				 public="false">
+			<argument type="service" id="Shopware\Bundle\SitemapBundle\Service\SitemapNameGenerator"/>
+			<argument type="service" id="Shopware\Components\Filesystem\PrefixFilesystem"/>
+			<argument type="service" id="corelogger"/>
+			<argument type="service" id="itsw.service.sitemap_writer.inner"/>
 		</service>
     </services>
 </container>
