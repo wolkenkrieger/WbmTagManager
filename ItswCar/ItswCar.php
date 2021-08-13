@@ -31,6 +31,10 @@ use Shopware\Bundle\CookieBundle\Structs\CookieGroupStruct;
 use Shopware\Bundle\CookieBundle\Structs\CookieStruct;
 use Shopware\Components\Theme\LessDefinition;
 
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+	require_once __DIR__ . '/vendor/autoload.php';
+}
+
 
 class ItswCar extends Plugin {
 	/**
