@@ -108,6 +108,7 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 			++$this->files[$shop->getId()]['urlCount'];
 			$this->write($this->files[$shop->getId()]['fileHandle'], (string) $url);
 			
+			/*
 			$content = json_encode([
 				'url' => $url->getLoc(),
 				'type' => 'URL_UPDATED'
@@ -117,6 +118,7 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 			$statusCode = $response->getStatusCode();
 			
 			echo(PHP_EOL . sprintf('URL: %s :: StatusCode: %d', $url->getLoc(), $statusCode));
+			*/
 		}
 		
 		return true;
