@@ -19,7 +19,7 @@ use Shopware\Models\Shop\Shop;
 
 class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInterface {
 	
-	private const SITEMAP_LIMIT = 1000;
+	private const SITEMAP_LIMIT = 2000;
 	
 	/**
 	 * @var \Shopware\Bundle\SitemapBundle\Service\SitemapWriter
