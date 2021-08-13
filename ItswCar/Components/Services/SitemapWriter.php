@@ -163,8 +163,11 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 			'urlCount' => 0,
 		];
 		
-		$this->write($fileHandler, '<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+		$this->write($fileHandler,
+			'<?xml version="1.0" encoding="UTF-8"?>'
+			. PHP_EOL.
+			'<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">'
+		);
 		
 		return true;
 	}
@@ -173,9 +176,9 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 	 * @param resource $fileHandler
 	 * @param string   $content
 	 */
-	private function write($fileHandler, $content)
+	private function write($fileHandler, string $content)
 	{
-		gzwrite($fileHandler, $content);
+		gzwrite($fileHandler, $content . PHP_EOL);
 	}
 	
 	/**
