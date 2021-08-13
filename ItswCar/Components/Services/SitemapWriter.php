@@ -13,7 +13,6 @@ use League\Flysystem\FilesystemInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Shopware\Bundle\SitemapBundle\Exception\UnknownFileException;
-use Shopware\Bundle\SitemapBundle\Service\SitemapNameGenerator;
 use Shopware\Bundle\SitemapBundle\Struct\Sitemap;
 use Shopware\Models\Shop\Shop;
 
@@ -32,9 +31,9 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 	private $filesystem;
 	
 	/**
-	 * @var SitemapNameGenerator
+	 * @var \ItswCar\Components\Services\SitemapNameGenerator
 	 */
-	private $sitemapNameGenerator;
+	private SitemapNameGenerator $sitemapNameGenerator;
 	
 	/**
 	 * @var array
@@ -115,7 +114,7 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 		$fileHandle = $this->files[$shopId]['fileHandle'];
 		$this->write($fileHandle, '</urlset>');
 		
-		gzclose($fileHandle);
+		fclose($fileHandle);
 		
 		if (!array_key_exists($shopId, $this->sitemaps)) {
 			$this->sitemaps[$shopId] = [];
@@ -143,13 +142,13 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 		}
 		
 		$filePath = sprintf(
-			'%s/sitemap-shop-%d-%.4f.xml.gz',
+			'%s/sitemap-shop-%d-%.4f.xml',
 			rtrim(sys_get_temp_dir(), '/'),
 			$shopId,
 			microtime(true)
 		);
 		
-		$fileHandler = gzopen($filePath, 'wb');
+		$fileHandler = fopen($filePath, 'wb');
 		
 		if (!$fileHandler) {
 			$this->logger->error(sprintf('Could not generate sitemap file, unable to write to "%s"', $filePath));
@@ -178,7 +177,7 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 	 */
 	private function write($fileHandler, string $content)
 	{
-		gzwrite($fileHandler, $content . PHP_EOL);
+		fwrite($fileHandler, $content . PHP_EOL);
 	}
 	
 	/**
