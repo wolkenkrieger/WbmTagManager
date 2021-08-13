@@ -226,7 +226,7 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 		foreach ($this->sitemaps as $shopId => $sitemaps) {
 			// Delete old sitemaps for this siteId
 			foreach ($this->filesystem->listContents(sprintf('shop-%d', $shopId)) as $file) {
-				if ($file['filename'] !== '.htaccess') {
+				if ($file['basename'] !== '.htaccess') {
 					$this->filesystem->delete($file['path']);
 				}
 			}
