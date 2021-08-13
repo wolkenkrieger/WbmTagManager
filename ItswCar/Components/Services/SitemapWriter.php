@@ -19,7 +19,7 @@ use Shopware\Models\Shop\Shop;
 
 class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInterface {
 	
-	private const SITEMAP_LIMIT = 2000;
+	private const SITEMAP_LIMIT = 1000;
 	
 	/**
 	 * @var \Shopware\Bundle\SitemapBundle\Service\SitemapWriter
@@ -146,7 +146,7 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 			'%s/sitemap-shop-%d-%s.xml.gz',
 			rtrim(sys_get_temp_dir(), '/'),
 			$shopId,
-			microtime(true) * 10000
+			microtime(true)
 		);
 		
 		$fileHandler = gzopen($filePath, 'wb');
