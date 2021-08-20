@@ -10,9 +10,9 @@
 
 namespace ItswCar\Components\Api\Resource;
 
-use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\OptimisticLockException;
+use ItswCar\Components\Api\Resource\Google\ContentApi\ContentProduct;
 use Shopware\Components\Api\BatchInterface;
 use Shopware\Components\Api\Exception as ApiException;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -41,12 +41,18 @@ use Shopware\Models\Property\Value;
 use Shopware\Models\Shop\Shop;
 use Shopware\Models\Tax\Tax;
 use ItswCar\Models\ArticleCarLinks as CarLinks;
+use ItswCar\Components\Api\Resource\Google\ContentApi\ContentSession as GoogleContentApiSession;
+
 
 class ExtendedArticle extends Resource implements BatchInterface {
 	/**
 	 * @var \Shopware_Components_Translation
 	 */
 	private $translationComponent;
+	/**
+	 * @var \ItswCar\Components\Api\Resource\Google\ContentApi\ContentSession|null
+	 */
+	private ?GoogleContentApiSession $googleContentApiSession = NULL;
 	
 	public function __construct(\Shopware_Components_Translation $translationComponent = null) {
 		$this->translationComponent = $translationComponent ?: Shopware()->Container()->get('translation');
@@ -163,7 +169,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		}
 		
 		if ($this->getResultMode() === self::HYDRATE_ARRAY) {
-			$product['images'] = $this->getArticleImages($id);
+			$product['images'] = $this->getArticleImages((int)$id);
 			$product['configuratorSet'] = $this->getArticleConfiguratorSet($id);
 			$product['links'] = $this->getArticleLinks($id);
 			$product['downloads'] = $this->getArticleDownloads($id);
@@ -316,6 +322,12 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			unset($params['carLinks']);
 		}
 		
+		$googleContentApi = FALSE;
+		if (isset($params['google_content_api']) && $params['google_content_api'] === TRUE) {
+			$googleContentApi = TRUE;
+			unset($params['google_content_api']);
+		}
+		
 		$params = $this->prepareAssociatedData($params, $product);
 		
 		$product->fromArray($params);
@@ -334,6 +346,10 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		
 		if (!empty($carLinks)) {
 			$this->writeCarLinks($carLinks, $product);
+		}
+		
+		if ($googleContentApi) {
+			$this->createGoogleContentProduct($product);
 		}
 		
 		return $product;
@@ -413,6 +429,12 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			unset($params['carLinks']);
 		}
 		
+		$googleContentApi = FALSE;
+		if (isset($params['google_content_api']) && $params['google_content_api'] === TRUE) {
+			$googleContentApi = TRUE;
+			unset($params['google_content_api']);
+		}
+		
 		$params = $this->prepareAssociatedData($params, $product);
 		
 		$product->fromArray($params);
@@ -430,9 +452,12 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		if (!empty($carLinks)) {
 			try {
 				$this->writeCarLinks($carLinks, $product);
-			} catch (OptimisticLockException $e) {
-			} catch (ORMException $e) {
+			} catch (OptimisticLockException | ORMException $e) {
 			}
+		}
+		
+		if ($googleContentApi) {
+			$this->updateGoogleContentProduct($product);
 		}
 		
 		return $product;
@@ -784,13 +809,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	/**
 	 * Selects all images of the main variant of the passed product id.
 	 * The images are sorted by their position value.
-	 *
 	 * @param int $articleId
-	 *
 	 * @return array
+	 * @throws \Exception
 	 */
-	protected function getArticleImages($articleId)
-	{
+	protected function getArticleImages(int $articleId): array	{
 		$builder = $this->getManager()->createQueryBuilder();
 		$builder->select(['images'])
 			->from(Image::class, 'images')
@@ -2596,5 +2619,30 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			->setParameter('ebayCategoryIds', $ebayCategoryIds);
 		
 		 return new ArrayCollection($builder->getQuery()->getResult());
+	}
+	
+	/**
+	 * Google Content API
+	 */
+	
+	
+	/**
+	 * @param \Shopware\Models\Article\Article $product
+	 */
+	private function createGoogleContentProduct(ProductModel $product) {
+		$googleContentProduct = new ContentProduct($product);
+		$response = $googleContentProduct->create();
+		
+		return $response->getId();
+	}
+	
+	/**
+	 * @param \Shopware\Models\Article\Article $product
+	 */
+	private function updateGoogleContentProduct(ProductModel $product) {
+		$googleContentProduct = new ContentProduct($product);
+		$response = $googleContentProduct->update();
+		
+		return $response->getId();
 	}
 }
