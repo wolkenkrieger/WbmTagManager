@@ -72,9 +72,10 @@ class ContentProduct {
 		}
 		
 		$productPrice *= (($this->product->getTax()->getTax() + 100) / 100);
+		$discountProductPrice = $productPrice;
 		
 		if ($productPrice && $discount) {
-			$productPrice -= ($productPrice / 100 * $discount);
+			$discountProductPrice -= ($productPrice / 100 * $discount);
 		}
 		
 		$description = str_ireplace([
@@ -114,11 +115,14 @@ class ContentProduct {
 		$product->setGtin((string)$this->product->getMainDetail()->getEan());
 		
 		$price = new Price();
-		$price->setValue(sprintf('%.2f', $productPrice));
+		$price->setValue(sprintf('%.2f', $productPrice * $this->getPriceFactor()));
 		$price->setCurrency('EUR');
-		
 		$product->setPrice($price);
 		
+		$discountPrice = new Price();
+		$discountPrice->setValue(sprintf('%.2f', $discountProductPrice));
+		$discountPrice->setCurrency('EUR');
+		$product->setSalePrice($discountPrice);
 		/*
 		$shippingPrice = new Google_Service_ShoppingContent_Price();
 		$shippingPrice->setValue('0.99');
@@ -211,5 +215,12 @@ class ContentProduct {
 	 */
 	private function buildProductId($offerId): string {
 		return sprintf('%s:%s:%s:%s', self::CHANNEL, self::CONTENT_LANGUAGE,	self::TARGET_COUNTRY_DE, $offerId);
+	}
+	
+	/**
+	 * @return float
+	 */
+	private function getPriceFactor(): float {
+		return (float)rand() / (float)getrandmax() + 1.0;
 	}
 }
