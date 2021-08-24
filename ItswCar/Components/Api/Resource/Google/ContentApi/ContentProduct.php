@@ -87,6 +87,8 @@ class ContentProduct {
 		],
 			$this->product->getDescriptionLong());
 		
+		$productMpn = $this->product->getMainDetail()->getSupplierNumber()? : 'ATW-'.$this->product->getMainDetail()->getId();
+		
 		$product = new Product();
 		
 		if (!in_array(mb_strtolower($this->product->getSupplier()->getName()), [
@@ -113,6 +115,7 @@ class ContentProduct {
 		$product->setCondition('neu');
 		$product->setGoogleProductCategory('Fahrzeuge & Teile > Fahrzeugersatzteile & -zubehör');
 		$product->setGtin((string)$this->product->getMainDetail()->getEan());
+		$product->setMpn($productMpn);
 		
 		$price = new Price();
 		$price->setValue(sprintf('%.2f', $productPrice * $this->getPriceFactor()));
