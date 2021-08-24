@@ -221,6 +221,6 @@ class ContentProduct {
 	 * @return float
 	 */
 	private function getPriceFactor(): float {
-		return (float)rand() / (float)getrandmax() + 1.1111;
+		return ((float)rand() / (float)getrandmax()) + 1.1111;
 	}
 }
