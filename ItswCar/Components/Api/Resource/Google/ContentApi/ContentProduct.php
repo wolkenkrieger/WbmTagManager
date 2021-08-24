@@ -100,6 +100,7 @@ class ContentProduct {
 			$product->setBrand($this->product->getSupplier()->getName());
 		} else {
 			$product->setTitle($this->product->getName());
+			$product->setBrand('ATW');
 		}
 		
 		
