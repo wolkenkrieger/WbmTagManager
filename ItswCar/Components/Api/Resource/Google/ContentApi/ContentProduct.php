@@ -59,7 +59,7 @@ class ContentProduct {
 		}
 		
 		$productAvailability = $this->product->getMainDetail()->getInStock()? 'auf Lager' : 'nicht auf Lager';
-		$productGtin = $this->product->getMainDetail()->getEan()?:$this->product->getMainDetail()->getNumber();
+		
 		$productPrice = 0;
 		$discount = 0;
 		
@@ -77,6 +77,15 @@ class ContentProduct {
 			$productPrice -= ($productPrice / 100 * $discount);
 		}
 		
+		$description = str_ireplace([
+			'</ul><br><br><div id="description_oe">',
+			'</div>'
+		], [
+			'<li>',
+			'</li></ul>'
+		],
+			$this->product->getDescriptionLong());
+		
 		$product = new Product();
 		
 		if (!in_array(mb_strtolower($this->product->getSupplier()->getName()), [
@@ -92,7 +101,7 @@ class ContentProduct {
 		
 		
 		$product->setOfferId($this->product->getMainDetail()->getNumber());
-		$product->setDescription($this->product->getDescriptionLong());
+		$product->setDescription($description);
 		$product->setLink(implode('/', [$this->session->websiteUrl, ltrim($this->getSeoLink(), '/')]));
 		$product->setImageLink((string)array_shift($productImageUrls));
 		
