@@ -52,12 +52,6 @@ class ContentProduct {
 	 * @return \Google\Service\ShoppingContent\Product
 	 */
 	private function buildProduct(): Product {
-		$productTitle = (in_array(mb_strtolower($this->product->getSupplier()->getName()), [
-			'autoteile wiesel',
-			'atw',
-			'autoteile-wiesel'
-		]))? $this->product->getName() : $this->product->getSupplier()->getName() . ' ' . $this->product->getName();
-		
 		$productImageUrls = [];
 		
 		foreach($this->product->getImages() as $image) {
@@ -85,8 +79,19 @@ class ContentProduct {
 		
 		$product = new Product();
 		
+		if (!in_array(mb_strtolower($this->product->getSupplier()->getName()), [
+			'autoteile wiesel',
+			'atw',
+			'autoteile-wiesel'
+		])) {
+			$product->setTitle($this->product->getSupplier()->getName() . ' ' . $this->product->getName());
+			$product->setBrand($this->product->getSupplier()->getName());
+		} else {
+			$product->setTitle($this->product->getName());
+		}
+		
+		
 		$product->setOfferId($this->product->getMainDetail()->getNumber());
-		$product->setTitle($productTitle);
 		$product->setDescription($this->product->getDescriptionLong());
 		$product->setLink(implode('/', [$this->session->websiteUrl, ltrim($this->getSeoLink(), '/')]));
 		$product->setImageLink((string)array_shift($productImageUrls));
