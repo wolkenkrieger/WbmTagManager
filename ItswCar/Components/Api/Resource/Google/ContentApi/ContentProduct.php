@@ -64,7 +64,7 @@ class ContentProduct {
 			$productImageUrls[] = $this->mediaService->getUrl($image->getMedia()->getPath());
 		}
 		
-		$productAvailability = $this->product->getMainDetail()->getInStock()? 'auf Lager' : 'nicht auf Lager';
+		$productAvailability = $this->product->getMainDetail()->getInStock()? 'auf_Lager' : 'nicht_auf_Lager';
 		$productGtin = $this->product->getMainDetail()->getEan()?:$this->product->getMainDetail()->getNumber();
 		$productPrice = 0;
 		$discount = 0;
