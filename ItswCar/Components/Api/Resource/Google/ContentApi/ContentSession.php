@@ -27,26 +27,54 @@ class ContentSession {
 	protected const CONFIGFILE_NAME = 'merchant-info.json';
 	protected const SERVICE_ACCOUNT_FILE_NAME = 'service-account.json';
 	
-	public array $config;
+	private	$config;
+	private $authConfig;
+	private int $shopID;
 	public string $merchantId;
 	public bool $mcaStatus;
 	public Google_Service_ShoppingContent $service;
 	public string $websiteUrl;
-	protected string $configDir;
 	
 	/**
+	 * @param array $config
+	 * @param int   $shopID
 	 * @throws \Google\Exception
 	 * @throws \JsonException
 	 */
-	public function __construct () {
-		$this->configDir = implode(DIRECTORY_SEPARATOR, [__DIR__, 'config']);
-		$configFile = implode(DIRECTORY_SEPARATOR, [$this->configDir, self::CONFIGFILE_NAME]);
-		if (file_exists($configFile)) {
-			$this->config = json_decode(file_get_contents($configFile), TRUE, 512, JSON_THROW_ON_ERROR);
+	public function __construct (array $config = [], int $shopID = 1) {
+		$this->shopID = $shopID;
+		if (!empty($config) && isset($config['merchant_info']) && $config['merchant_info']) {
+			$this->config = json_decode($config['merchant_info'], TRUE, 512, JSON_THROW_ON_ERROR);
 			if (is_null($this->config)) {
 				throw new InvalidArgumentException();
 			}
+		} else {
+			$configDir = implode(DIRECTORY_SEPARATOR, [__DIR__, 'config']);
+			$configFile = implode(DIRECTORY_SEPARATOR, [$configDir, self::CONFIGFILE_NAME]);
+			if (file_exists($configFile)) {
+				$this->config = json_decode(file_get_contents($configFile), TRUE, 512, JSON_THROW_ON_ERROR);
+				if (is_null($this->config)) {
+					throw new InvalidArgumentException();
+				}
+			}
 		}
+		
+		if (!empty($config) && isset($config['service_account']) && $config['service_account']) {
+			$this->authConfig = json_decode($config['service_account'], TRUE, 512, JSON_THROW_ON_ERROR);
+			if (is_null($this->authConfig)) {
+				throw new InvalidArgumentException();
+			}
+		} else {
+			$configDir = implode(DIRECTORY_SEPARATOR, [__DIR__, 'config']);
+			$accountFile = implode(DIRECTORY_SEPARATOR, [$configDir, self::SERVICE_ACCOUNT_FILE_NAME]);
+			if (file_exists($accountFile)) {
+				$this->authConfig = json_decode(file_get_contents($accountFile), TRUE, 512, JSON_THROW_ON_ERROR);
+				if (is_null($this->authConfig)) {
+					throw new InvalidArgumentException();
+				}
+			}
+		}
+		
 		$client = new Google_Client();
 		$client->setApplicationName('ATW Onlineshop Google Shopping');
 		$client->setScopes(Google_Service_ShoppingContent::CONTENT);
@@ -60,15 +88,11 @@ class ContentSession {
 	 * @param \Google_Client $client
 	 */
 	protected function authenticateFromConfig(Google_Client $client): void {
-		$accountFile = implode(DIRECTORY_SEPARATOR, [$this->configDir, self::SERVICE_ACCOUNT_FILE_NAME]);
 		try {
-			$client->setAuthConfig($accountFile);
+			$client->setAuthConfig($this->authConfig);
 			$client->setScopes(Google_Service_ShoppingContent::CONTENT);
 		} catch (Exception $exception) {
-			$msg = sprintf('Could not find or read credentials from '
-				. 'either the Google Application Default credentials or '
-				. '%s.', $accountFile);
-			throw new DomainException($msg);
+			throw new InvalidArgumentException();
 		}
 	}
 	

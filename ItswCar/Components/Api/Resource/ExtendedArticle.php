@@ -41,7 +41,7 @@ use Shopware\Models\Property\Value;
 use Shopware\Models\Shop\Shop;
 use Shopware\Models\Tax\Tax;
 use ItswCar\Models\ArticleCarLinks as CarLinks;
-use ItswCar\Components\Api\Resource\Google\ContentApi\ContentSession as GoogleContentApiSession;
+use Shopware\Components\Plugin\Configuration\CachedReader;
 
 
 class ExtendedArticle extends Resource implements BatchInterface {
@@ -49,13 +49,20 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 * @var \Shopware_Components_Translation
 	 */
 	private $translationComponent;
-	/**
-	 * @var \ItswCar\Components\Api\Resource\Google\ContentApi\ContentSession|null
-	 */
-	private ?GoogleContentApiSession $googleContentApiSession = NULL;
+	
+	private array $config;
+	private $shop = FALSE;
 	
 	public function __construct(\Shopware_Components_Translation $translationComponent = null) {
 		$this->translationComponent = $translationComponent ?: Shopware()->Container()->get('translation');
+		
+		if ($this->getContainer()->initialized('shop')) {
+			$this->shop = $this->getContainer()->get('shop');
+		} else {
+			$this->shop = $this->getContainer()->get('models')->getRepository(Shop::class)->getActiveDefault();
+		}
+		
+		$this->config = $this->getContainer()->get(CachedReader::class)->getByPluginName('ItswCar', $this->shop->getId());
 	}
 	
 	/**
@@ -2630,7 +2637,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 * @param \Shopware\Models\Article\Article $product
 	 */
 	private function createGoogleContentProduct(ProductModel $product) {
-		$googleContentProduct = new ContentProduct($product);
+		$googleContentProduct = new ContentProduct($product, $this->config, $this->shop->getId());
 		$response = $googleContentProduct->create();
 		
 		return $response->getId();
@@ -2640,7 +2647,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 * @param \Shopware\Models\Article\Article $product
 	 */
 	private function updateGoogleContentProduct(ProductModel $product) {
-		$googleContentProduct = new ContentProduct($product);
+		$googleContentProduct = new ContentProduct($product, $this->config, $this->shop->getId());
 		$response = $googleContentProduct->update();
 		
 		return $response->getId();

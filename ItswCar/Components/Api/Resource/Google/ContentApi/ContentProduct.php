@@ -21,7 +21,7 @@ class ContentProduct {
 	protected const CONTENT_LANGUAGE = 'de';
 	protected const TARGET_COUNTRY_DE = 'DE';
 	protected const TARGET_COUNTRY_CH = 'CH';
-	protected const TARGET_COUNTRY_AUT = 'AUT';
+	protected const TARGET_COUNTRY_AT = 'AT';
 	protected const MAX_RETRIES = 5;
 	
 	private ProductModel $product;
@@ -29,21 +29,26 @@ class ContentProduct {
 	private int $shopID;
 	private $mediaService;
 	private bool $force;
+	private array $config;
 	
 	
 	/**
 	 * @param \Shopware\Models\Article\Article $product
+	 * @param array                            $config
 	 * @param int                              $shopID
 	 * @param bool                             $force
+	 * @throws \Google\Exception
+	 * @throws \JsonException
 	 */
-	public function __construct(ProductModel $product, int $shopID = 1, bool $force = FALSE) {
+	public function __construct(ProductModel $product, array $config, int $shopID = 1, bool $force = FALSE) {
 		$this->product = $product;
+		$this->config = $config;
 		$this->shopID = $shopID;
 		$this->force = $force;
 		$this->mediaService = Shopware()->Container()->get('shopware_media.media_service');
 		
 		if (is_null($this->session)) {
-			$this->session = new ContentSession();
+			$this->session = new ContentSession($this->config, $this->shopID);
 		}
 		
 	}
