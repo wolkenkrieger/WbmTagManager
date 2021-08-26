@@ -29,7 +29,6 @@ class ContentProduct {
 	private int $shopID;
 	private $mediaService;
 	private bool $force;
-	private array $config;
 	
 	
 	/**
@@ -42,13 +41,12 @@ class ContentProduct {
 	 */
 	public function __construct(ProductModel $product, array $config, int $shopID = 1, bool $force = FALSE) {
 		$this->product = $product;
-		$this->config = $config;
 		$this->shopID = $shopID;
 		$this->force = $force;
 		$this->mediaService = Shopware()->Container()->get('shopware_media.media_service');
 		
 		if (is_null($this->session)) {
-			$this->session = new ContentSession($this->config, $this->shopID);
+			$this->session = new ContentSession($config, $this->shopID);
 		}
 		
 	}

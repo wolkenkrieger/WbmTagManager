@@ -16,35 +16,38 @@ use ItswCar\Components\Eventhandlers\Eventhandlers as Eventhandler;
 use ItswCar\Components\Eventhandlers\CategoryConditionHandler;
 use ItswCar\Components\Services\Services;
 use Shopware\Components\DependencyInjection\Container;
+use Shopware\Components\Plugin\Configuration\CachedReader;
+use Shopware\Models\Shop\Shop;
 
 
 class Subscribers implements SubscriberInterface {
-	/**
-	 * @var \ItswCar\Components\Eventhandlers
-	 */
-	protected $eventHandler;
-	/**
-	 * @var \Shopware\Components\DependencyInjection\Container
-	 */
-	protected $container;
-	/**
-	 * @var \ItswCar\Components\Services\Services
-	 */
-	protected $service;
 	
-	protected $pluginDir;
+	protected Eventhandler $eventHandler;
+	protected Container $container;
+	protected Services $service;
+	protected string $pluginDir;
+	protected array $config;
+	protected Shop $shop;
 	
 	/**
-	 * Subscribers constructor.
 	 * @param \Shopware\Components\DependencyInjection\Container $container
 	 * @param \ItswCar\Components\Services\Services              $service
-	 * @param                                                    $pluginDir
+	 * @param string                                             $pluginDir
+	 * @param string                                             $pluginName
 	 */
-	public function __construct(Container $container, Services $service, $pluginDir) {
+	public function __construct(Container $container, Services $service, string $pluginDir, string $pluginName) {
 		$this->container = $container;
 		$this->service = $service;
 		$this->pluginDir = $pluginDir;
-		$this->eventHandler = new Eventhandler($this->service, $this->pluginDir);
+		
+		if ($this->container->initialized('shop')) {
+			$this->shop = $this->container->get('shop');
+		} else {
+			$this->shop = $this->container->get('models')->getRepository(Shop::class)->getActiveDefault();
+		}
+		
+		$this->config = $this->container->get(CachedReader::class)->getByPluginName($pluginName, $this->shop->getID());
+		$this->eventHandler = new Eventhandler($service, $pluginDir, $this->config);
 	}
 	
 	/**
@@ -53,7 +56,7 @@ class Subscribers implements SubscriberInterface {
 	public static function getSubscribedEvents(): array {
 		return [
 			'Enlight_Controller_Action_PostDispatchSecure_Frontend'         => 'onPostDispatchSecureFrontend',
-			'Enlight_Controller_Front_RouteStartup'                        => 'onFrontRouteStartup',
+			'Enlight_Controller_Front_RouteStartup'                         => 'onFrontRouteStartup',
 			'Enlight_Controller_Front_RouteShutdown'                        => 'onFrontRouteShutdown',
 			'Shopware_SearchBundleDBAL_Collect_Condition_Handlers'          => 'onCollectConditionHandlers',
 			'Legacy_Struct_Converter_Convert_Category'                      => 'onAfterConvertCategoryByLegacyStructConverter',
@@ -80,6 +83,7 @@ class Subscribers implements SubscriberInterface {
 	
 	/**
 	 * @param \Enlight_Controller_ActionEventArgs $actionEventArgs
+	 * @throws \Exception
 	 */
 	public function onPostDispatchSecureFrontend(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
 		$this->eventHandler->onPostDispatchSecureFrontend($actionEventArgs);
