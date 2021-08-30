@@ -110,6 +110,7 @@ class ContentProduct {
 		$product->setOfferId($this->product->getMainDetail()->getNumber());
 		$product->setDescription($description);
 		$product->setLink(implode('/', [$this->session->websiteUrl, ltrim($this->getSeoLink(), '/')]));
+		$product->setCanonicalLink(implode('/', [$this->session->websiteUrl, ltrim($this->getSeoLink(), '/')]));
 		$product->setImageLink((string)array_shift($productImageUrls));
 		
 		$product->setContentLanguage(self::CONTENT_LANGUAGE);
