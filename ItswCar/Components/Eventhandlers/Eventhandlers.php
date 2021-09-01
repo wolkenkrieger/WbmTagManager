@@ -169,12 +169,7 @@ class Eventhandlers {
 		$articles = $return['sArticles']??[];
 		foreach($articles as &$article) {
 			$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
-			if ($discount = $this->service->getUserGroupDiscount()) {
-				$article['has_pseudoprice'] = TRUE;
-				$article['pseudoprice'] = $this->getPrice($article['price_numeric'], $article['tax'], $discount);
-				$article['pseudoprice_numeric'] = $this->getPriceNum($article['price_numeric'], $article['tax'], $discount);
-				$article['pseudopricePercent'] = $discount;
-			}
+			$article = $this->setPseudoprice($article);
 		}
 		unset($article);
 		$return['sArticles'] = $articles;
@@ -184,7 +179,7 @@ class Eventhandlers {
 	/**
 	 * @param \Enlight_Event_EventArgs $eventArgs
 	 */
-	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs) {
+	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs): void {
 		$article = $eventArgs->getReturn();
 		$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
 		$eventArgs->setReturn($article);
@@ -206,12 +201,7 @@ class Eventhandlers {
 		$article = $hookArgs->getReturn();
 		
 		$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
-		if ($discount = $this->service->getUserGroupDiscount()) {
-			$article['has_pseudoprice'] = TRUE;
-			$article['pseudoprice'] = $this->getPrice($article['price_numeric'], $article['tax'], $discount);
-			$article['pseudoprice_numeric'] = $this->getPriceNum($article['price_numeric'], $article['tax'], $discount);
-			$article['pseudopricePercent'] = $discount;
-		}
+		$article = $this->setPseudoprice($article);
 		
 		$hookArgs->setReturn($article);
 	}
@@ -219,7 +209,7 @@ class Eventhandlers {
 	/**
 	 * @param \Enlight_Controller_ActionEventArgs $eventArgs
 	 */
-	public function onPostDispatchSecureBackendForm(\Enlight_Controller_ActionEventArgs $eventArgs) {
+	public function onPostDispatchSecureBackendForm(\Enlight_Controller_ActionEventArgs $eventArgs): void {
 		$controller = $eventArgs->getSubject();
 		$view = $controller->View();
 		$request = $controller->Request();
@@ -248,7 +238,7 @@ class Eventhandlers {
 	 * @param $discount
 	 * @return string
 	 */
-	private function getPrice($price, $tax, $discount) {
+	private function getPrice($price, $tax, $discount): string {
 		$price /= (1 - ($discount / 100));
 		return Shopware()->Modules()->Articles()->sFormatPrice($price);
 	}
@@ -262,6 +252,21 @@ class Eventhandlers {
 	private function getPriceNum($price, $tax, $discount) {
 		$price /= (1 - ($discount / 100));
 		return Shopware()->Modules()->Articles()->sRound($price);
+	}
+	
+	/**
+	 * @param $realPrice
+	 * @param $fakePrice
+	 * @return false|float
+	 */
+	private function getFakePriceDiscountPercent($realPrice, $fakePrice) {
+		$p = (100 / $fakePrice) * $realPrice;
+		
+		if ($p < 100) {
+			return floor(100 - $p);
+		}
+		
+		return floor($p);
 	}
 	
 	/**
@@ -361,5 +366,24 @@ class Eventhandlers {
 			'badgeposition' => $this->config['google_badge_position'],
 			'surveyoptinstyle' => $this->config['google_survey_opt_in_style']
 		]);
+	}
+	
+	/**
+	 * @param $article
+	 * @return mixed
+	 */
+	public function setPseudoprice($article) {
+		if ($fakePrice = $article['attributes']['core']['fake_price'] ?? NULL) {
+			$article['has_pseudoprice'] = TRUE;
+			$article['pseudoprice'] = $fakePrice;
+			$article['pseudoprice_numeric'] = (float)$fakePrice;
+			$article['pseudopricePercent'] = $this->getFakePriceDiscountPercent($article['price_numeric'], $article['pseudoprice_numeric']);
+		} else if ($discount = $this->service->getUserGroupDiscount()) {
+			$article['has_pseudoprice'] = TRUE;
+			$article['pseudoprice'] = $this->getPrice($article['price_numeric'], $article['tax'], $discount);
+			$article['pseudoprice_numeric'] = $this->getPriceNum($article['price_numeric'], $article['tax'], $discount);
+			$article['pseudopricePercent'] = $this->getFakePriceDiscountPercent($article['price_numeric'], $article['pseudoprice_numeric']);
+		}
+		return $article;
 	}
 }

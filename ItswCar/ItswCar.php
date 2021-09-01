@@ -230,6 +230,15 @@ class ItswCar extends Plugin {
 			'position' => 107,
 			'custom' => TRUE
 		]);
+		$service->update('s_articles_attributes', 'fake_price', 'float', [
+			'label' => 'Fake Preis',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'position' => 108,
+			'custom' => TRUE
+		]);
 		
 		
 		$metaDataCache  = Shopware()->Models()->getConfiguration()->getMetadataCacheImpl();

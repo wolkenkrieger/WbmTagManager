@@ -81,6 +81,8 @@ class ContentProduct {
 			$discountProductPrice -= ($productPrice / 100 * $discount);
 		}
 		
+		$fakePrice = $productPrice * $this->getPriceFactor();
+		
 		$description = str_ireplace([
 			'</ul><br><br><div id="description_oe">',
 			'</div>'
@@ -124,7 +126,7 @@ class ContentProduct {
 		$product->setIdentifierExists(!$this->product->getMainDetail()->getEan()?'nein':'ja');
 		
 		$price = new Price();
-		$price->setValue(sprintf('%.2f', $productPrice * $this->getPriceFactor()));
+		$price->setValue(sprintf('%.2f', $fakePrice));
 		$price->setCurrency('EUR');
 		$product->setPrice($price);
 		
@@ -160,29 +162,37 @@ class ContentProduct {
 	}
 	
 	/**
-	 * @return \Google\Service\ShoppingContent\Product
+	 * @return array
 	 */
-	public function create(): Product {
-		$response = $this->session->service->products->insert($this->session->merchantId, $this->buildProduct());
+	public function create(): array {
+		$contentProduct = $this->buildProduct();
+		$response = $this->session->service->products->insert($this->session->merchantId, $contentProduct);
 		
 		if ($this->force) {
 			$this->session->retry($this, 'get', $this->product->getMainDetail()->getNumber(), self::MAX_RETRIES);
 		}
 		
-		return $response;
+		return [
+			'response' => $response,
+			'contentProduct' => $contentProduct
+		];
 	}
 	
 	/**
-	 * @return \Google\Service\ShoppingContent\Product
+	 * @return array
 	 */
-	public function update(): Product {
-		$response = $this->session->service->products->insert($this->session->merchantId, $this->buildProduct());
+	public function update(): array {
+		$contentProduct = $this->buildProduct();
+		$response = $this->session->service->products->insert($this->session->merchantId, $contentProduct);
 		
 		if ($this->force) {
 			$this->session->retry($this, 'get', $this->product->getMainDetail()->getNumber(), self::MAX_RETRIES);
 		}
 		
-		return $response;
+		return [
+			'response' => $response,
+			'contentProduct' => $contentProduct
+		];
 	}
 	
 	/**

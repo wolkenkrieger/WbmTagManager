@@ -12,6 +12,7 @@ namespace ItswCar\Components\Api\Resource;
 
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\OptimisticLockException;
+use Google\Service\ShoppingContent\Product as GoogleContentProduct;
 use ItswCar\Components\Api\Resource\Google\ContentApi\ContentProduct;
 use Shopware\Components\Api\BatchInterface;
 use Shopware\Components\Api\Exception as ApiException;
@@ -32,6 +33,7 @@ use Shopware\Models\Article\Link;
 use Shopware\Models\Article\Repository;
 use Shopware\Models\Article\SeoCategory;
 use Shopware\Models\Article\Supplier;
+use Shopware\Models\Attribute\Article as Attribute;
 use Shopware\Models\Category\Category;
 use Shopware\Models\Media\Media as MediaModel;
 use Shopware\Models\Price\Group;
@@ -356,7 +358,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		}
 		
 		if ($googleContentApi) {
-			$this->createGoogleContentProduct($product);
+			try {
+				$contentProduct = $this->createGoogleContentProduct($product);
+				$this->setProductFakePrice($contentProduct, $product);
+			} catch (\Google\Exception | \JsonException $e) {
+			}
 		}
 		
 		return $product;
@@ -464,7 +470,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		}
 		
 		if ($googleContentApi) {
-			$this->updateGoogleContentProduct($product);
+			try {
+				$contentProduct = $this->updateGoogleContentProduct($product);
+				$this->setProductFakePrice($contentProduct, $product);
+			} catch (\Google\Exception | \JsonException | ORMException | ApiException\OrmException $e) {
+			}
 		}
 		
 		return $product;
@@ -1906,6 +1916,26 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
+	 * @param array                                 $contentProduct
+	 * @param \Shopware\Models\Article\Article|null $product
+	 * @throws \Doctrine\ORM\ORMException
+	 * @throws \Doctrine\ORM\OptimisticLockException
+	 */
+	private function setProductFakePrice(array $contentProduct, ?ProductModel $product): void {
+		$response = $contentProduct['response'] ?? NULL;
+		$contentProduct = $contentProduct['contentProduct'] ?? NULL;
+		
+		if ($contentProduct && $response && $response->getId() && ($attribute = $this->getManager()->getRepository(Attribute::class)
+				->findOneBy([
+					'articleDetailId' => $product->getMainDetail()->getId()
+				]))) {
+				$this->getManager()->persist($attribute);
+				$attribute->setFakePrice($contentProduct->getPrice()->getValue());
+				$this->getManager()->flush($attribute);
+			}
+	}
+	
+	/**
 	 * @deprecated in 5.6, will be removed in 5.7 without a replacement
 	 *
 	 * Checks if the passed product image is already created
@@ -2635,21 +2665,25 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	
 	/**
 	 * @param \Shopware\Models\Article\Article $product
+	 * @return array
+	 * @throws \Google\Exception
+	 * @throws \JsonException
 	 */
-	private function createGoogleContentProduct(ProductModel $product) {
+	private function createGoogleContentProduct(ProductModel $product): array {
 		$googleContentProduct = new ContentProduct($product, $this->config, $this->shop->getId());
-		$response = $googleContentProduct->create();
 		
-		return $response->getId();
+		return $googleContentProduct->create();
 	}
 	
 	/**
 	 * @param \Shopware\Models\Article\Article $product
+	 * @return array
+	 * @throws \Google\Exception
+	 * @throws \JsonException
 	 */
-	private function updateGoogleContentProduct(ProductModel $product) {
+	private function updateGoogleContentProduct(ProductModel $product): array {
 		$googleContentProduct = new ContentProduct($product, $this->config, $this->shop->getId());
-		$response = $googleContentProduct->update();
 		
-		return $response->getId();
+		return $googleContentProduct->update();
 	}
 }
