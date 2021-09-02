@@ -168,8 +168,8 @@ class Eventhandlers {
 		$return = $hookArgs->getReturn();
 		$articles = $return['sArticles']??[];
 		foreach($articles as &$article) {
+			$this->setPseudoprice($article);
 			$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
-			$article = $this->setPseudoprice($article);
 		}
 		unset($article);
 		$return['sArticles'] = $articles;
@@ -181,6 +181,7 @@ class Eventhandlers {
 	 */
 	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs): void {
 		$article = $eventArgs->getReturn();
+		$this->setPseudoprice($article);
 		$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
 		$eventArgs->setReturn($article);
 	}
@@ -200,8 +201,8 @@ class Eventhandlers {
 	public function onAfterGetArticleById(\Enlight_Hook_HookArgs $hookArgs): void {
 		$article = $hookArgs->getReturn();
 		
+		$this->setPseudoprice($article);
 		$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
-		$article = $this->setPseudoprice($article);
 		
 		$hookArgs->setReturn($article);
 	}
@@ -370,9 +371,8 @@ class Eventhandlers {
 	
 	/**
 	 * @param $article
-	 * @return mixed
 	 */
-	public function setPseudoprice($article) {
+	public function setPseudoprice(&$article) {
 		if ($fakePrice = $article['attributes']['core']['fake_price'] ?? NULL) {
 			$article['has_pseudoprice'] = TRUE;
 			$article['pseudoprice'] = $fakePrice;
@@ -384,6 +384,5 @@ class Eventhandlers {
 			$article['pseudoprice_numeric'] = $this->getPriceNum($article['price_numeric'], $article['tax'], $discount);
 			$article['pseudopricePercent'] = $this->getFakePriceDiscountPercent($article['price_numeric'], $article['pseudoprice_numeric']);
 		}
-		return $article;
 	}
 }
