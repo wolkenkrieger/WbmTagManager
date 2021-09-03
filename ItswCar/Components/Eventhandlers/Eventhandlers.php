@@ -67,20 +67,14 @@ class Eventhandlers {
 	/**
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
-	public function onFrontRouterStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		$requestUri = $controllerEventArgs->getRequest()->getRequestUri();
-		$basePath = $controllerEventArgs->getRequest()->getBasePath();
-		
-		if ($basePath !== '') {
-			$redirectUri = mb_strcut($requestUri, mb_strlen($basePath));
-			$controllerEventArgs->getResponse()->setRedirect($redirectUri, 301);
-		}
+	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
+	
 	}
 	
 	/**
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
-	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
+	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
 		$requestUri = $controllerEventArgs->getRequest()->getRequestUri();
 		$queryPath = $controllerEventArgs->getRequest()->getPathInfo();
 		
@@ -104,9 +98,11 @@ class Eventhandlers {
 				}
 			}
 		}
-		$uri = implode('/', $queryPaths);
+		$uri = trim(implode('/', $queryPaths), '/'). '/';
 		
 		$matches = $controllerEventArgs->getSubject()->Router()->match($uri);
+		
+		/*
 		$requestQueryAction = NULL;
 		
 		if ($queryQuery && stripos($queryQuery, 'action=') !== FALSE) {
@@ -126,11 +122,20 @@ class Eventhandlers {
 				$controllerEventArgs->getRequest()->setQuery($queryQuery);
 			}
 		}
-		
+		*/
+		$controllerEventArgs->getRequest()->clearParams();
 		$controllerEventArgs->getRequest()->setParams($matches);
 		$controllerEventArgs->getRequest()->setControllerName($matches['controller']);
 		$controllerEventArgs->getRequest()->setModuleName($matches['module']);
 		$controllerEventArgs->getRequest()->setActionName($matches['action']);
+		
+		/*
+		$controllerEventArgs->getRequest()->setQuery(array_merge($controllerEventArgs->getRequest()->getQuery(), [
+			'module' => $matches['module'],
+			'controller' => $matches['controller'],
+			'action' => $matches['action']
+		]));
+		*/
 	}
 	
 	/**

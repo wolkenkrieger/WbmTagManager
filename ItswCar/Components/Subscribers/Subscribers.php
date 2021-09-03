@@ -93,7 +93,7 @@ class Subscribers implements SubscriberInterface {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		$this->eventHandler->onFrontRouterStartup($controllerEventArgs);
+		$this->eventHandler->onFrontRouteStartup($controllerEventArgs);
 	}
 	
 	/**
