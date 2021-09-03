@@ -185,6 +185,11 @@ class ItswCar extends Plugin {
 			'position' => 103,
 			'custom' => TRUE
 		]);
+		$service->delete('s_articles_attributes', 'position_1');
+		$service->delete('s_articles_attributes', 'position_2');
+		$service->delete('s_articles_attributes', 'position_3');
+		$service->delete('s_articles_attributes', 'position_4');
+		/*
 		$service->update('s_articles_attributes', 'position_1', 'string', [
 			'label' => 'Einbauposition 1',
 			'supportText' => '',
@@ -221,6 +226,7 @@ class ItswCar extends Plugin {
 			'position' => 106,
 			'custom' => TRUE
 		]);
+		*/
 		$service->update('s_articles_attributes', 'oe_numbers', 'string', [
 			'label' => 'OE-Nummern',
 			'supportText' => '',
@@ -237,7 +243,7 @@ class ItswCar extends Plugin {
 			'translatable' => FALSE,
 			'displayInBackend' => TRUE,
 			'position' => 108,
-			'custom' => TRUE
+			'custom' => FALSE
 		]);
 		
 		

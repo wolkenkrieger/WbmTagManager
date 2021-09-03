@@ -363,6 +363,10 @@ class ExtendedArticle extends Resource implements BatchInterface {
 				$this->setProductFakePrice($contentProduct, $product);
 			} catch (\Google\Exception | \JsonException $e) {
 			}
+		} else {
+			try {
+				$this->setProductFakePrice([], $product);
+			} catch (OptimisticLockException | ORMException $e) {}
 		}
 		
 		return $product;
@@ -372,7 +376,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 * @param string $number
 	 * @param array  $params
 	 * @return \Shopware\Models\Article\Article|null
+	 * @throws \Doctrine\DBAL\DBALException
 	 * @throws \Doctrine\ORM\NonUniqueResultException
+	 * @throws \Doctrine\ORM\ORMException
+	 * @throws \Doctrine\ORM\OptimisticLockException
+	 * @throws \Doctrine\ORM\TransactionRequiredException
 	 * @throws \Shopware\Components\Api\Exception\CustomValidationException
 	 * @throws \Shopware\Components\Api\Exception\NotFoundException
 	 * @throws \Shopware\Components\Api\Exception\OrmException
@@ -390,7 +398,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 * @param       $id
 	 * @param array $params
 	 * @return \Shopware\Models\Article\Article|null
+	 * @throws \Doctrine\DBAL\DBALException
 	 * @throws \Doctrine\ORM\NonUniqueResultException
+	 * @throws \Doctrine\ORM\ORMException
+	 * @throws \Doctrine\ORM\OptimisticLockException
+	 * @throws \Doctrine\ORM\TransactionRequiredException
 	 * @throws \Shopware\Components\Api\Exception\CustomValidationException
 	 * @throws \Shopware\Components\Api\Exception\NotFoundException
 	 * @throws \Shopware\Components\Api\Exception\OrmException
@@ -473,8 +485,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			try {
 				$contentProduct = $this->updateGoogleContentProduct($product);
 				$this->setProductFakePrice($contentProduct, $product);
-			} catch (\Google\Exception | \JsonException | ORMException | ApiException\OrmException $e) {
-			}
+			} catch (\Google\Exception | \JsonException | ORMException $e) {}
+		} else {
+			try {
+				$this->setProductFakePrice([], $product);
+			} catch (OptimisticLockException | ORMException $e) {}
 		}
 		
 		return $product;
@@ -672,12 +687,12 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * Helper function which creates a new product image with the passed media object.
-	 *
-	 * @return Image
+	 * @param \Shopware\Models\Article\Article $article
+	 * @param \Shopware\Models\Media\Media     $media
+	 * @return \Shopware\Models\Article\Image
+	 * @throws \Doctrine\ORM\ORMException
 	 */
-	public function createNewArticleImage(ProductModel $article, MediaModel $media)
-	{
+	public function createNewArticleImage(ProductModel $article, MediaModel $media): Image {
 		$image = new Image();
 		$image = $this->updateArticleImageWithMedia(
 			$article,
@@ -691,12 +706,12 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * Helper function to map the media data into an product image
-	 *
-	 * @return Image
+	 * @param \Shopware\Models\Article\Article $article
+	 * @param \Shopware\Models\Article\Image   $image
+	 * @param \Shopware\Models\Media\Media     $media
+	 * @return \Shopware\Models\Article\Image
 	 */
-	public function updateArticleImageWithMedia(ProductModel $article, Image $image, MediaModel $media)
-	{
+	public function updateArticleImageWithMedia(ProductModel $article, Image $image, MediaModel $media): Image {
 		$image->setMain(2);
 		$image->setMedia($media);
 		$image->setArticle($article);
@@ -708,13 +723,14 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * @param int   $articleId
-	 * @param array $translations
-	 *
-	 * @throws ApiException\CustomValidationException
+	 * @param $articleId
+	 * @param $translations
+	 * @throws \Doctrine\ORM\ORMException
+	 * @throws \Doctrine\ORM\OptimisticLockException
+	 * @throws \Doctrine\ORM\TransactionRequiredException
+	 * @throws \Shopware\Components\Api\Exception\CustomValidationException
 	 */
-	public function writeTranslations($articleId, $translations)
-	{
+	public function writeTranslations($articleId, $translations): void {
 		$whitelist = $this->getAttributeProperties();
 		array_push(
 			$whitelist,
@@ -751,8 +767,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 *
 	 * {@inheritdoc}
 	 */
-	public function getIdByData($data)
-	{
+	public function getIdByData($data)	{
 		$id = null;
 		
 		if (isset($data['id'])) {
@@ -779,38 +794,32 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * @return Variant
+	 * @return mixed|object|\Shopware\Components\Api\Resource\Variant|null
 	 */
-	protected function getVariantResource()
-	{
+	protected function getVariantResource()	{
 		return $this->getContainer()->get('shopware.api.variant');
 	}
 	
 	/**
-	 * @return Translation
+	 * @return mixed|object|\Shopware\Components\Api\Resource\Translation|null
 	 */
-	protected function getTranslationResource()
-	{
+	protected function getTranslationResource()	{
 		return $this->getContainer()->get('shopware.api.translation');
 	}
 	
 	/**
-	 * @return Media
+	 * @return mixed|object|null
 	 */
-	protected function getMediaResource()
-	{
+	protected function getMediaResource() {
 		return $this->getContainer()->get('shopware.api.media');
 	}
 	
 	/**
-	 * Selects the configured product configurator set and the assigned
-	 * configurator groups of the set.
-	 * The groups are sorted by the position value.
-	 *
-	 * @param int $articleId
+	 * @param $articleId
+	 * @return mixed
+	 * @throws \Exception
 	 */
-	protected function getArticleConfiguratorSet($articleId)
-	{
+	protected function getArticleConfiguratorSet($articleId) {
 		$builder = $this->getManager()->createQueryBuilder();
 		$builder->select(['configuratorSet', 'groups'])
 			->from(Configurator\Set::class, 'configuratorSet')
@@ -824,8 +833,6 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * Selects all images of the main variant of the passed product id.
-	 * The images are sorted by their position value.
 	 * @param int $articleId
 	 * @return array
 	 * @throws \Exception
@@ -844,14 +851,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * Selects all configured download files for the passed product id.
-	 *
-	 * @param int $articleId
-	 *
+	 * @param $articleId
 	 * @return array
+	 * @throws \Exception
 	 */
-	protected function getArticleDownloads($articleId)
-	{
+	protected function getArticleDownloads($articleId): array {
 		$builder = $this->getManager()->createQueryBuilder();
 		$builder->select(['downloads'])
 			->from(Download::class, 'downloads')
@@ -863,15 +867,12 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * Helper function which selects all configured links
-	 * for the passed product id.
-	 *
-	 * @param int $articleId
-	 *
+	 * @param $articleId
 	 * @return array
+	 * @throws \Exception
+	 * @throws \Exception
 	 */
-	protected function getArticleLinks($articleId)
-	{
+	protected function getArticleLinks($articleId): array {
 		$builder = $this->getManager()->createQueryBuilder();
 		$builder->select(['links'])
 			->from(Link::class, 'links')
@@ -1916,23 +1917,41 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * @param array                                 $contentProduct
+	 * @param array|null                            $contentProduct
 	 * @param \Shopware\Models\Article\Article|null $product
 	 * @throws \Doctrine\ORM\ORMException
 	 * @throws \Doctrine\ORM\OptimisticLockException
 	 */
-	private function setProductFakePrice(array $contentProduct, ?ProductModel $product): void {
+	private function setProductFakePrice(?array $contentProduct, ?ProductModel $product): void {
 		$response = $contentProduct['response'] ?? NULL;
 		$contentProduct = $contentProduct['contentProduct'] ?? NULL;
+		$attribute = $this->getManager()->getRepository(Attribute::class)
+			->findOneBy([
+				'articleDetailId' => $product->getMainDetail()->getId()
+			]);
 		
-		if ($contentProduct && $response && $response->getId() && ($attribute = $this->getManager()->getRepository(Attribute::class)
-				->findOneBy([
-					'articleDetailId' => $product->getMainDetail()->getId()
-				]))) {
-				$this->getManager()->persist($attribute);
-				$attribute->setFakePrice($contentProduct->getPrice()->getValue());
-				$this->getManager()->flush($attribute);
+		if ($attribute) {
+			$productPrice = 0;
+			
+			foreach($product->getMainDetail()->getPrices() as $price) {
+				if ($price->getCustomerGroup()->getKey() === 'EK') {
+					$productPrice = $price->getPrice();
+					break;
+				}
 			}
+			
+			$productPrice *= (($product->getTax()->getTax() + 100) / 100);
+			
+			if ($contentProduct && $response && $response->getId()) {
+				$fakePrice = $contentProduct->getPrice()->getValue();
+			} else {
+				$fakePrice = $productPrice * $this->getPriceFactor();
+			}
+			
+			$this->getManager()->persist($attribute);
+			$attribute->setFakePrice($fakePrice);
+			$this->getManager()->flush($attribute);
+		}
 	}
 	
 	/**
@@ -2685,5 +2704,12 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		$googleContentProduct = new ContentProduct($product, $this->config, $this->shop->getId());
 		
 		return $googleContentProduct->update();
+	}
+	
+	/**
+	 * @return float
+	 */
+	private function getPriceFactor(): float {
+		return ((float)rand() / (float)getrandmax()) + 1.1111;
 	}
 }
