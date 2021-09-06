@@ -63,7 +63,7 @@ class ContentProduct {
 			$productImageUrls[] = $this->mediaService->getUrl($image->getMedia()->getPath());
 		}
 		
-		$productAvailability = $this->product->getMainDetail()->getInStock()? 'auf Lager' : 'nicht auf Lager';
+		$productAvailability = $this->product->getMainDetail()->getInStock()? 'auf_Lager' : 'nicht_auf_Lager';
 		
 		$productPrice = 0;
 		$discount = 0;
@@ -125,7 +125,7 @@ class ContentProduct {
 		$product->setGoogleProductCategory('Fahrzeuge & Teile > Fahrzeugersatzteile & -zubehör');
 		$product->setGtin((string)$this->product->getMainDetail()->getEan());
 		$product->setMpn($productMpn);
-		//$product->setIdentifierExists(!$this->product->getMainDetail()->getEan()?'nein':'ja');
+		//wiesel$product->setIdentifierExists(!$this->product->getMainDetail()->getEan()?'nein':'ja');
 		
 		$price = new Price();
 		$price->setValue(sprintf('%.2f', $fakePrice));
