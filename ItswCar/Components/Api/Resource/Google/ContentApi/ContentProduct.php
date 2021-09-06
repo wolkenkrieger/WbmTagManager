@@ -63,7 +63,7 @@ class ContentProduct {
 			$productImageUrls[] = $this->mediaService->getUrl($image->getMedia()->getPath());
 		}
 		
-		$productAvailability = $this->product->getMainDetail()->getInStock()? 'auf_Lager' : 'nicht_auf_Lager';
+		$productAvailability = $this->product->getMainDetail()->getInStock()? 'auf Lager' : 'nicht auf Lager';
 		
 		$productPrice = 0;
 		$discount = 0;
