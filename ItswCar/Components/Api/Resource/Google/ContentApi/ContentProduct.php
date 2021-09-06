@@ -13,6 +13,8 @@ use Google\Service\ShoppingContent\Product;
 use Google\Service\ShoppingContent\Price;
 use Google\Service\ShoppingContent\ProductShipping;
 use Google\Service\ShoppingContent\ProductShippingWeight;
+use Google_Service_ShoppingContent_Price;
+use Google_Service_ShoppingContent_ProductShipping;
 use ItswCar\Components\Api\Resource\Google\ContentApi\ContentSession;
 use Shopware\Models\Article\Article as ProductModel;
 
@@ -123,7 +125,7 @@ class ContentProduct {
 		$product->setGoogleProductCategory('Fahrzeuge & Teile > Fahrzeugersatzteile & -zubehör');
 		$product->setGtin((string)$this->product->getMainDetail()->getEan());
 		$product->setMpn($productMpn);
-		$product->setIdentifierExists(!$this->product->getMainDetail()->getEan()?'nein':'ja');
+		//$product->setIdentifierExists(!$this->product->getMainDetail()->getEan()?'nein':'ja');
 		
 		$price = new Price();
 		$price->setValue(sprintf('%.2f', $fakePrice));
@@ -134,18 +136,19 @@ class ContentProduct {
 		$discountPrice->setValue(sprintf('%.2f', $discountProductPrice));
 		$discountPrice->setCurrency('EUR');
 		$product->setSalePrice($discountPrice);
-		/*
+		
 		$shippingPrice = new Google_Service_ShoppingContent_Price();
-		$shippingPrice->setValue('0.99');
-		$shippingPrice->setCurrency('USD');
+		$shippingPrice->setValue('0');
+		$shippingPrice->setCurrency('EUR');
 		
 		$shipping = new Google_Service_ShoppingContent_ProductShipping();
 		$shipping->setPrice($shippingPrice);
-		$shipping->setCountry('US');
-		$shipping->setService('Standard shipping');
+		$shipping->setCountry('DE');
+		$shipping->setService('DHL');
 		
 		$product->setShipping([$shipping]);
 		
+		/*
 		$shippingWeight =
 			new Google_Service_ShoppingContent_ProductShippingWeight();
 		$shippingWeight->setValue(200);
