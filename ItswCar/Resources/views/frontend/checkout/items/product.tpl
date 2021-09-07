@@ -34,7 +34,6 @@
                 {s name="CART_ITEM_SELECTED_CAR" namespace="itsw/checkout"}Gewähltes Fahrzeug:{/s} {$sBasketItem.__s_order_basket_attributes_car_display}
             </p>
             {/if}
-            {debug}
         {/block}
 
         {* Product delivery information *}
