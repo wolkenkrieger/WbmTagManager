@@ -59,6 +59,7 @@
                 dataType: 'json',
                 cache: true
             }).done(function (response) {
+                console.log(response);
                 if (response.success === true) {
                     me.$el.html(response.data).prop('disabled', false).select2({
                         allowClear: false,

@@ -15,21 +15,21 @@ use ItswCar\Models\Car;
 use ItswCar\Models\KbaCodes;
 use Shopware\Components\DependencyInjection\Container;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Components\Logger as PluginLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\HttpFoundation\Cookie;
 
 class Services {
-	protected $container;
-	protected $modelManager;
-	protected $pluginLogger;
+	protected Container $container;
+	protected ModelManager $modelManager;
+	protected PluginLogger $pluginLogger;
 	protected $front;
 	protected $basePath;
 	protected $cache;
 	protected $session;
-	protected $shopId = 1;
-	
-	protected $rootCategoryId = 5;
+	protected int $shopId = 1;
+	protected int $rootCategoryId = 5;
 	
 	/**
 	 * Services constructor.
@@ -40,12 +40,23 @@ class Services {
 		$this->container = $container;
 		$this->modelManager = $modelManager;
 		$this->pluginLogger = $this->container->get('pluginlogger');
-		$this->front = $this->container->get('front');
 		$this->cache = $this->container->get('shopware.cache_manager');
 		
 		if ($this->container->initialized('shop')) {
 			$this->basePath = $this->container->get('shop')->getBasePath();
 			$this->shopId = $this->container->get('shop')->getId();
+		}
+		
+		if ($this->container->initialized('front')) {
+			$this->front = $this->container->get('front');
+		} else {
+			$this->front = NULL;
+		}
+		
+		if ($this->container->initialized('session')) {
+			$this->session = $this->container->get('session');
+		} else {
+			$this->session = NULL;
 		}
 		
 		if ($this->basePath === null || $this->basePath === '') {
@@ -84,10 +95,9 @@ class Services {
 	/**
 	 * @param array  $array
 	 * @param string $key
-	 * @param string $format
 	 * @return mixed
 	 */
-	public function validate(array $array, string $key, string $format = 'string') {
+	public function validate(array $array, string $key) {
 		if (!isset($array[$key])) {
 			throw new \RuntimeException(sprintf("column not found: %s", $key));
 		}
@@ -117,6 +127,8 @@ class Services {
 		if (property_exists($this, $property)) {
 			return $this->$property;
 		}
+		
+		return NULL;
 	}
 	
 	/**
@@ -130,6 +142,8 @@ class Services {
 			
 			return $this->$property;
 		}
+		
+		return NULL;
 	}
 	
 	/**
@@ -141,31 +155,44 @@ class Services {
 	}
 	
 	/**
-	 * @return mixed
+	 * @return \Enlight_Controller_Plugins_ViewRenderer_Bootstrap|\Enlight_Plugin_Bootstrap|false
 	 */
 	public function setNoRender() {
-		return $this->container->get('front')->Plugins()->ViewRenderer()->setNoRender();
+		if ($this->isFront()) {
+			return $this->front->Plugins()->ViewRenderer()->setNoRender();
+		}
+		
+		return FALSE;
 	}
 	
 	/**
-	 * @return mixed
+	 * @return \Enlight_Controller_Plugins_ViewRenderer_Bootstrap|\Enlight_Plugin_Bootstrap|false
 	 */
 	public function setNeverRender() {
-		return $this->container->get('front')->Plugins()->ViewRenderer()->setNeverRender();
+		
+		if ($this->isFront()) {
+			return $this->front->Plugins()->ViewRenderer()->setNeverRender();
+		}
+		
+		return FALSE;
 	}
 	
 	/**
 	 * @return mixed
 	 */
 	public function setJsonRender() {
-		return $this->container->get('front')->Plugins()->Json()->setRenderer();
+		if ($this->isFront()) {
+			return $this->front->Plugins()->Json()->setRenderer();
+		}
+		
+		return FALSE;
 	}
 	
 	/**
 	 * @param string $string
 	 * @return string
 	 */
-	public function getCleanedStringForUrl($string = ''):string {
+	public function getCleanedStringForUrl(string $string = ''):string {
 		$string = mb_strtolower(trim($string));
 		$umlauts = ['/ß/', '/Ä/', '/Ö/', '/Ü/', '/ä/', '/ö/', '/ü/'];
 		$umlautsReplacements = ['sz', 'Ae', 'Oe', 'Ue', 'ae', 'oe', 'ue'];
@@ -346,7 +373,7 @@ class Services {
 		if ($dataEncoded = json_encode($data, JSON_THROW_ON_ERROR)) {
 			$expire = new \DateTime();
 			$expire->modify('+7 day');
-			$this->front->Response()->headers->setCookie(
+			Shopware()->Front()->Response()->headers->setCookie(
 				new Cookie(
 					'itsw_cache',
 					$dataEncoded,
@@ -368,11 +395,11 @@ class Services {
 	 * @return array
 	 */
 	public function getSessionData(bool $full = FALSE): array {
-		if (!is_object($this->session)) {
+		if (is_null($this->session)) {
 			$this->session = $this->container->get('session');
 		}
 		
-		if ($cookieData = $this->front->Request()->getCookie('itsw_cache')) {
+		if ($cookieData = Shopware()->Front()->Request()->getCookie('itsw_cache')) {
 			try {
 				$sessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR);
 				$this->session->offsetSet('itsw-session-data', $sessionData);
@@ -391,14 +418,14 @@ class Services {
 			$sessionData = $this->session->offsetGet('itsw-session-data');
 			if ($full) {
 				return $sessionData;
-			} else {
-				return [
-					'manufacturer' => $sessionData['manufacturer'],
-					'model' => $sessionData['model'],
-					'type' => $sessionData['type'],
-					'car' => $sessionData['car']??NULL
-				];
 			}
+			
+			return [
+				'manufacturer' => $sessionData['manufacturer'],
+				'model' => $sessionData['model'],
+				'type' => $sessionData['type'],
+				'car' => $sessionData['car']??NULL
+			];
 		}
 		
 		return [];
@@ -588,10 +615,7 @@ class Services {
 	 */
 	public function getServiceMode(): bool {
 		$config = $this->container->get('config');
-		if (!empty($config->setOffline) && strpos($config->offlineIp, $this->front->Request()->getClientIp()) === false) {
-			return TRUE;
-		}
-		return FALSE;
+		return $this->isFront() && !empty($config->setOffline) && (strpos($config->offlineIp, $this->front->Request()->getClientIp()) === false);
 	}
 	
 	/**
@@ -599,11 +623,7 @@ class Services {
 	 */
 	public function getDevelopmentMode(): bool {
 		$environment = $this->container->getParameter('kernel.environment');
-		
-		if ($environment === 'dev') {
-			return TRUE;
-		}
-		return FALSE;
+		return ($environment === 'dev');
 	}
 	
 	/**
@@ -615,5 +635,12 @@ class Services {
 		}
 		
 		return 0;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function isFront(): bool {
+		return !is_null($this->front);
 	}
 }

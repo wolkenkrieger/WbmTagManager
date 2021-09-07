@@ -16,8 +16,11 @@ use ItswCar\Components\Eventhandlers\Eventhandlers as Eventhandler;
 use ItswCar\Components\Eventhandlers\CategoryConditionHandler;
 use ItswCar\Components\Services\Services;
 use Shopware\Components\DependencyInjection\Container;
+use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Plugin\Configuration\CachedReader;
 use Shopware\Models\Shop\Shop;
+use Shopware\Bundle\AttributeBundle\Service\DataLoader;
+use Shopware\Bundle\AttributeBundle\Service\DataPersister;
 
 
 class Subscribers implements SubscriberInterface {
@@ -25,9 +28,12 @@ class Subscribers implements SubscriberInterface {
 	protected Eventhandler $eventHandler;
 	protected Container $container;
 	protected Services $service;
+	protected ModelManager $modelManager;
 	protected string $pluginDir;
 	protected array $config;
 	protected Shop $shop;
+	protected DataLoader $attributeLoader;
+	protected DataPersister $attributePersister;
 	
 	/**
 	 * @param \Shopware\Components\DependencyInjection\Container $container
@@ -35,9 +41,16 @@ class Subscribers implements SubscriberInterface {
 	 * @param string                                             $pluginDir
 	 * @param string                                             $pluginName
 	 */
-	public function __construct(Container $container, Services $service, string $pluginDir, string $pluginName) {
+	public function __construct(Container $container,
+	                            Services $service,
+	                            ModelManager $modelManager,
+	                            DataLoader $attributeLoader,
+	                            DataPersister $attributePersister,
+	                            string $pluginDir,
+	                            string $pluginName)	{
 		$this->container = $container;
 		$this->service = $service;
+		$this->modelManager = $modelManager;
 		$this->pluginDir = $pluginDir;
 		
 		if ($this->container->initialized('shop')) {
@@ -47,7 +60,7 @@ class Subscribers implements SubscriberInterface {
 		}
 		
 		$this->config = $this->container->get(CachedReader::class)->getByPluginName($pluginName, $this->shop->getID());
-		$this->eventHandler = new Eventhandler($service, $pluginDir, $this->config);
+		$this->eventHandler = new Eventhandler($service, $modelManager, $attributeLoader, $attributePersister, $pluginDir, $this->config);
 	}
 	
 	/**
@@ -69,8 +82,8 @@ class Subscribers implements SubscriberInterface {
 			//'Enlight_Controller_Action_PreDispatch_Frontend'                => 'onPreDispatchFrontend',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
-			'Enlight_Controller_Action_PostDispatchSecure_Backend_Form'     => 'onPostDispatchSecureBackendForm'
-		
+			'Enlight_Controller_Action_PostDispatchSecure_Backend_Form'     => 'onPostDispatchSecureBackendForm',
+			'Shopware_Modules_Basket_UpdateCartItems_Updated'               => 'onBasketUpdateCartItemsUpdated',
 		];
 	}
 	
@@ -164,9 +177,16 @@ class Subscribers implements SubscriberInterface {
 	}
 	
 	/**
-	 * @param \Enlight_Controller_EventArgs $eventArgs
+	 * @param \Enlight_Controller_ActionEventArgs $eventArgs
 	 */
 	public function onPostDispatchSecureBackendForm(\Enlight_Controller_ActionEventArgs $eventArgs): void {
 		$this->eventHandler->onPostDispatchSecureBackendForm($eventArgs);
+	}
+	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 */
+	public function onBasketUpdateCartItemsUpdated(\Enlight_Event_EventArgs $eventArgs): void {
+		$this->eventHandler->onBasketUpdateCartItemsUpdated($eventArgs);
 	}
 }

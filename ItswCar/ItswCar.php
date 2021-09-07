@@ -149,6 +149,7 @@ class ItswCar extends Plugin {
 	 */
 	protected function createAttributes(): void {
 		$service = Shopware()->Container()->get('shopware_attribute.crud_service');
+		
 		$service->update('s_categories_attributes', 'ebay_category_id', 'float', [
 			'label' => 'eBay Category ID',
 			'supportText' => '',
@@ -158,6 +159,7 @@ class ItswCar extends Plugin {
 			'position' => 100,
 			'custom' => TRUE
 		]);
+		
 		$service->update('s_articles_attributes', 'afterbuy_id', 'float', [
 			'label' => 'Afterbuy ID',
 			'supportText' => '',
@@ -167,6 +169,7 @@ class ItswCar extends Plugin {
 			'position' => 100,
 			'custom' => TRUE
 		]);
+		
 		$service->update('s_articles_attributes', 'google_product_category_id', 'float', [
 			'label' => 'Google Product Category',
 			'supportText' => '',
@@ -176,6 +179,7 @@ class ItswCar extends Plugin {
 			'position' => 102,
 			'custom' => TRUE
 		]);
+		
 		$service->update('s_articles_attributes', 'afterbuy_link', 'string', [
 			'label' => 'Afterbuy Link',
 			'supportText' => '',
@@ -185,48 +189,7 @@ class ItswCar extends Plugin {
 			'position' => 103,
 			'custom' => TRUE
 		]);
-		$service->delete('s_articles_attributes', 'position_1');
-		$service->delete('s_articles_attributes', 'position_2');
-		$service->delete('s_articles_attributes', 'position_3');
-		$service->delete('s_articles_attributes', 'position_4');
-		/*
-		$service->update('s_articles_attributes', 'position_1', 'string', [
-			'label' => 'Einbauposition 1',
-			'supportText' => '',
-			'helpText' => '',
-			'translatable' => FALSE,
-			'displayInBackend' => TRUE,
-			'position' => 104,
-			'custom' => TRUE
-		]);
-		$service->update('s_articles_attributes', 'position_2', 'string', [
-			'label' => 'Einbauposition 2',
-			'supportText' => '',
-			'helpText' => '',
-			'translatable' => FALSE,
-			'displayInBackend' => TRUE,
-			'position' => 105,
-			'custom' => TRUE
-		]);
-		$service->update('s_articles_attributes', 'position_3', 'string', [
-			'label' => 'Einbauposition 3',
-			'supportText' => '',
-			'helpText' => '',
-			'translatable' => FALSE,
-			'displayInBackend' => TRUE,
-			'position' => 105,
-			'custom' => TRUE
-		]);
-		$service->update('s_articles_attributes', 'position_4', 'string', [
-			'label' => 'Einbauposition 4',
-			'supportText' => '',
-			'helpText' => '',
-			'translatable' => FALSE,
-			'displayInBackend' => TRUE,
-			'position' => 106,
-			'custom' => TRUE
-		]);
-		*/
+		
 		$service->update('s_articles_attributes', 'oe_numbers', 'string', [
 			'label' => 'OE-Nummern',
 			'supportText' => '',
@@ -236,6 +199,7 @@ class ItswCar extends Plugin {
 			'position' => 107,
 			'custom' => TRUE
 		]);
+		
 		$service->update('s_articles_attributes', 'fake_price', 'float', [
 			'label' => 'Fake Preis',
 			'supportText' => '',
@@ -246,14 +210,82 @@ class ItswCar extends Plugin {
 			'custom' => FALSE
 		]);
 		
+		$service->update('s_order_basket_attributes', 'tecdoc_id', 'float', [
+			'label' => 'Tecdoc-ID',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'custom' => FALSE
+		]);
+		
+		$service->update('s_order_basket_attributes', 'car_display', 'string', [
+			'label' => 'Fahrzeug',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'custom' => FALSE
+		]);
+		
+		$service->update('s_order_details_attributes', 'tecdoc_id', 'float', [
+			'label' => 'Tecdoc-ID',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'custom' => FALSE
+		]);
+		
+		$service->update('s_order_details_attributes', 'car_display', 'string', [
+			'label' => 'Fahrzeug',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'custom' => FALSE
+		]);
+		
+		if ($service->get('s_order_attributes', 'tecdoc_id')) {
+			$service->delete('s_order_attributes', 'tecdoc_id');
+		}
+		
+		if ($service->get('s_order_attributes', 'car_display')) {
+			$service->delete('s_order_attributes', 'car_display');
+		}
+		
+		if ($service->get('s_articles_attributes', 'position_1')) {
+			$service->delete('s_articles_attributes', 'position_1');
+		}
+		
+		if ($service->get('s_articles_attributes', 'position_2')) {
+			$service->delete('s_articles_attributes', 'position_2');
+		}
+		
+		if ($service->get('s_articles_attributes', 'position_3')) {
+			$service->delete('s_articles_attributes', 'position_3');
+		}
+		
+		if ($service->get('s_articles_attributes', 'position_4')) {
+			$service->delete('s_articles_attributes', 'position_4');
+		}
+		
+		if ($service->get('s_articles_attributes', 'position_aggregated')) {
+			$service->delete('s_articles_attributes', 'position_aggregated');
+		}
 		
 		$metaDataCache  = Shopware()->Models()->getConfiguration()->getMetadataCacheImpl();
 		$metaDataCache->deleteAll();
 		
 		Shopware()->Models()->generateAttributeModels([
 			's_categories_attributes',
-			's_articles_attributes'
+			's_articles_attributes',
+			's_order_basket_attributes',
+			's_order_details_attributes',
+			's_order_attributes'
 		]);
+		
+		Shopware()->Models()->regenerateProxies();
 	}
 	
 	/**

@@ -12,6 +12,9 @@
         <service id="itswcar.subscribers" class="%itswcar.subscribers.class%">
             <argument type="service" id="service_container" />
             <argument type="service" id="itswcar.services" />
+            <argument type="service" id="models" />
+            <argument type="service" id="shopware_attribute.data_loader" />
+            <argument type="service" id="shopware_attribute.data_persister" />
             <argument>%itsw_car.plugin_dir%</argument>
             <argument>%itsw_car.plugin_name%</argument>
             <tag name="shopware.event_subscriber" />

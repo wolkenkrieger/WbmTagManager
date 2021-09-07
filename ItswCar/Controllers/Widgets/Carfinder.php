@@ -41,12 +41,13 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	}
 	
 	/**
-	 *
+	 * @throws \JsonException
 	 */
 	public function getManufacturerAction(): void {
 		try {
 			$this->Request()->setHeader('Content-Type', 'application/json');
-			$this->service->setNeverRender();
+			$this->service->setNoRender();
+			$this->View()->setTemplate(NULL);
 			$manufacturers = $this->service->getManufacturersForCarfinder();
 			$topBrands = [];
 			$allBrands = [];
@@ -82,7 +83,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			];
 		}
 		
-		$this->Response()->setBody(json_encode($result));
+		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
 	}
 	
 	/**

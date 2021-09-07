@@ -10,23 +10,44 @@
 
 namespace ItswCar\Components\Eventhandlers;
 
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\ORMException;
 use InvalidArgumentException;
 use ItswCar\Components\Services\Services;
+use Shopware\Bundle\AttributeBundle\Service\DataLoader;
+use Shopware\Bundle\AttributeBundle\Service\DataPersister;
+use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Attribute\OrderBasket;
+use Shopware\Models\Order\Basket;
 
 class Eventhandlers {
 	protected Services $service;
 	protected string $pluginDir;
 	protected array $config;
+	private ModelManager $modelManager;
+	private DataLoader $attributeLoader;
+	private DataPersister $attributePersister;
 	
 	/**
-	 * @param \ItswCar\Components\Services\Services $service
-	 * @param                                       $pluginDir
-	 * @param                                       $config
+	 * @param \ItswCar\Components\Services\Services                  $service
+	 * @param \Shopware\Components\Model\ModelManager                $modelManager
+	 * @param \Shopware\Bundle\AttributeBundle\Service\DataLoader    $attributeLoader
+	 * @param \Shopware\Bundle\AttributeBundle\Service\DataPersister $attributePersister
+	 * @param string                                                 $pluginDir
+	 * @param array                                                  $config
 	 */
-	public function __construct(Services $service, $pluginDir, $config) {
+	public function __construct(Services $service,
+	                            ModelManager $modelManager,
+	                            DataLoader $attributeLoader,
+	                            DataPersister $attributePersister,
+	                            string $pluginDir,
+	                            array $config) {
 		$this->service = $service;
 		$this->pluginDir = $pluginDir;
 		$this->config = $config;
+		$this->modelManager = $modelManager;
+		$this->attributeLoader = $attributeLoader;
+		$this->attributePersister = $attributePersister;
 	}
 	
 	/**
@@ -377,7 +398,7 @@ class Eventhandlers {
 	/**
 	 * @param $article
 	 */
-	public function setPseudoprice(&$article) {
+	public function setPseudoprice(&$article): void {
 		if ($fakePrice = $article['attributes']['core']['fake_price'] ?? NULL) {
 			$article['has_pseudoprice'] = TRUE;
 			$article['pseudoprice'] = $fakePrice;
@@ -388,6 +409,73 @@ class Eventhandlers {
 			$article['pseudoprice'] = $this->getPrice($article['price_numeric'], $article['tax'], $discount);
 			$article['pseudoprice_numeric'] = $this->getPriceNum($article['price_numeric'], $article['tax'], $discount);
 			$article['pseudopricePercent'] = $this->getFakePriceDiscountPercent($article['price_numeric'], $article['pseudoprice_numeric']);
+		}
+	}
+	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 */
+	public function onBasketUpdateCartItemsUpdated(\Enlight_Event_EventArgs $eventArgs): void {
+		$sessionData = $this->service->getSessionData();
+		
+		if (empty($sessionData) || is_null($sessionData['car'])) {
+			return;
+		}
+		
+		try {
+			$query = $this->modelManager->getRepository(\ItswCar\Models\Car::class)->getCarsQuery([
+				'select' => 'cars',
+				'conditions' => [
+					'cars.tecdocId' => $sessionData['car']
+				]
+			]);
+			
+			$query->useQueryCache(TRUE);
+			$query->setMaxResults(1);
+			
+			if (is_null($car = $query->getOneOrNullResult())) {
+				return;
+			}
+			
+			$carDisplay = sprintf('%s %s %s', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay());
+		} catch (NonUniqueResultException $nonUniqueResultException) {
+			return;
+		}
+		
+		$ids = [];
+		
+		foreach($eventArgs->get('updateableItems') as $item) {
+			$id = $item->getId();
+			
+			if (in_array($id, $ids, TRUE)) {
+				continue;
+			}
+			
+			array_push($ids, $id);
+			
+			if (is_object($basketEntity = $this->modelManager->getRepository(Basket::class)->find($id)) &&
+				is_null($basketEntity->getAttribute()->getTecdocId())) {
+				
+				try {
+					$orderBasketAttributeEntity = $this->modelManager->getRepository(OrderBasket::class)->findOneBy([
+						'orderBasketId' => $basketEntity->getId()
+					]);
+					
+					if (is_object($orderBasketAttributeEntity)) {
+						$orderBasketAttributeEntity->setTecdocId($sessionData['car']);
+						$orderBasketAttributeEntity->setCarDisplay($carDisplay);
+						$this->modelManager->persist($orderBasketAttributeEntity);
+					} else {
+						$orderBasketAttributeEntity = new OrderBasket();
+						$orderBasketAttributeEntity->setOrderBasketId($basketEntity->getId());
+						$orderBasketAttributeEntity->setTecdocId($sessionData['car']);
+						$orderBasketAttributeEntity->setCarDisplay($carDisplay);
+						$this->modelManager->persist($orderBasketAttributeEntity);
+						$basketEntity->setAttribute($orderBasketAttributeEntity);
+					}
+					$this->modelManager->flush();
+				} catch (ORMException $exception) {}
+			}
 		}
 	}
 }
