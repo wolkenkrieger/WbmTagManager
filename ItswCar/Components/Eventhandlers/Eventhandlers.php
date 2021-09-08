@@ -19,6 +19,7 @@ use Shopware\Bundle\AttributeBundle\Service\DataPersister;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Attribute\OrderBasket;
 use Shopware\Models\Order\Basket;
+use Shopware\Components\DependencyInjection\Container;
 
 class Eventhandlers {
 	protected Services $service;
@@ -27,8 +28,10 @@ class Eventhandlers {
 	private ModelManager $modelManager;
 	private DataLoader $attributeLoader;
 	private DataPersister $attributePersister;
+	protected Container $container;
 	
 	/**
+	 * @param \Shopware\Components\DependencyInjection\Container     $container
 	 * @param \ItswCar\Components\Services\Services                  $service
 	 * @param \Shopware\Components\Model\ModelManager                $modelManager
 	 * @param \Shopware\Bundle\AttributeBundle\Service\DataLoader    $attributeLoader
@@ -36,12 +39,14 @@ class Eventhandlers {
 	 * @param string                                                 $pluginDir
 	 * @param array                                                  $config
 	 */
-	public function __construct(Services $service,
+	public function __construct(Container $container,
+	                            Services $service,
 	                            ModelManager $modelManager,
 	                            DataLoader $attributeLoader,
 	                            DataPersister $attributePersister,
 	                            string $pluginDir,
 	                            array $config) {
+		$this->container = $container;
 		$this->service = $service;
 		$this->pluginDir = $pluginDir;
 		$this->config = $config;
@@ -227,8 +232,38 @@ class Eventhandlers {
 	public function onAfterGetArticleById(\Enlight_Hook_HookArgs $hookArgs): void {
 		$article = $hookArgs->getReturn();
 		
+		$titlePart = implode(' ', [
+			$article['ordernumber'],
+			(!in_array(mb_strtolower($article['supplierName']), [
+				'autoteile wiesel',
+				'atw',
+				'autoteile-wiesel'
+			]) ? implode(' ', [
+				$article['supplierName'],
+				$article['articleName']
+			]) : $article['articleName'])
+		]);
+		
 		$this->setPseudoprice($article);
+		
+		$article['seoTitle'] = implode(' ', [
+			$titlePart,
+			'- Jetzt Kaufen!'
+		]);
+		
+		$article['seoDescription'] = implode(' &star; ', [
+			sprintf('%s günstig kaufen', $titlePart),
+			sprintf('Sparen Sie jetzt bis zu %d%%', $article['pseudopricePercent']),
+			'Versandkostenfreie Lieferung in Deutschland'
+		]);
+		
 		$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
+		
+		if (empty($article['keywords'])) {
+			$article['keywords'] = $this->getKeywords($article['description_long']);
+		}
+		
+		//echo "<pre>"; var_dump($article); echo "</pre>"; die;
 		
 		$hookArgs->setReturn($article);
 	}
@@ -477,5 +512,75 @@ class Eventhandlers {
 				} catch (ORMException $exception) {}
 			}
 		}
+	}
+	
+	/**
+	 * @param string $source
+	 * @return string
+	 */
+	private function getKeywords(string $source): string {
+		$dom = new \DOMDocument();
+		$dom->loadHTML(mb_convert_encoding($source, 'HTML-ENTITIES', 'UTF-8'));
+		$badWords = explode(',', $this->container->get(\Shopware_Components_Config::class)->get('badwords'));
+		$words = [];
+		$listElements = $dom->getElementsByTagName('li');
+		
+		foreach($listElements as $listElement) {
+			$nodeValue = str_ireplace([
+				',',
+				';',
+				':'
+			], ' ', strip_tags(html_entity_decode($listElement->nodeValue, ENT_COMPAT | ENT_HTML401, 'UTF-8')));
+			
+			if ($this->isStopWord($nodeValue)) {
+				continue;
+			}
+			
+			$words = array_merge($words, explode(' ', $nodeValue));
+		}
+		
+		if (!is_null($oeElement = $dom->getElementById('description_oe'))) {
+			$nodeValue = str_ireplace([
+				',',
+				';',
+				':'
+			], ' ', strip_tags(html_entity_decode($oeElement->nodeValue, ENT_COMPAT | ENT_HTML401, 'UTF-8')));
+			
+			$words = array_merge($words, explode(' ', $nodeValue));
+		}
+		
+		$words = array_count_values(array_diff($words, $badWords));
+		foreach (array_keys($words) as $word) {
+			if (strlen((string)$word) < 2) {
+				unset($words[$word]);
+			}
+		}
+		arsort($words);
+		
+		return htmlspecialchars(
+			implode(', ', array_slice(array_keys($words), 0, 20)),
+			ENT_QUOTES,
+			'UTF-8',
+			false
+		);
+	}
+	
+	/**
+	 * @param string $source
+	 * @return bool
+	 */
+	private function isStopWord(string $source): bool {
+		$stopWords = [
+			'qualität',
+			'lieferumfang'
+		];
+		
+		foreach($stopWords as $stopWord) {
+			if (mb_stripos($source, $stopWord) !== FALSE || stripos($source, $stopWord) !== FALSE) {
+				return TRUE;
+			}
+		}
+		
+		return FALSE;
 	}
 }

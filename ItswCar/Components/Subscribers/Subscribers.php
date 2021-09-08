@@ -60,7 +60,7 @@ class Subscribers implements SubscriberInterface {
 		}
 		
 		$this->config = $this->container->get(CachedReader::class)->getByPluginName($pluginName, $this->shop->getID());
-		$this->eventHandler = new Eventhandler($service, $modelManager, $attributeLoader, $attributePersister, $pluginDir, $this->config);
+		$this->eventHandler = new Eventhandler($container, $service, $modelManager, $attributeLoader, $attributePersister, $pluginDir, $this->config);
 	}
 	
 	/**
