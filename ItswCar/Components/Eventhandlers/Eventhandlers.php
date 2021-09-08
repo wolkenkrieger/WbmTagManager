@@ -472,7 +472,7 @@ class Eventhandlers {
 				return;
 			}
 			
-			$carDisplay = sprintf('%s %s %s', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay());
+			$carDisplay = sprintf('%s %s %s (%d/%d - %d/%d)', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay(), $car->getBuildFromMonth(), $car->getBuildFromYear(), $car->getBuildToMonth(), $car->getBuildToYear());
 		} catch (NonUniqueResultException $nonUniqueResultException) {
 			return;
 		}
