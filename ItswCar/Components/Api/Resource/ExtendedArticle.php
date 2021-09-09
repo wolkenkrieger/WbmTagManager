@@ -633,6 +633,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			$media = $image->getMedia();
 			
 			$projectDir = $this->getContainer()->getParameter('shopware.app.rootdir');
+			
+			if (!\is_string($projectDir)) {
+				throw new \RuntimeException('Parameter shopware.app.rootDir has to be an string');
+			}
+			
 			if (!$force && $mediaService->has($projectDir . $media->getPath())) {
 				continue;
 			}
@@ -2555,6 +2560,9 @@ class ExtendedArticle extends Resource implements BatchInterface {
 					$image,
 					$media
 				);
+				
+				$image->setPosition($position);
+				++$position;
 			}
 			
 			$image->fromArray($imageData);
@@ -2575,8 +2583,6 @@ class ExtendedArticle extends Resource implements BatchInterface {
 				$this->createImageMappings($image, $product, $imageData['options']);
 			}
 		}
-		
-		unset($imageData);
 		
 		$hasMain = $this->getCollectionElementByProperty(
 			$images,
