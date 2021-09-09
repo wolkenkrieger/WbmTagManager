@@ -10,6 +10,8 @@
 
 namespace ItswCar\Components\Services;
 
+use Doctrine\ORM\AbstractQuery;
+use Doctrine\ORM\NonUniqueResultException;
 use ItswCar\Models\ArticleCarLinks;
 use ItswCar\Models\Car;
 use ItswCar\Models\KbaCodes;
@@ -370,6 +372,9 @@ class Services {
 			$data = $tmp;
 		}
 		
+		$data['description'] = (isset($data['car']) && $data['car']) ? $this->getCarDisplayForView((int)$data['car'], TRUE) : NULL;
+		$data['title'] = (isset($data['car']) && $data['car']) ? $this->getCarDisplayForView((int)$data['car']) : NULL;
+		
 		if ($dataEncoded = json_encode($data, JSON_THROW_ON_ERROR)) {
 			$expire = new \DateTime();
 			$expire->modify('+7 day');
@@ -409,7 +414,9 @@ class Services {
 					'manufacturer' => NULL,
 					'model' => NULL,
 					'type' => NULL,
-					'car' => NULL
+					'car' => NULL,
+					'description' => NULL,
+					'title' => NULL
 				]);
 			}
 		}
@@ -424,7 +431,9 @@ class Services {
 				'manufacturer' => $sessionData['manufacturer'],
 				'model' => $sessionData['model'],
 				'type' => $sessionData['type'],
-				'car' => $sessionData['car']??NULL
+				'car' => $sessionData['car']??NULL,
+				'description' => $sessionData['description']??NULL,
+				'title' => $sessionData['title']??NULL
 			];
 		}
 		
@@ -642,5 +651,34 @@ class Services {
 	 */
 	public function isFront(): bool {
 		return !is_null($this->front);
+	}
+	
+	/**
+	 * @param int  $tecdocId
+	 * @param bool $forDescription
+	 * @return string|null
+	 */
+	public function getCarDisplayForView(int $tecdocId, bool $forDescription = FALSE): ?string {
+		try {
+			$car = $this->modelManager->getRepository(Car::class)->getCarsQuery([
+				'select' => 'cars',
+				'conditions' => [
+					'cars.tecdocId' => $tecdocId
+				]
+			])
+				->getOneOrNullResult();
+			
+			if (is_object($car)) {
+				if ($forDescription) {
+					return sprintf('%s %s %s %d PS', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay(), $car->getPs());
+				} else {
+					return sprintf('%s %s %s - %d PS - %s ', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay(), $car->getPs(), $car->getBuildFrom()->format('Y'));
+				}
+			}
+		} catch (NonUniqueResultException $nonUniqueResultException) {
+		
+		}
+		
+		return NULL;
 	}
 }
