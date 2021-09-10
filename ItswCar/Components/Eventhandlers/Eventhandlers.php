@@ -91,7 +91,6 @@ class Eventhandlers {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		return;
 		$sessionData = $this->service->getSessionData();
 		$queryPath = $controllerEventArgs->getRequest()->getPathInfo();
 		if (!$queryPath || $queryPath === '/' || stripos($queryPath, 'carfinder') !== FALSE) {

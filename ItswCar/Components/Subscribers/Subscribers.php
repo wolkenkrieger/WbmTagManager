@@ -55,7 +55,6 @@ class Subscribers implements SubscriberInterface {
 		
 		$this->config = $this->container->get(CachedReader::class)->getByPluginName($pluginName, $this->shop->getID());
 		$this->eventHandler = new Eventhandler($container, $modelManager, $pluginDir, $this->config);
-		$this->service = $this->container->get('itswcar.services');
 	}
 	
 	/**
@@ -123,7 +122,7 @@ class Subscribers implements SubscriberInterface {
 	 */
 	public function onCollectConditionHandlers(): ?CategoryConditionHandler {
 		if ($this->container->initialized('shop')) {
-			return new CategoryConditionHandler($this->service);
+			return new CategoryConditionHandler($this->container->get('itswcar.services'));
 		}
 		
 		return NULL;

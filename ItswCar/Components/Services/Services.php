@@ -374,8 +374,6 @@ class Services {
 			'title'         => NULL
 		], $data);
 		
-		
-		
 		$data['description'] = $data['car'] ? $this->getCarDisplayForView((int)$data['car'], TRUE) : NULL;
 		$data['title'] = $data['car'] ? $this->getCarDisplayForView((int)$data['car']) : NULL;
 		
