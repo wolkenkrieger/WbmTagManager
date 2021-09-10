@@ -1,4 +1,7 @@
 <?php declare(strict_types=1);
+
+use ItswCar\Components\Services\Services;
+
 /**
  * Projekt: ITSW Car
  * Autor:   Rico Wunglück <development@itsw.dev>
@@ -10,7 +13,7 @@
 
 class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	
-	protected $service;
+	protected Services $service;
 	
 	
 	public function init(): void {
@@ -175,26 +178,24 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				
 			} else {
 				$sessionData = $this->service->getSessionData();
-				$carId = $typeId = $modelId = NULL;
 				
-				if (isset($sessionData['model']) && ((int)$sessionData['manufacturer'] === $manufacturerId)) {
-					$modelId = $sessionData['model'];
-					if (isset($sessionData['type'])) {
-						$typeId = $sessionData['type'];
-					}
+				if ($manufacturerId !== $sessionData['manufacturer']) {
+					$sessionData = array_merge($sessionData, [
+						'manufacturer'  => $manufacturerId,
+						'model'         => NULL,
+						'type'          => NULL,
+						'car'           => NULL
+					]);
 				}
 				
-				$result = [
+				$result = array_merge($sessionData, [
 					'success' => TRUE,
-					'data' => NULL,
-					'manufacturer' => $manufacturerId,
-					'model' => $modelId,
-					'type' => $typeId,
-					'car' => $carId
-				];
+					'data' => NULL
+				]);
 			}
 			
-			$this->service->setSessionData($result);
+			$this->service->setSessionData($sessionData);
+			
 		} catch (\Exception $e) {
 			$this->setLog($e);
 			
@@ -243,7 +244,11 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'car' => NULL
 			];
 			
-			$this->service->setSessionData($result);
+			$this->service->setSessionData([
+				'manufacturer' => $manufacturerId,
+				'model' => $modelId,
+				'type' => $typeId,
+				'car' => NULL]);
 		} catch (\Exception $e) {
 			$this->setLog($e);
 			
@@ -297,7 +302,11 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'type' => $typeId,
 				'car' => $tecdocId
 			];
-			$this->service->setSessionData($result);
+			$this->service->setSessionData([
+				'manufacturer' => $manufacturerId,
+				'model' => $modelId,
+				'type' => $typeId,
+				'car' => $tecdocId]);
 		} catch (\Exception $e) {
 			$this->setLog($e);
 			
@@ -411,7 +420,6 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'type' => $typeId,
 				'car' => NULL
 			];
-			
 		} catch (\Exception $e) {
 			$this->setLog($e);
 			
@@ -445,15 +453,11 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				$typeId = $ids['typeId'];
 			}
 			
-			$result = [
-				'success' => TRUE,
+			$this->service->setSessionData([
 				'manufacturer' => $manufacturerId,
 				'model' => $modelId,
 				'type' => $typeId,
-				'car' => $tecdocId
-			];
-			
-			$this->service->setSessionData($result);
+				'car' => $tecdocId]);
 			
 			$url = $this->service->getUrl([
 				'controller' => 'cat',
@@ -487,7 +491,11 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'car' => NULL
 			];
 			
-			$this->service->setSessionData($result);
+			$this->service->setSessionData([
+				'manufacturer' => NULL,
+				'model' => NULL,
+				'type' => NULL,
+				'car' => NULL]);
 			
 			if ($withRedirect) {
 				$url = $this->service->getUrl([
@@ -516,7 +524,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	 * @param \Exception $e
 	 */
 	private function setLog(\Exception $e): void {
-		$this->service->pluginLogger->addRecord($e->getMessage(), [
+		$this->service->pluginLogger->critical($e->getMessage(), [
 			'code' => $e->getCode(),
 			'file' => $e->getFile(),
 			'line' => $e->getLine(),

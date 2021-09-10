@@ -10,10 +10,12 @@
 
 namespace ItswCar\Components\Eventhandlers;
 
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\ORMException;
 use InvalidArgumentException;
 use ItswCar\Components\Services\Services;
+use ItswCar\Models\Car;
 use Shopware\Bundle\AttributeBundle\Service\DataLoader;
 use Shopware\Bundle\AttributeBundle\Service\DataPersister;
 use Shopware\Components\Model\ModelManager;
@@ -101,67 +103,64 @@ class Eventhandlers {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		$requestUri = $controllerEventArgs->getRequest()->getRequestUri();
+		$sessionData = $this->service->getSessionData();
 		$queryPath = $controllerEventArgs->getRequest()->getPathInfo();
-		
-		if (!$queryPath || $queryPath === '/') {
+		if (!$queryPath || $queryPath === '/' || stripos($queryPath, 'carfinder') !== FALSE) {
 			return;
 		}
 		
-		$queryQuery = parse_url($requestUri, PHP_URL_QUERY);
-		$queryFragment = parse_url($requestUri, PHP_URL_FRAGMENT);
-		$queryPaths = explode('/', $queryPath);
+		$queryPathParts = explode('/', $queryPath);
 		
-		$queryPaths = array_filter($queryPaths, static function ($value) {
+		$queryPathParts = array_filter($queryPathParts, static function ($value) {
 			return ($value !== NULL && $value !== FALSE && $value !== '');
 		});
 		
-		foreach($queryPaths as $index => $queryPath) {
-			$matches = $controllerEventArgs->getSubject()->Router()->match($queryPath);
+		foreach($queryPathParts as $index => $queryPathPart) {
+			$matches = $controllerEventArgs->getSubject()->Router()->match($queryPathPart);
 			if (is_array($matches)) {
-				if (isset($macthes['m']) || isset($matches['mo'])) {
-					unset($queryPaths[$index]);
+				if (isset($matches['m']) || isset($matches['mo']) || isset($matches['car'])) {
+					/*
+					if ( stripos($queryPath, 'carfinder') === FALSE) {
+						unset($queryPathParts[$index]);
+					}
+					*/
+					unset($queryPathParts[$index]);
+					if (((int)$matches['car'] && !$sessionData['car']) || ((int)$matches['car'] !== $sessionData['car'])) {
+						try {
+							$query = $this->modelManager->getRepository(Car::class)
+								->getIdsByTecdocIdQueryBuilder((int)$matches['car'])
+								->getQuery()
+								->useQueryCache(TRUE);
+							
+							if (!is_null($car = $query->getOneOrNullResult())) {
+								$sessionData = [
+									'manufacturer' => $car['manufacturerId'],
+									'model' => $car['modelId'],
+									'type' => $car['typeId'],
+									'car' => $car['tecdocId']
+								];
+								
+								$this->service->setSessionData($sessionData);
+							}
+						} catch(NonUniqueResultException $nonUniqueResultException) {
+							$this->setLog($nonUniqueResultException);
+						} catch (\JsonException $jsonException) {
+							$this->setLog($jsonException);
+						}
+					}
 				}
 			}
 		}
-		$uri = trim(implode('/', $queryPaths), '/'). '/';
+		
+		$uri = trim(implode('/', $queryPathParts), '/'). '/';
 		
 		$matches = $controllerEventArgs->getSubject()->Router()->match($uri);
 		
-		/*
-		$requestQueryAction = NULL;
-		
-		if ($queryQuery && stripos($queryQuery, 'action=') !== FALSE) {
-			$queryParts = explode('&', $queryQuery);
-			$requestQueryActions = explode('=', reset($queryParts));
-			$requestQueryAction = end($requestQueryActions);
-		}
-		
-		if ($requestQueryAction) {
-			$matches['action'] = $requestQueryAction;
-		}
-		
-		if ($queryQuery) {
-			if ($queryFragment) {
-				$controllerEventArgs->getRequest()->setQuery($queryQuery . '#' . $queryFragment);
-			} else {
-				$controllerEventArgs->getRequest()->setQuery($queryQuery);
-			}
-		}
-		*/
 		$controllerEventArgs->getRequest()->clearParams();
 		$controllerEventArgs->getRequest()->setParams($matches);
 		$controllerEventArgs->getRequest()->setControllerName($matches['controller']);
 		$controllerEventArgs->getRequest()->setModuleName($matches['module']);
 		$controllerEventArgs->getRequest()->setActionName($matches['action']);
-		
-		/*
-		$controllerEventArgs->getRequest()->setQuery(array_merge($controllerEventArgs->getRequest()->getQuery(), [
-			'module' => $matches['module'],
-			'controller' => $matches['controller'],
-			'action' => $matches['action']
-		]));
-		*/
 	}
 	
 	/**
@@ -458,7 +457,7 @@ class Eventhandlers {
 		}
 		
 		try {
-			$query = $this->modelManager->getRepository(\ItswCar\Models\Car::class)->getCarsQuery([
+			$query = $this->modelManager->getRepository(Car::class)->getCarsQuery([
 				'select' => 'cars',
 				'conditions' => [
 					'cars.tecdocId' => $sessionData['car']
@@ -582,5 +581,17 @@ class Eventhandlers {
 		}
 		
 		return FALSE;
+	}
+	
+	/**
+	 * @param \Exception $e
+	 */
+	private function setLog(\Exception $e): void {
+		$this->service->pluginLogger->critical($e->getMessage(), [
+			'code' => $e->getCode(),
+			'file' => $e->getFile(),
+			'line' => $e->getLine(),
+			'trace' => $e->getTraceAsString()
+		]);
 	}
 }

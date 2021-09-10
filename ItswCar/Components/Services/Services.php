@@ -18,20 +18,21 @@ use ItswCar\Models\KbaCodes;
 use Shopware\Components\DependencyInjection\Container;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Components\Logger as PluginLogger;
+use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\HttpFoundation\Cookie;
 
 class Services {
-	protected Container $container;
-	protected ModelManager $modelManager;
-	protected PluginLogger $pluginLogger;
-	protected $front;
-	protected $basePath;
-	protected $cache;
-	protected $session;
-	protected int $shopId = 1;
-	protected int $rootCategoryId = 5;
+	public Container $container;
+	public ModelManager $modelManager;
+	public PluginLogger $pluginLogger;
+	public $front;
+	public $basePath;
+	public $cache;
+	public $session;
+	public int $shopId = 1;
+	public int $rootCategoryId = 5;
 	
 	/**
 	 * Services constructor.
@@ -356,28 +357,30 @@ class Services {
 	
 	/**
 	 * @param array $data
-	 * @param bool  $full
 	 * @return array
 	 * @throws \JsonException
 	 */
-	public function setSessionData(array $data = [], bool $full = FALSE): array {
-		if (!$full) {
-			$tmp = [
-				'manufacturer' => $data['manufacturer'],
-				'model' => $data['model'],
-				'type' => $data['type'],
-				'car' => $data['car']??NULL
-			];
-			
-			$data = $tmp;
+	public function setSessionData(array $data = []): array {
+		if (is_null($this->session)) {
+			$this->session = $this->container->get('session');
 		}
 		
-		$data['description'] = (isset($data['car']) && $data['car']) ? $this->getCarDisplayForView((int)$data['car'], TRUE) : NULL;
-		$data['title'] = (isset($data['car']) && $data['car']) ? $this->getCarDisplayForView((int)$data['car']) : NULL;
+		$data = array_merge([
+			'manufacturer'  => NULL,
+			'model'         => NULL,
+			'type'          => NULL,
+			'car'           => NULL,
+			'description'   => NULL,
+			'title'         => NULL
+		], $data);
+		
+		
+		$data['description'] = $data['car'] ? $this->getCarDisplayForView((int)$data['car'], TRUE) : NULL;
+		$data['title'] = $data['car'] ? $this->getCarDisplayForView((int)$data['car']) : NULL;
+		
+		$this->session->offsetSet('itsw-session-data', $data);
 		
 		if ($dataEncoded = json_encode($data, JSON_THROW_ON_ERROR)) {
-			$expire = new \DateTime();
-			$expire->modify('+7 day');
 			Shopware()->Front()->Response()->headers->setCookie(
 				new Cookie(
 					'itsw_cache',
@@ -392,52 +395,40 @@ class Services {
 			);
 		}
 		
-		return $this->getSessionData(TRUE);
+		return $this->session->offsetGet('itsw-session-data');
 	}
 	
 	/**
-	 * @param bool $full
-	 * @return array
+	 * @return null[]
 	 */
-	public function getSessionData(bool $full = FALSE): array {
+	public function getSessionData(): array {
 		if (is_null($this->session)) {
 			$this->session = $this->container->get('session');
 		}
 		
-		if ($cookieData = Shopware()->Front()->Request()->getCookie('itsw_cache')) {
+		$defaultData = [
+			'manufacturer'  => NULL,
+			'model'         => NULL,
+			'type'          => NULL,
+			'car'           => NULL,
+			'description'   => NULL,
+			'title'         => NULL
+		];
+		
+		if ($this->session->offsetExists('itsw-session-data')) {
+			return array_merge($defaultData, $this->session->offsetGet('itsw-session-data'));
+		} else if ($cookieData = Shopware()->Front()->Request()->getCookie('itsw_cache')) {
 			try {
 				$sessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR);
+				$sessionData = array_merge($defaultData, $sessionData);
 				$this->session->offsetSet('itsw-session-data', $sessionData);
 			} catch (\JsonException $exception) {
 				$this->setLog($exception);
-				$this->session->offsetSet('itsw-session-data', [
-					'manufacturer' => NULL,
-					'model' => NULL,
-					'type' => NULL,
-					'car' => NULL,
-					'description' => NULL,
-					'title' => NULL
-				]);
+				$this->session->offsetSet('itsw-session-data', $defaultData);
 			}
 		}
 		
-		if ($this->session->offsetExists('itsw-session-data')) {
-			$sessionData = $this->session->offsetGet('itsw-session-data');
-			if ($full) {
-				return $sessionData;
-			}
-			
-			return [
-				'manufacturer' => $sessionData['manufacturer'],
-				'model' => $sessionData['model'],
-				'type' => $sessionData['type'],
-				'car' => $sessionData['car']??NULL,
-				'description' => $sessionData['description']??NULL,
-				'title' => $sessionData['title']??NULL
-			];
-		}
-		
-		return [];
+		return array_merge($defaultData, $this->session->offsetGet('itsw-session-data'));
 	}
 	
 	/**
@@ -519,19 +510,50 @@ class Services {
 	/**
 	 * @param int|null $manufacturer
 	 * @param int|null $model
+	 * @param int|null $car
 	 * @return string[]
 	 */
-	public function getCarSeoUrl(int $manufacturer = NULL, int $model = NULL): array {
+	public function getCarSeoUrl(int $manufacturer = NULL, int $model = NULL, int $car = NULL): array {
 		$manufacturer = $manufacturer ?: $this->getSessionData()['manufacturer'];
 		$model = $model ?: $this->getSessionData()['model'];
+		$car = $car ?: $this->getSessionData()['car'];
 		
-		return $this->getSeoUrlQuery()
-			->setParameter('orgPath', ($model? 'sViewPort=cat&m=' . $manufacturer . '&mo=' . $model : 'sViewPort=cat&m=' . $manufacturer))
-			->execute()
-			->fetch(\PDO::FETCH_ASSOC) ?: [
+		$seoUrl = '';
+		
+		if ($manufacturer) {
+			$orgPath = sprintf('sViewPort=cat&m=%d', $manufacturer);
+			$seoUrl = $this->getSeoUrlPart($orgPath);
+		}
+		
+		if ($model) {
+			$orgPath = sprintf('sViewPort=cat&mo=%d', $model);
+			$urlPart = $this->getSeoUrlPart($orgPath);
+			$seoUrl = ($seoUrl && $urlPart)? $seoUrl.$urlPart : $seoUrl;
+		}
+		
+		if ($car) {
+			$orgPath = sprintf('sViewPort=cat&car=%d', $car);
+			$urlPart = $this->getSeoUrlPart($orgPath);
+			$seoUrl = ($seoUrl && $urlPart)? $seoUrl.$urlPart : $seoUrl;
+		}
+		
+		return [
 				'realUrl' => '',
-				'seoUrl' => ''
+				'seoUrl' => $seoUrl
 			];
+	}
+	
+	/**
+	 * @param string $orgPath
+	 * @return mixed|string
+	 */
+	private function getSeoUrlPart(string $orgPath) {
+		$result = $this->getSeoUrlQuery()
+			->setParameter('orgPath', $orgPath)
+			->execute()
+			->fetch(\PDO::FETCH_ASSOC);
+		
+		return $result['seoUrl']??'';
 	}
 	
 	/**
@@ -623,7 +645,7 @@ class Services {
 	 * @return bool
 	 */
 	public function getServiceMode(): bool {
-		$config = $this->container->get('config');
+		$config = Shopware()->Config();
 		return $this->isFront() && !empty($config->setOffline) && (strpos($config->offlineIp, $this->front->Request()->getClientIp()) === false);
 	}
 	
@@ -666,6 +688,7 @@ class Services {
 					'cars.tecdocId' => $tecdocId
 				]
 			])
+				->useQueryCache(TRUE)
 				->getOneOrNullResult();
 			
 			if (is_object($car)) {

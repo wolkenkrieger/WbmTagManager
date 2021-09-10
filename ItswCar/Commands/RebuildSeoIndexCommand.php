@@ -225,22 +225,55 @@ class RebuildSeoIndexCommand extends ShopwareCommand {
 	 * @return string
 	 */
 	protected function buildModelPath($car):string {
-		return $this->cleanStringForUrl($car->manufacturer_name) . '-' . $this->cleanStringForUrl($car->model_name);
+		return implode('/', [
+			$this->buildManufacturerPath($car),
+			$this->cleanStringForUrl($car->model_name)
+		]);
+	}
+	
+	protected function buildCarPath($car):string {
+		return implode('/', [
+			$this->buildModelPath($car),
+			$this->cleanStringForUrl(sprintf('%s-%d', $car->type_name, $car->tecdoc_id))
+		]);
 	}
 	
 	/**
 	 * @param $car
 	 */
 	protected function renderAndWriteSeoUrl($car)	{
+		/*
 		$path = $this->buildManufacturerPath($car);
-		$org_path = 'sViewport=cat&m=' . $car->manufacturer_id ;
+		$org_path = sprintf('sViewport=cat&m=%d', $car->manufacturer_id);
 		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
 		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
 		
 		$path = $this->buildModelPath($car);
-		$org_path = 'sViewport=cat&m=' . $car->manufacturer_id . '&mo=' . $car->model_id;
+		$org_path = sprintf('sViewport=cat&m=%d&mo=%d', $car->manufacturer_id, $car->model_id);
 		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
 		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
+		
+		$path = $this->buildCarPath($car);
+		$org_path = sprintf('sViewport=cat&m=%d&mo=%d&car=%d', $car->manufacturer_id, $car->model_id, $car->tecdoc_id);
+		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
+		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
+		*/
+		
+		$path = $this->cleanStringForUrl($car->manufacturer_name);
+		$org_path = sprintf('sViewport=cat&m=%d', $car->manufacturer_id);
+		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
+		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
+		
+		$path = $this->cleanStringForUrl($car->model_name);
+		$org_path = sprintf('sViewport=cat&mo=%d', $car->model_id);
+		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
+		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
+		
+		$path = $this->cleanStringForUrl(sprintf('%s-%d', $car->type_name, $car->tecdoc_id));
+		$org_path = sprintf('sViewport=cat&car=%d', $car->tecdoc_id);
+		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
+		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
+		
 	}
 	
 	/**
@@ -252,15 +285,19 @@ class RebuildSeoIndexCommand extends ShopwareCommand {
 			'm.id as manufacturer_id',
 			'm.name as manufacturer_name',
 			'mo.id as model_id',
-			'mo.name as model_name'
+			'mo.name as model_name',
+			't.name as type_name',
+			'c.*'
 		])
-			->from('itsw_cars', 't')
-			->join('t', 'itsw_manufacturers', 'm', 't.manufacturer_id = m.id')
-			->join('t', 'itsw_models', 'mo', 't.model_id = mo.id')
-			->where('t.active = 1')
+			->from('itsw_cars', 'c')
+			->join('c', 'itsw_manufacturers', 'm', 'c.manufacturer_id = m.id')
+			->join('c', 'itsw_models', 'mo', 'c.model_id = mo.id')
+			->join('c','itsw_types', 't', 'c.type_id = t.id')
+			->where('c.active = 1')
 			->andWhere('m.active = 1')
 			->andWhere('mo.active = 1')
-			->groupBy('mo.id')
+			->andWhere('t.active = 1')
+			//->groupBy('mo.id')
 			->orderBy('m.name')
 			->addOrderBy('mo.name')
 			->execute();
