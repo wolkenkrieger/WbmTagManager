@@ -361,6 +361,10 @@ class Services {
 	 * @throws \JsonException
 	 */
 	public function setSessionData(array $data = []): array {
+		if (is_null($this->session)) {
+			return [];
+		}
+		
 		$data = array_merge([
 			'manufacturer'  => NULL,
 			'model'         => NULL,
@@ -370,16 +374,7 @@ class Services {
 			'title'         => NULL
 		], $data);
 		
-		if (is_null($this->session)) {
-			return array_merge([
-				'manufacturer'  => NULL,
-				'model'         => NULL,
-				'type'          => NULL,
-				'car'           => NULL,
-				'description'   => NULL,
-				'title'         => NULL
-			], $data);
-		}
+		
 		
 		$data['description'] = $data['car'] ? $this->getCarDisplayForView((int)$data['car'], TRUE) : NULL;
 		$data['title'] = $data['car'] ? $this->getCarDisplayForView((int)$data['car']) : NULL;
@@ -408,6 +403,10 @@ class Services {
 	 * @return null[]
 	 */
 	public function getSessionData(): array {
+		if (is_null($this->session)) {
+			return [];
+		}
+		
 		$defaultData = [
 			'manufacturer'  => NULL,
 			'model'         => NULL,
@@ -416,10 +415,6 @@ class Services {
 			'description'   => NULL,
 			'title'         => NULL
 		];
-		
-		if (is_null($this->session)) {
-			return $defaultData;
-		}
 		
 		if ($this->session->offsetExists('itsw-session-data')) {
 			return array_merge($defaultData, $this->session->offsetGet('itsw-session-data'));
