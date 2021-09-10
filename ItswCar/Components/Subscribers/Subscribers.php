@@ -32,24 +32,18 @@ class Subscribers implements SubscriberInterface {
 	protected string $pluginDir;
 	protected array $config;
 	protected Shop $shop;
-	protected DataLoader $attributeLoader;
-	protected DataPersister $attributePersister;
 	
 	/**
 	 * @param \Shopware\Components\DependencyInjection\Container $container
-	 * @param \ItswCar\Components\Services\Services              $service
+	 * @param \Shopware\Components\Model\ModelManager            $modelManager
 	 * @param string                                             $pluginDir
 	 * @param string                                             $pluginName
 	 */
 	public function __construct(Container $container,
-	                            Services $service,
 	                            ModelManager $modelManager,
-	                            DataLoader $attributeLoader,
-	                            DataPersister $attributePersister,
 	                            string $pluginDir,
 	                            string $pluginName)	{
 		$this->container = $container;
-		$this->service = $service;
 		$this->modelManager = $modelManager;
 		$this->pluginDir = $pluginDir;
 		
@@ -60,7 +54,8 @@ class Subscribers implements SubscriberInterface {
 		}
 		
 		$this->config = $this->container->get(CachedReader::class)->getByPluginName($pluginName, $this->shop->getID());
-		$this->eventHandler = new Eventhandler($container, $service, $modelManager, $attributeLoader, $attributePersister, $pluginDir, $this->config);
+		$this->eventHandler = new Eventhandler($container, $modelManager, $pluginDir, $this->config);
+		$this->service = $this->container->get('itswcar.services');
 	}
 	
 	/**

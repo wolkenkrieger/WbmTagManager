@@ -16,8 +16,6 @@ use Doctrine\ORM\ORMException;
 use InvalidArgumentException;
 use ItswCar\Components\Services\Services;
 use ItswCar\Models\Car;
-use Shopware\Bundle\AttributeBundle\Service\DataLoader;
-use Shopware\Bundle\AttributeBundle\Service\DataPersister;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Attribute\OrderBasket;
 use Shopware\Models\Order\Basket;
@@ -28,33 +26,23 @@ class Eventhandlers {
 	protected string $pluginDir;
 	protected array $config;
 	private ModelManager $modelManager;
-	private DataLoader $attributeLoader;
-	private DataPersister $attributePersister;
 	protected Container $container;
 	
 	/**
-	 * @param \Shopware\Components\DependencyInjection\Container     $container
-	 * @param \ItswCar\Components\Services\Services                  $service
-	 * @param \Shopware\Components\Model\ModelManager                $modelManager
-	 * @param \Shopware\Bundle\AttributeBundle\Service\DataLoader    $attributeLoader
-	 * @param \Shopware\Bundle\AttributeBundle\Service\DataPersister $attributePersister
-	 * @param string                                                 $pluginDir
-	 * @param array                                                  $config
+	 * @param \Shopware\Components\DependencyInjection\Container $container
+	 * @param \Shopware\Components\Model\ModelManager            $modelManager
+	 * @param string                                             $pluginDir
+	 * @param array                                              $config
 	 */
 	public function __construct(Container $container,
-	                            Services $service,
 	                            ModelManager $modelManager,
-	                            DataLoader $attributeLoader,
-	                            DataPersister $attributePersister,
 	                            string $pluginDir,
 	                            array $config) {
 		$this->container = $container;
-		$this->service = $service;
 		$this->pluginDir = $pluginDir;
 		$this->config = $config;
 		$this->modelManager = $modelManager;
-		$this->attributeLoader = $attributeLoader;
-		$this->attributePersister = $attributePersister;
+		$this->service = $this->container->get('itswcar.services');
 	}
 	
 	/**
@@ -96,13 +84,14 @@ class Eventhandlers {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-	
+	 return;
 	}
 	
 	/**
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
+		return;
 		$sessionData = $this->service->getSessionData();
 		$queryPath = $controllerEventArgs->getRequest()->getPathInfo();
 		if (!$queryPath || $queryPath === '/' || stripos($queryPath, 'carfinder') !== FALSE) {

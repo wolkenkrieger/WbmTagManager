@@ -49,7 +49,7 @@ class Services {
 			$this->basePath = $this->container->get('shop')->getBasePath();
 			$this->shopId = $this->container->get('shop')->getId();
 		}
-		
+	
 		if ($this->container->initialized('front')) {
 			$this->front = $this->container->get('front');
 		} else {
@@ -362,11 +362,7 @@ class Services {
 	 */
 	public function setSessionData(array $data = []): array {
 		if (is_null($this->session)) {
-			if ($this->isFront()) {
-				$this->session = $this->container->get('session');
-			} else {
-				return [];
-			}
+			$this->session = $this->container->get('session');
 		}
 		
 		$data = array_merge([
@@ -408,11 +404,7 @@ class Services {
 	 */
 	public function getSessionData(): array {
 		if (is_null($this->session)) {
-			if ($this->isFront()) {
-				$this->session = $this->container->get('session');
-			} else {
-				return [];
-			}
+			$this->session = $this->container->get('session');
 		}
 		
 		$defaultData = [
