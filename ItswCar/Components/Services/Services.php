@@ -362,7 +362,11 @@ class Services {
 	 */
 	public function setSessionData(array $data = []): array {
 		if (is_null($this->session)) {
-			return [];
+			if ($this->isFront()) {
+				$this->session = $this->container->get('session');
+			} else {
+				return [];
+			}
 		}
 		
 		$data = array_merge([
@@ -404,7 +408,11 @@ class Services {
 	 */
 	public function getSessionData(): array {
 		if (is_null($this->session)) {
-			return [];
+			if ($this->isFront()) {
+				$this->session = $this->container->get('session');
+			} else {
+				return [];
+			}
 		}
 		
 		$defaultData = [
