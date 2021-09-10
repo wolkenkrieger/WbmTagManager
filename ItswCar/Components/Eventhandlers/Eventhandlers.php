@@ -113,6 +113,7 @@ class Eventhandlers {
 					}
 					*/
 					unset($queryPathParts[$index]);
+					/*
 					if (((int)$matches['car'] && !$sessionData['car']) || ((int)$matches['car'] !== $sessionData['car'])) {
 						try {
 							$query = $this->modelManager->getRepository(Car::class)
@@ -136,6 +137,7 @@ class Eventhandlers {
 							$this->setLog($jsonException);
 						}
 					}
+					*/
 				}
 			}
 		}
