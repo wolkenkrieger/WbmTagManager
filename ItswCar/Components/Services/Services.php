@@ -427,7 +427,7 @@ class Services {
 			}
 		}
 		
-		return array_merge($defaultData, $this->session->offsetGet('itsw-session-data'));
+		return $defaultData;
 	}
 	
 	/**
