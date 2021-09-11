@@ -350,8 +350,8 @@ class ItswCar extends Plugin {
 		
 		$collection->add(new CookieStruct(
 			'itswCache',
-			'/^itsw_cache$/',
-			'Modul "ITSW Car" - techn. Daten',
+			'/^itsw-[a-z0-9]+-data$/',
+			'Modul "ITSW Car" - technische Daten',
 			CookieGroupStruct::TECHNICAL
 		));
 		

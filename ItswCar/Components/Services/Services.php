@@ -379,7 +379,7 @@ class Services {
 		if ($dataEncoded = json_encode($data, JSON_THROW_ON_ERROR)) {
 			Shopware()->Front()->Response()->headers->setCookie(
 				new Cookie(
-					'itsw_cache',
+					'itsw-session-data',
 					$dataEncoded,
 					0,
 					$this->basePath,
@@ -390,6 +390,19 @@ class Services {
 				)
 			);
 		}
+		
+		Shopware()->Front()->Response()->headers->setCookie(
+			new Cookie(
+				'itsw-cache-data',
+				(string)$data['car'],
+				0,
+				$this->basePath,
+				NULL,
+				FALSE,
+				FALSE,
+				TRUE
+			)
+		);
 		
 		return $data;
 	}
@@ -415,7 +428,7 @@ class Services {
 		
 		if ($session->offsetExists('itsw-session-data')) {
 			$sessionData = array_merge($sessionData, $session->offsetGet('itsw-session-data'));
-		} else if ($cookieData = Shopware()->Front()->Request()->getCookie('itsw_cache')) {
+		} else if ($cookieData = Shopware()->Front()->Request()->getCookie('itsw-session-data')) {
 			try {
 				$cookieSessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR);
 				$sessionData = array_merge($sessionData, $cookieSessionData);
