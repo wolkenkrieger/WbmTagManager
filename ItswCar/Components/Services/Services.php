@@ -30,7 +30,6 @@ class Services {
 	public $front;
 	public $basePath;
 	public $cache;
-	public $session;
 	public int $shopId = 1;
 	public int $rootCategoryId = 5;
 	
@@ -54,12 +53,6 @@ class Services {
 			$this->front = $this->container->get('front');
 		} else {
 			$this->front = NULL;
-		}
-		
-		if ($this->container->initialized('session')) {
-			$this->session = $this->container->get('session');
-		} else {
-			$this->session = NULL;
 		}
 		
 		if ($this->basePath === null || $this->basePath === '') {
@@ -361,23 +354,27 @@ class Services {
 	 * @throws \JsonException
 	 */
 	public function setSessionData(array $data = []): array {
-		if (is_null($this->session)) {
-			$this->session = $this->container->get('session');
-		}
-		
-		$data = array_merge([
+		$defaultData = [
 			'manufacturer'  => NULL,
 			'model'         => NULL,
 			'type'          => NULL,
 			'car'           => NULL,
 			'description'   => NULL,
 			'title'         => NULL
-		], $data);
+		];
+		
+		if (!$this->container->initialized('session')) {
+			return $defaultData;
+		}
+		
+		$session = $this->container->get('session');
+		
+		$data = array_merge($defaultData, $data);
 		
 		$data['description'] = $data['car'] ? $this->getCarDisplayForView((int)$data['car'], TRUE) : NULL;
 		$data['title'] = $data['car'] ? $this->getCarDisplayForView((int)$data['car']) : NULL;
 		
-		$this->session->offsetSet('itsw-session-data', $data);
+		$session->offsetSet('itsw-session-data', $data);
 		
 		if ($dataEncoded = json_encode($data, JSON_THROW_ON_ERROR)) {
 			Shopware()->Front()->Response()->headers->setCookie(
@@ -394,18 +391,14 @@ class Services {
 			);
 		}
 		
-		return $this->session->offsetGet('itsw-session-data');
+		return $data;
 	}
 	
 	/**
 	 * @return null[]
 	 */
 	public function getSessionData(): array {
-		if (is_null($this->session)) {
-			$this->session = $this->container->get('session');
-		}
-		
-		$defaultData = [
+		$sessionData = [
 			'manufacturer'  => NULL,
 			'model'         => NULL,
 			'type'          => NULL,
@@ -414,20 +407,26 @@ class Services {
 			'title'         => NULL
 		];
 		
-		if ($this->session->offsetExists('itsw-session-data')) {
-			return array_merge($defaultData, $this->session->offsetGet('itsw-session-data'));
+		if (!$this->container->initialized('session')) {
+			return $sessionData;
+		}
+		
+		$session = $this->container->get('session');
+		
+		if ($session->offsetExists('itsw-session-data')) {
+			$sessionData = array_merge($sessionData, $session->offsetGet('itsw-session-data'));
 		} else if ($cookieData = Shopware()->Front()->Request()->getCookie('itsw_cache')) {
 			try {
-				$sessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR);
-				$sessionData = array_merge($defaultData, $sessionData);
-				$this->session->offsetSet('itsw-session-data', $sessionData);
+				$cookieSessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR);
+				$sessionData = array_merge($sessionData, $cookieSessionData);
+				$session->offsetSet('itsw-session-data', $sessionData);
 			} catch (\JsonException $exception) {
 				$this->setLog($exception);
-				$this->session->offsetSet('itsw-session-data', $defaultData);
+				$session->offsetSet('itsw-session-data', $sessionData);
 			}
 		}
 		
-		return $defaultData;
+		return $sessionData;
 	}
 	
 	/**

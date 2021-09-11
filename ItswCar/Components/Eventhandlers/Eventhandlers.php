@@ -91,7 +91,7 @@ class Eventhandlers {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		$sessionData = $this->getSessionData();
+		$sessionData = $this->service->getSessionData();
 		$queryPath = $controllerEventArgs->getRequest()->getPathInfo();
 		if (!$queryPath || $queryPath === '/' || stripos($queryPath, 'carfinder') !== FALSE) {
 			return;
@@ -583,85 +583,5 @@ class Eventhandlers {
 			'line' => $e->getLine(),
 			'trace' => $e->getTraceAsString()
 		]);
-	}
-	
-	/**
-	 * @param array $data
-	 * @return array
-	 * @throws \JsonException
-	 */
-	private function setSessionData(array $data = []): array {
-		if ($this->container->initialized('session')) {
-			$session = $this->container->get('session');
-		} else {
-			return [];
-		}
-		
-		$data = array_merge([
-			'manufacturer'  => NULL,
-			'model'         => NULL,
-			'type'          => NULL,
-			'car'           => NULL,
-			'description'   => NULL,
-			'title'         => NULL
-		], $data);
-		
-		$data['description'] = $data['car'] ? $this->getCarDisplayForView((int)$data['car'], TRUE) : NULL;
-		$data['title'] = $data['car'] ? $this->getCarDisplayForView((int)$data['car']) : NULL;
-		
-		$session->offsetSet('itsw-session-data', $data);
-		
-		if ($dataEncoded = json_encode($data, JSON_THROW_ON_ERROR)) {
-			Shopware()->Front()->Response()->headers->setCookie(
-				new Cookie(
-					'itsw_cache',
-					$dataEncoded,
-					0,
-					$this->basePath,
-					NULL,
-					FALSE,
-					FALSE,
-					TRUE
-				)
-			);
-		}
-		
-		return $session->offsetGet('itsw-session-data');
-	}
-	
-	/**
-	 * @return null[]
-	 */
-	private function getSessionData(): array {
-		if ($this->container->initialized('session')) {
-			$session = $this->container->get('session');
-		} else {
-			return [];
-		}
-		
-		
-		$defaultData = [
-			'manufacturer'  => NULL,
-			'model'         => NULL,
-			'type'          => NULL,
-			'car'           => NULL,
-			'description'   => NULL,
-			'title'         => NULL
-		];
-		
-		if ($session->offsetExists('itsw-session-data')) {
-			return array_merge($defaultData, $session->offsetGet('itsw-session-data'));
-		} else if ($cookieData = Shopware()->Front()->Request()->getCookie('itsw_cache')) {
-			try {
-				$sessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR);
-				$sessionData = array_merge($defaultData, $sessionData);
-				$session->offsetSet('itsw-session-data', $sessionData);
-			} catch (\JsonException $exception) {
-				$this->setLog($exception);
-				$session->offsetSet('itsw-session-data', $defaultData);
-			}
-		}
-		
-		return $defaultData;
 	}
 }
