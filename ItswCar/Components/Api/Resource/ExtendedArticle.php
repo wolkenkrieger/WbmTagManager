@@ -1934,7 +1934,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			}
 			
 			$productPrice *= (($product->getTax()->getTax() + 100) / 100);
-			$fakePrice = $productPrice * $this->getPriceFactor(1, 1.345);
+			$fakePrice = $productPrice * $this->getPriceFactor(1, 1.3);
 			
 			$this->getManager()->persist($attribute);
 			$attribute->setFakePrice($fakePrice);
