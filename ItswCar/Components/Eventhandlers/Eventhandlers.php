@@ -10,17 +10,21 @@
 
 namespace ItswCar\Components\Eventhandlers;
 
-use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\ORMException;
+use Google\Exception;
 use InvalidArgumentException;
+use ItswCar\Components\Google\ContentApi\ContentProduct;
+use ItswCar\Components\Google\ContentApi\ContentSession;
 use ItswCar\Components\Services\Services;
 use ItswCar\Models\Car;
+use ItswCar\Models\GoogleMerchantCenterQueue;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Attribute\OrderBasket;
 use Shopware\Models\Order\Basket;
 use Shopware\Components\DependencyInjection\Container;
-use Symfony\Component\HttpFoundation\Cookie;
+use Shopware\Models\Article\Article as ProductModel;
+use Shopware\Models\Shop\Shop;
 
 class Eventhandlers {
 	protected Services $service;
@@ -28,22 +32,39 @@ class Eventhandlers {
 	protected array $config;
 	private ModelManager $modelManager;
 	protected Container $container;
+	protected Shop $shop;
+	
+	/* Hydration mode constants */
+	/**
+	 * Hydrates an object graph. This is the default behavior.
+	 */
+	public const HYDRATE_OBJECT = 1;
+	
+	/**
+	 * Hydrates an array graph.
+	 */
+	public const HYDRATE_ARRAY = 2;
+	
+	public const CRON_GMC_QUEUE_LIMIT = 10;
 	
 	/**
 	 * @param \Shopware\Components\DependencyInjection\Container $container
 	 * @param \Shopware\Components\Model\ModelManager            $modelManager
 	 * @param string                                             $pluginDir
 	 * @param array                                              $config
+	 * @param \Shopware\Models\Shop\Shop                         $shop
 	 */
 	public function __construct(Container $container,
 	                            ModelManager $modelManager,
 	                            string $pluginDir,
-	                            array $config) {
+	                            array $config,
+								Shop $shop) {
 		$this->container = $container;
 		$this->pluginDir = $pluginDir;
 		$this->config = $config;
 		$this->modelManager = $modelManager;
 		$this->service = $this->container->get('itswcar.services');
+		$this->shop = $shop;
 	}
 	
 	/**
@@ -504,8 +525,111 @@ class Eventhandlers {
 	}
 	
 	/**
+	 * @param \Shopware_Components_Cron_CronJob $cronJob
+	 * @return string
+	 * @throws \Doctrine\ORM\NonUniqueResultException
+	 */
+	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): string {
+		$limit = $this->config['cronjob_handle_gmc_queue_limit']??self::CRON_GMC_QUEUE_LIMIT;
+		
+		try {
+			$list = $this->modelManager->getRepository(GoogleMerchantCenterQueue::class)->findBy([
+				'handled' => NULL
+			], [
+				'created' => 'ASC'
+			], (int)$limit);
+		} catch (\UnexpectedValueException $exception) {
+			$this->setLog($exception);
+			$cronJob->setProcessed(TRUE);
+			return $exception->getMessage();
+		}
+		
+		if (!count($list)) {
+			$cronJob->setProcessed(TRUE);
+			return 'no items to handle';
+		}
+		$counter = 0;
+		
+		try {
+			$googleContentApiSession = new ContentSession($this->config, $this->shop->getId());
+		} catch (Exception | \JsonException $exception) {
+			$this->setLog($exception);
+			$cronJob->setProcessed(TRUE);
+			return $exception->getMessage();
+		}
+		
+		foreach ($list as $item) {
+			$builder = $this->modelManager->createQueryBuilder();
+			$builder->select([
+				'product',
+				'mainVariant',
+				'mainVariantPrices',
+				'mainVariantAttribute',
+				'tax',
+				'supplier',
+			])
+				->from(ProductModel::class, 'product')
+				->leftJoin('product.mainDetail', 'mainVariant')
+				->leftJoin('mainVariant.prices', 'mainVariantPrices')
+				->leftJoin('product.tax', 'tax')
+				->leftJoin('product.supplier', 'supplier')
+				->leftJoin('mainVariant.attribute', 'mainVariantAttribute')
+				->where('product.id = ?1')
+				->setParameter(1, $item->getArticleId());
+			
+			/** @var ProductModel|null $product */
+			$product = $builder->getQuery()->getOneOrNullResult(self::HYDRATE_OBJECT);
+			
+			if (!$product) {
+				throw new ApiException\NotFoundException(sprintf('Product by id "%d" not found', $item->getArticleId()));
+			}
+			
+			try {
+				$contentProduct = new ContentProduct($product, $this->config, $this->shop->getId(), $googleContentApiSession);
+			} catch (Exception | \JsonException $exception) {
+				$this->setLog($exception);
+				$cronJob->setProcessed(TRUE);
+				return $exception->getMessage();
+			}
+			
+			$response = NULL;
+			
+			switch($item->getJobType) {
+				case 'delete' : break;
+				case 'update':	$response = $contentProduct->update();	break;
+				default: $response = $contentProduct->create();	break;
+			}
+			
+			if (!is_null($response)) {
+				$response = $response['response'];
+				try {
+					$item->setHandled(new \DateTime());
+					$item->setGoogleProductId($response->getId());
+					$item->setResponse(json_encode($response, JSON_THROW_ON_ERROR));
+					$this->modelManager->persist($item);
+					$this->modelManager->flush($item);
+				} catch (\Exception $exception) {
+					$this->setLog($exception);
+					$cronJob->setProcessed(TRUE);
+					return $exception->getMessage();
+				}
+			}
+			
+			$counter++;
+		}
+		
+		$cronJob->setProcessed(TRUE);
+		
+		return sprintf('%d items processed', $counter);
+	}
+	
+	
+	// Helpers and private functions
+	
+	/**
 	 * @param string $source
 	 * @return string
+	 * @throws \Exception
 	 */
 	private function getKeywords(string $source): string {
 		$dom = new \DOMDocument();

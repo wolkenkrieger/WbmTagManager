@@ -54,7 +54,7 @@ class Subscribers implements SubscriberInterface {
 		}
 		
 		$this->config = $this->container->get(CachedReader::class)->getByPluginName($pluginName, $this->shop->getID());
-		$this->eventHandler = new Eventhandler($container, $modelManager, $pluginDir, $this->config);
+		$this->eventHandler = new Eventhandler($container, $modelManager, $pluginDir, $this->config, $this->shop);
 	}
 	
 	/**
@@ -78,6 +78,8 @@ class Subscribers implements SubscriberInterface {
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
 			'Enlight_Controller_Action_PostDispatchSecure_Backend_Form'     => 'onPostDispatchSecureBackendForm',
 			'Shopware_Modules_Basket_UpdateCartItems_Updated'               => 'onBasketUpdateCartItemsUpdated',
+			
+			'Shopware_CronJob_ItswHandleGoogleMerchantCenterQueue'          => 'onCronHandleGoogleMerchantCenterQueue'
 		];
 	}
 	
@@ -182,5 +184,12 @@ class Subscribers implements SubscriberInterface {
 	 */
 	public function onBasketUpdateCartItemsUpdated(\Enlight_Event_EventArgs $eventArgs): void {
 		$this->eventHandler->onBasketUpdateCartItemsUpdated($eventArgs);
+	}
+	
+	/**
+	 * @param \Shopware_Components_Cron_CronJob $cronJob
+	 */
+	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob) {
+		$this->eventHandler->onCronHandleGoogleMerchantCenterQueue($cronJob);
 	}
 }

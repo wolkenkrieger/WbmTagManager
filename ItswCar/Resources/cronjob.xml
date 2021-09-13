@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cronjobs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		  xsi:noNamespaceSchemaLocation="schemas/cronjob.xsd">
+	<cronjob>
+		<name>ITSW - Synchronize Google Merchant Center Product Feed</name>
+		<action>Shopware_CronJob_ItswHandleGoogleMerchantCenterQueue</action>
+		<active>false</active>
+		<interval>300</interval>
+		<disableOnError>true</disableOnError>
+	</cronjob>
+</cronjobs>

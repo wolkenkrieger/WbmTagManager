@@ -12,17 +12,13 @@ namespace ItswCar\Components\Api\Resource;
 
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\OptimisticLockException;
-use Google\Service\ShoppingContent\Product as GoogleContentProduct;
-use ItswCar\Components\Api\Resource\Google\ContentApi\ContentProduct;
+use ItswCar\Models\GoogleMerchantCenterQueue;
 use Shopware\Components\Api\BatchInterface;
 use Shopware\Components\Api\Exception as ApiException;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\ORMException;
 use Shopware\Components\Api\Resource\Category as CategoryResource;
-use Shopware\Components\Api\Resource\Media;
 use Shopware\Components\Api\Resource\Resource;
-use Shopware\Components\Api\Resource\Translation;
-use Shopware\Components\Api\Resource\Variant;
 use Shopware\Components\Model\QueryBuilder;
 use Shopware\Models\Article\Article as ProductModel;
 use Shopware\Models\Article\Configurator;
@@ -357,16 +353,12 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			$this->writeCarLinks($carLinks, $product);
 		}
 		
+		try {
+			$this->setProductFakePrice([], $product);
+		} catch (OptimisticLockException | ORMException $e) {}
+		
 		if ($googleContentApi) {
-			try {
-				$contentProduct = $this->createGoogleContentProduct($product);
-				$this->setProductFakePrice($contentProduct, $product);
-			} catch (\Google\Exception | \JsonException $e) {
-			}
-		} else {
-			try {
-				$this->setProductFakePrice([], $product);
-			} catch (OptimisticLockException | ORMException $e) {}
+			$queueId = $this->addToGoogleMerchantCenterQueue($product, 'create');
 		}
 		
 		return $product;
@@ -481,15 +473,12 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			}
 		}
 		
+		try {
+			$this->setProductFakePrice([], $product);
+		} catch (OptimisticLockException | ORMException $e) {}
+		
 		if ($googleContentApi) {
-			try {
-				$contentProduct = $this->updateGoogleContentProduct($product);
-				$this->setProductFakePrice($contentProduct, $product);
-			} catch (\Google\Exception | \JsonException | ORMException $e) {}
-		} else {
-			try {
-				$this->setProductFakePrice([], $product);
-			} catch (OptimisticLockException | ORMException $e) {}
+			$queueId = $this->addToGoogleMerchantCenterQueue($product, 'update');
 		}
 		
 		return $product;
@@ -574,6 +563,8 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		
 		$this->getManager()->remove($product);
 		$this->flush();
+		
+		$this->addToGoogleMerchantCenterQueue($product, 'delete');
 		
 		return $product;
 	}
@@ -2684,38 +2675,28 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * Google Content API
-	 */
-	
-	
-	/**
-	 * @param \Shopware\Models\Article\Article $product
-	 * @return array
-	 * @throws \Google\Exception
-	 * @throws \JsonException
-	 */
-	private function createGoogleContentProduct(ProductModel $product): array {
-		$googleContentProduct = new ContentProduct($product, $this->config, $this->shop->getId());
-		
-		return $googleContentProduct->create();
-	}
-	
-	/**
-	 * @param \Shopware\Models\Article\Article $product
-	 * @return array
-	 * @throws \Google\Exception
-	 * @throws \JsonException
-	 */
-	private function updateGoogleContentProduct(ProductModel $product): array {
-		$googleContentProduct = new ContentProduct($product, $this->config, $this->shop->getId());
-		
-		return $googleContentProduct->update();
-	}
-	
-	/**
 	 * @return float
 	 */
 	private function getPriceFactor(): float {
 		return ((float)rand() / (float)getrandmax()) + 1.1111;
+	}
+	
+	/**
+	 * @param \Shopware\Models\Article\Article $product
+	 * @param string                           $jobType
+	 * @return int
+	 */
+	private function addToGoogleMerchantCenterQueue(ProductModel $product, string $jobType = 'create'): int {
+		try {
+			$entity = new GoogleMerchantCenterQueue();
+			$entity->setArticleId($product->getId());
+			$entity->setJobType($jobType);
+			$this->getManager()->persist($entity);
+			$this->getManager()->flush($entity);
+		} catch (\Exception $exception) {
+			return 0;
+		}
+		
+		return $entity->getId();
 	}
 }

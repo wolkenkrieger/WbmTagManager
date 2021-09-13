@@ -122,5 +122,12 @@
                 </div>
             ]]></description>
 		</element>
+		
+		<element type="number" scope="shop">
+			<name>cronjob_handle_gmc_queue_limit</name>
+			<label>Limit für die Anzahl der Produkte, die pro Cronjob-Durchlauf als Produktfeed an Google übertragen werden</label>
+			<value>10</value>
+			<description></description>
+		</element>
 	</elements>
 </config>

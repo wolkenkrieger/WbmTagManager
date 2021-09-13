@@ -18,6 +18,7 @@ use ItswCar\Models\Model;
 use ItswCar\Models\Type;
 use ItswCar\Models\Car;
 use ItswCar\Models\ArticleCarLinks;
+use ItswCar\Models\GoogleMerchantCenterQueue;
 
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
@@ -210,6 +211,16 @@ class ItswCar extends Plugin {
 			'custom' => FALSE
 		]);
 		
+		$service->update('s_articles_attributes', 'google_produkt_id', 'string', [
+			'label' => ' Google Merchant Center Produkt-ID',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'position' => 109,
+			'custom' => FALSE
+		]);
+		
 		$service->update('s_order_basket_attributes', 'tecdoc_id', 'float', [
 			'label' => 'Tecdoc-ID',
 			'supportText' => '',
@@ -302,6 +313,7 @@ class ItswCar extends Plugin {
 			$entityManager->getClassMetadata(KbaCodes::class),
 			$entityManager->getClassMetadata(Car::class),
 			$entityManager->getClassMetadata(ArticleCarLinks::class),
+			$entityManager->getClassMetadata(GoogleMerchantCenterQueue::class),
 		];
 		
 		$entityManager->getConfiguration()->getMetadataCacheImpl()->deleteAll();
@@ -323,6 +335,7 @@ class ItswCar extends Plugin {
 			$entityManager->getClassMetadata(KbaCodes::class),
 			$entityManager->getClassMetadata(Car::class),
 			$entityManager->getClassMetadata(ArticleCarLinks::class),
+			$entityManager->getClassMetadata(GoogleMerchantCenterQueue::class),
 		];
 		
 		$entityManager->getConfiguration()->getMetadataCacheImpl()->deleteAll();

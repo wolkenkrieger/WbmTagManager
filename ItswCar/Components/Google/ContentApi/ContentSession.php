@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-namespace ItswCar\Components\Api\Resource\Google\ContentApi;
+namespace ItswCar\Components\Google\ContentApi;
 
 use DomainException;
 use Google\Auth\Cache\InvalidArgumentException;

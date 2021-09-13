@@ -32,6 +32,7 @@ class Services {
 	public $cache;
 	public int $shopId = 1;
 	public int $rootCategoryId = 5;
+	public $session;
 	
 	/**
 	 * Services constructor.
@@ -51,8 +52,10 @@ class Services {
 	
 		if ($this->container->initialized('front')) {
 			$this->front = $this->container->get('front');
-		} else {
-			$this->front = NULL;
+		}
+		
+		if ($this->container->initialized('session')) {
+			$this->session = $this->container->get('session');
 		}
 		
 		if ($this->basePath === null || $this->basePath === '') {

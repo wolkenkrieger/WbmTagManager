@@ -7,7 +7,7 @@
  * @package ItswCar\Components\Api\Resource\Google\ContentApi
  */
 
-namespace ItswCar\Components\Api\Resource\Google\ContentApi;
+namespace ItswCar\Components\Google\ContentApi;
 
 use Google\Service\ShoppingContent\Product;
 use Google\Service\ShoppingContent\Price;
@@ -15,7 +15,6 @@ use Google\Service\ShoppingContent\ProductShipping;
 use Google\Service\ShoppingContent\ProductShippingWeight;
 use Google_Service_ShoppingContent_Price;
 use Google_Service_ShoppingContent_ProductShipping;
-use ItswCar\Components\Api\Resource\Google\ContentApi\ContentSession;
 use Shopware\Models\Article\Article as ProductModel;
 
 class ContentProduct {
@@ -34,21 +33,24 @@ class ContentProduct {
 	
 	
 	/**
-	 * @param \Shopware\Models\Article\Article $product
-	 * @param array                            $config
-	 * @param int                              $shopID
-	 * @param bool                             $force
+	 * @param \Shopware\Models\Article\Article                          $product
+	 * @param array                                                     $config
+	 * @param int                                                       $shopID
+	 * @param \ItswCar\Components\Google\ContentApi\ContentSession|null $session
+	 * @param bool                                                      $force
 	 * @throws \Google\Exception
 	 * @throws \JsonException
 	 */
-	public function __construct(ProductModel $product, array $config, int $shopID = 1, bool $force = FALSE) {
+	public function __construct(ProductModel $product, array $config, int $shopID = 1, ?ContentSession $session = NULL, bool $force = FALSE) {
 		$this->product = $product;
 		$this->shopID = $shopID;
 		$this->force = $force;
 		$this->mediaService = Shopware()->Container()->get('shopware_media.media_service');
 		
-		if (is_null($this->session)) {
+		if (is_null($session)) {
 			$this->session = new ContentSession($config, $this->shopID);
+		} else {
+			$this->session = $session;
 		}
 		
 	}
@@ -83,7 +85,8 @@ class ContentProduct {
 			$discountProductPrice -= ($productPrice / 100 * $discount);
 		}
 		
-		$fakePrice = $productPrice * $this->getPriceFactor();
+		//$fakePrice = $productPrice * $this->getPriceFactor();
+		$fakePrice = $this->product->getMainDetail()->getAttribute()->getFakePrice()?:$productPrice;
 		
 		$description = str_ireplace([
 			'</ul><br><br><div id="description_oe">',
