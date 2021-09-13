@@ -4,8 +4,8 @@
 	<cronjob>
 		<name>ITSW - Synchronize Google Merchant Center Product Feed</name>
 		<action>Shopware_CronJob_ItswHandleGoogleMerchantCenterQueue</action>
-		<active>false</active>
-		<interval>300</interval>
+		<active>true</active>
+		<interval>120</interval>
 		<disableOnError>true</disableOnError>
 	</cronjob>
 </cronjobs>
