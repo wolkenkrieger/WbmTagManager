@@ -354,7 +354,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		}
 		
 		try {
-			$this->setProductFakePrice([], $product);
+			$this->setProductFakePrice($product);
 		} catch (OptimisticLockException | ORMException $e) {}
 		
 		if ($googleContentApi) {
@@ -474,7 +474,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		}
 		
 		try {
-			$this->setProductFakePrice([], $product);
+			$this->setProductFakePrice($product);
 		} catch (OptimisticLockException | ORMException $e) {}
 		
 		if ($googleContentApi) {
@@ -1913,14 +1913,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * @param array|null                            $contentProduct
-	 * @param \Shopware\Models\Article\Article|null $product
+	 * @param \Shopware\Models\Article\Article $product
 	 * @throws \Doctrine\ORM\ORMException
 	 * @throws \Doctrine\ORM\OptimisticLockException
 	 */
-	private function setProductFakePrice(?array $contentProduct, ?ProductModel $product): void {
-		$response = $contentProduct['response'] ?? NULL;
-		$contentProduct = $contentProduct['contentProduct'] ?? NULL;
+	private function setProductFakePrice(ProductModel $product): void {
 		$attribute = $this->getManager()->getRepository(Attribute::class)
 			->findOneBy([
 				'articleDetailId' => $product->getMainDetail()->getId()
@@ -1937,12 +1934,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			}
 			
 			$productPrice *= (($product->getTax()->getTax() + 100) / 100);
-			
-			if ($contentProduct && $response && $response->getId()) {
-				$fakePrice = $contentProduct->getPrice()->getValue();
-			} else {
-				$fakePrice = $productPrice * $this->getPriceFactor();
-			}
+			$fakePrice = $productPrice * $this->getPriceFactor(1, 1.345);
 			
 			$this->getManager()->persist($attribute);
 			$attribute->setFakePrice($fakePrice);
