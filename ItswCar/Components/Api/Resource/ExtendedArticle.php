@@ -2675,10 +2675,13 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
+	 * @param int   $min
+	 * @param float $max
 	 * @return float
 	 */
-	private function getPriceFactor(): float {
-		return ((float)rand() / (float)getrandmax()) + 1.1111;
+	private function getPriceFactor(int $min = 1, float $max = 1.987): float {
+		//return ((float)mt_rand() / (float)mt_getrandmax()) + 1.1111;
+		return $min + mt_rand() / mt_getrandmax() * ($max - $min);
 	}
 	
 	/**
