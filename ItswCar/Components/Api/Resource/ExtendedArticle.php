@@ -1929,12 +1929,15 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			foreach($product->getMainDetail()->getPrices() as $price) {
 				if ($price->getCustomerGroup()->getKey() === 'EK') {
 					$productPrice = $price->getPrice();
+					if ($discount = $price->getCustomerGroup()->getDiscount()) {
+						$productPrice -= ($productPrice / 100 * $discount);
+					}
 					break;
 				}
 			}
 			
 			$productPrice *= (($product->getTax()->getTax() + 100) / 100);
-			$fakePrice = $productPrice * $this->getPriceFactor(1, 1.3);
+			$fakePrice = $productPrice * $this->getPriceFactor(1, 1.543);
 			
 			$this->getManager()->persist($attribute);
 			$attribute->setFakePrice($fakePrice);
