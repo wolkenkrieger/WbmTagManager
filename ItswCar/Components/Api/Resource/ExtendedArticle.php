@@ -477,7 +477,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			$this->setProductFakePrice($product);
 		} catch (OptimisticLockException | ORMException $e) {}
 		
-		if ($googleContentApi) {
+		if ($googleContentApi || $this->isInQueue($product)) {
 			$queueId = $this->addToGoogleMerchantCenterQueue($product, 'update');
 		}
 		
@@ -2696,5 +2696,16 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		}
 		
 		return $entity->getId();
+	}
+	
+	/**
+	 * @param \Shopware\Models\Article\Article $product
+	 * @return bool
+	 */
+	private function isInQueue(ProductModel $product): bool {
+		return NULL !== $this->getManager()->getRepository(GoogleMerchantCenterQueue::class)
+			->findOneBy([
+				'articleId' => $product->getId()
+			]);
 	}
 }
