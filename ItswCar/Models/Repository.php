@@ -12,10 +12,12 @@ namespace ItswCar\Models;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Shopware\Components\Model\ModelRepository;
 use Shopware\Models\Article\Detail;
+use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 
 class Repository extends ModelRepository {
 	/**
@@ -473,5 +475,225 @@ class Repository extends ModelRepository {
 				$builder->addOrderBy($column, $order);
 			}
 		}
+	}
+	
+	/**
+	 * @param int $tecdocId
+	 * @return array|null
+	 */
+	public function getCarDisplayForView(int $tecdocId): ?array {
+		if (!$tecdocId) {
+			return NULL;
+		}
+		
+		try {
+			$car = $this->getCarsQuery([
+				'select' => 'cars',
+				'conditions' => [
+					'cars.tecdocId' => $tecdocId
+				]
+			])
+				->useQueryCache(TRUE)
+				->getOneOrNullResult();
+			
+			if (is_object($car)) {
+				return [
+					'description' => sprintf('%s %s %s %d PS', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay(), $car->getPs()),
+					'title' => sprintf('%s %s %s - %d PS - %s ', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay(), $car->getPs(), $car->getBuildFrom()->format('Y'))
+				];
+			}
+		} catch (NonUniqueResultException $nonUniqueResultException) {}
+		
+		return NULL;
+	}
+	
+	/**
+	 * @param int $tecdocId
+	 * @return array
+	 */
+	public function getVariantIdsByTecdocId(int $tecdocId): array {
+		$carLinks = $this->getCarLinksQuery([
+				'select' => [
+					'articleCarLinks.articleDetailsId'
+				],
+				'conditions' => [
+					'articleCarLinks.tecdocId' => $tecdocId
+				]
+			])
+			->getArrayResult();
+		
+		return array_column($carLinks, 'articleDetailsId');
+	}
+	
+	/**
+	 * @return array
+	 * @throws \Doctrine\DBAL\Exception
+	 */
+	public function getVariantIdsWithoutArticleCarLink(): array {
+		$builder = Shopware()->Container()->get('dbal_connection')->createQueryBuilder();
+		$result = $builder
+			->select(['details.id'])
+			->from('s_articles_details', 'details')
+			->join('details', 's_articles', 'articles', 'details.id = articles.main_detail_id and articles.active = 1 and details.active = 1')
+			->leftJoin('details', 'itsw_article_car_links', 'carLinks', 'details.id = carLinks.article_details_id and carLinks.active = 1')
+			->where('carLinks.article_details_id IS NULL')
+			->execute()
+			->fetchAll(\PDO::FETCH_COLUMN);
+		
+		return array_map(static function($value) {return (int)$value;}, $result);
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getManufacturersForCarfinder(): array {
+		$manufacturers = $this->getManufacturersQuery([
+				'select' => [
+					'manufacturers'
+				],
+				'conditions' => [
+					'manufacturers.active = 1'
+				],
+				'orders' => [
+					'manufacturers.display' => 'ASC'
+				]
+			])
+			->getResult();
+		
+		foreach($manufacturers as $manufacturer) {
+			$return[] = [
+				'name' => $manufacturer->getName(),
+				'url' => Shopware()->Container()->get('itsw.helper.seo')->getCleanedStringForUrl($manufacturer->getName()),
+				'display' => $manufacturer->getDisplay(),
+				'id' => $manufacturer->getId(),
+				'topBrand' => $manufacturer->getTopBrand()
+			];
+		}
+		
+		return $return??[];
+	}
+	
+	/**
+	 * @param int|null $manufacturerId
+	 * @return array
+	 */
+	public function getModelsForCarfinder(int $manufacturerId = NULL): array {
+		if (!$manufacturerId) {
+			throw new ParameterNotFoundException("manufacturerId");
+		}
+		
+		$models = $this->getModelsForCarfinderQuery($manufacturerId, [
+				'models.active = 1'
+			])
+			->getResult();
+		
+		foreach($models as $model) {
+			$buildFrom = \DateTime::createFromFormat('Y-m-d H:i:s', $model['buildFrom'])->format('m/Y');
+			$buildTo = \DateTime::createFromFormat('Y-m-d H:i:s', $model['buildTo'])->format('m/Y');
+			
+			$return[$model['modelDisplay']][] = [
+				'typeDisplay' => $model['typeDisplay'],
+				'buildFrom' => $buildFrom,
+				'buildTo' => $buildTo,
+				'typeId' => $model['typeId'],
+				'modelId' => $model['modelId']
+			];
+		}
+		
+		return $return??[];
+	}
+	
+	/**
+	 * @param int|null $manufacturerId
+	 * @param int|null $modelId
+	 * @param int|null $typeId
+	 * @return array
+	 */
+	public function getTypesForCarfinder(int $manufacturerId = NULL, int $modelId = NULL, int $typeId = NULL): array {
+		if (!$manufacturerId) {
+			throw new ParameterNotFoundException("manufacturerId");
+		}
+		if (!$modelId) {
+			throw new ParameterNotFoundException("modelId");
+		}
+		$types = $this->getTypesForCarfinderQuery($manufacturerId, $modelId, $typeId, [
+				'cars.active = 1'
+			])
+			->getResult();
+		
+		foreach($types as $type) {
+			$return[] = [
+				'tecdocId' => $type['tecdocId'],
+				'ccm' => $type['ccm'],
+				'display' => sprintf('%.1f', $type['ccm'] / 1000),
+				'ps' => $type['ps'],
+				'kw' => $type['kw'],
+				'platform' => $type['platform'],
+				'typeId' => $type['typeId']
+			];
+		}
+		
+		
+		return $return??[];
+	}
+	
+	/**
+	 * @param array $options
+	 * @return array
+	 */
+	public function getCarsForCarfinder(array $options = []): array {
+		$cars = $this->getCars($options);
+		
+		foreach($cars as $car) {
+			$codes = [];
+			foreach($car->getCodes() as $kbaCodes) {
+				$codes[] = [
+					'hsn' => $kbaCodes->getHsn(),
+					'tsn' => $kbaCodes->getTsn()
+				];
+			}
+			$result[] = array_merge($car->toArray(), [
+				'manufacturer' => $car->getManufacturer()->toArray(),
+				'model' => $car->getModel()->toArray(),
+				'type' => $car->getType()->toArray(),
+				'platform' => $car->getPlatform()->toArray(),
+				'codes' => $codes,
+				'buildFrom' => $car->getBuildFrom()->format('m/Y'),
+				'buildTo' => $car->getBuildTo()?$car->getBuildTo()->format('m/Y') : '---'
+			]);
+		}
+		
+		return $result??[];
+	}
+	
+	/**
+	 * @param array $options
+	 * @return mixed
+	 */
+	public function getCars(array $options = []) {
+		return $this->getCarsQuery($options)->getResult();
+	}
+	
+	/**
+	 * @param array $options
+	 * @return mixed
+	 */
+	public function getCodes(array $options = []) {
+		return $this->getCodesQuery($options)->getResult();
+	}
+	
+	/**
+	 * @param int $tecdocId
+	 * @return array
+	 */
+	public function getIdsByTecdocId(int $tecdocId): array {
+		$ids = $this->getIdsByTecdocIdQuery($tecdocId)
+			->getArrayResult();
+		
+		if (!empty($ids)) {
+			return reset($ids);
+		}
+		
+		return [];
 	}
 }

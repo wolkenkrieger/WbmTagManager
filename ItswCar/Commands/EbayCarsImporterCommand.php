@@ -30,16 +30,16 @@ class EbayCarsImporterCommand extends ShopwareCommand {
 	private $entityManager;
 	private $fileName = 'fahrzeugliste_de_20.07_q3.csv';
 	
+	
 	/**
 	 * EbayCarsImporterCommand constructor.
 	 * @param \ItswCar\Components\Services\Services $itswCarServices
 	 */
 	public function __construct(\ItswCar\Components\Services\Services $itswCarServices) {
+		$this->setContainer(Shopware()->Container());
 		$this->itswCarServices = $itswCarServices;
-		$this->setContainer($itswCarServices->getContainer());
-		$this->entityManager = $itswCarServices->getModelManager();
-		$this->environment = $itswCarServices->getEnvironment();
-		$this->docPath = $itswCarServices->getDocPath();
+		$this->entityManager = Shopware()->Models();
+		$this->docPath = $this->getContainer()->get('itsw.helper.config')->getDocPath();
 		
 		parent::__construct();
 	}

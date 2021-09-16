@@ -26,25 +26,55 @@
 			<argument type="service" id="itswcar.services"/>
 		</service>
 		
-		<service id="itsw.customer_group_condition_handler_dbal"
+		<service id="itswcar.customer_group_condition_handler_dbal"
 				 decorates="shopware_searchdbal.customer_group_condition_handler_dbal"
 				 class="%itswcar.customer_group_condition_handler.class%">
 			<tag name="condition_handler_dbal" />
 		</service>
 	
-		<service id="itsw.service.sitemap_writer"
+		<service id="itswcar.service.sitemap_writer"
 				 class="%itswcar.sitemap_writer_service.class%"
 				 decorates="shopware_bundle_sitemap.service.sitemap_writer"
 				 public="false">
-			<argument type="service" id="itsw.service.sitemap_name_generator"/>
+			<argument type="service" id="itswcar.service.sitemap_name_generator"/>
 			<argument type="service" id="Shopware\Components\Filesystem\PrefixFilesystem"/>
 			<argument type="service" id="corelogger"/>
-			<argument type="service" id="itsw.service.sitemap_writer.inner"/>
+			<argument type="service" id="itswcar.service.sitemap_writer.inner"/>
 		</service>
 	
-		<service id="itsw.service.sitemap_name_generator"
+		<service id="itswcar.service.sitemap_name_generator"
 				 class="%itswcar.sitemap_name_generator_service.class%" >
 			<argument type="service" id="Shopware\Components\Filesystem\PrefixFilesystem"/>
+		</service>
+	
+		<service id="itswcar.service.debug_logger" class="Shopware\Components\Logger" public="true">
+			<argument>itsw_car_debug</argument>
+			<call method="pushHandler">
+				<argument type="service" id="itswcar.monolog.handler.rotating_file.debug" />
+			</call>
+		</service>
+	
+		<service id="itswcar.service.error_logger" class="Shopware\Components\Logger" public="true">
+			<argument>itsw_car_error</argument>
+			<call method="pushHandler">
+				<argument type="service" id="itswcar.monolog.handler.rotating_file.warning" />
+			</call>
+		</service>
+	
+		<service id="itswcar.monolog.handler.rotating_file.debug" class="Monolog\Handler\RotatingFileHandler" public="false">
+			<argument>%kernel.logs_dir%/itsw_car_debug.log</argument>
+			<argument>14</argument>
+			<call method="pushProcessor">
+				<argument type="service" id="monolog.processor.uid"/>
+			</call>
+		</service>
+	
+		<service id="itswcar.monolog.handler.rotating_file.warning" class="Monolog\Handler\RotatingFileHandler" public="false">
+			<argument>%kernel.logs_dir%/itsw_car_error.log</argument>
+			<argument>14</argument>
+			<call method="pushProcessor">
+				<argument type="service" id="monolog.processor.uid"/>
+			</call>
 		</service>
     </services>
 </container>

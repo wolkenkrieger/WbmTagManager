@@ -17,19 +17,19 @@
 
 namespace ItswCar\Components\Google\ContentApi;
 
-use DomainException;
 use Google\Auth\Cache\InvalidArgumentException;
 use Google\Exception;
 use Google_Client;
 use Google_Service_ShoppingContent;
+use ItswCar\Traits\LoggingTrait;
 
 class ContentSession {
+	use LoggingTrait;
+	
 	protected const CONFIGFILE_NAME = 'merchant-info.json';
 	protected const SERVICE_ACCOUNT_FILE_NAME = 'service-account.json';
 	
 	private	$config;
-	private $authConfig;
-	private int $shopID;
 	public string $merchantId;
 	public bool $mcaStatus;
 	public Google_Service_ShoppingContent $service;
@@ -42,7 +42,31 @@ class ContentSession {
 	 * @throws \JsonException
 	 */
 	public function __construct (array $config = [], int $shopID = 1) {
-		$this->shopID = $shopID;
+		$this->config = $config;
+		$clientConfig = $authConfig = [];
+		
+		if (empty($this->config)) {
+			$configDir = implode(DIRECTORY_SEPARATOR, [__DIR__, 'config']);
+			$configFile = implode(DIRECTORY_SEPARATOR, [$configDir, self::CONFIGFILE_NAME]);
+			if (file_exists($configFile)) {
+				$clientConfig = json_decode(file_get_contents($configFile), TRUE, 512, JSON_THROW_ON_ERROR);
+				if (is_null($clientConfig)) {
+					throw new InvalidArgumentException();
+				}
+			}
+			
+			$accountFile = implode(DIRECTORY_SEPARATOR, [$configDir, self::SERVICE_ACCOUNT_FILE_NAME]);
+			if (file_exists($accountFile)) {
+				$authConfig = json_decode(file_get_contents($accountFile), TRUE, 512, JSON_THROW_ON_ERROR);
+				if (is_null($authConfig)) {
+					throw new InvalidArgumentException();
+				}
+			}
+			
+			$this->config = array_merge($clientConfig, $authConfig);
+		}
+		
+		/*
 		if (!empty($config) && isset($config['merchant_info']) && $config['merchant_info']) {
 			$this->config = json_decode($config['merchant_info'], TRUE, 512, JSON_THROW_ON_ERROR);
 			if (is_null($this->config)) {
@@ -74,11 +98,11 @@ class ContentSession {
 				}
 			}
 		}
+		*/
 		
 		$client = new Google_Client();
 		$client->setApplicationName('ATW Onlineshop Google Shopping');
 		$client->setScopes(Google_Service_ShoppingContent::CONTENT);
-		
 		$this->authenticateFromConfig($client);
 		$this->prepareServices($client);
 		$this->retrieveConfig();
@@ -89,7 +113,7 @@ class ContentSession {
 	 */
 	protected function authenticateFromConfig(Google_Client $client): void {
 		try {
-			$client->setAuthConfig($this->authConfig);
+			$client->setAuthConfig($this->config);
 			$client->setScopes(Google_Service_ShoppingContent::CONTENT);
 		} catch (Exception $exception) {
 			throw new InvalidArgumentException();

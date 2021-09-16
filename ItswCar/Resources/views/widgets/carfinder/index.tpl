@@ -53,9 +53,9 @@
 												name="manufacturer"
 												data-no-fancy-select="true"
 												disabled
-												data-itsw-select="true"
-												data-itsw-trigger="models"
-												data-itsw-basepath="{$basePath}"
+												data-itsw-car-select="true"
+												data-itsw-car-trigger="models"
+												data-itsw-car-basepath="{$basePath}"
 										>
 										</select>
 									</div>
@@ -65,9 +65,9 @@
 												name="model"
 												data-no-fancy-select="true"
 												disabled
-												data-itsw-select="true"
-												data-itsw-trigger="types"
-												data-itsw-basepath="{$basePath}"
+												data-itsw-car-select="true"
+												data-itsw-car-trigger="types"
+												data-itsw-car-basepath="{$basePath}"
 										>
 										</select>
 									</div>
@@ -76,8 +76,8 @@
 										<select id="types"
 												name="type"
 												data-no-fancy-select="true"
-												data-itsw-select="true"
-												data-itsw-basepath="{$basePath}"
+												data-itsw-car-select="true"
+												data-itsw-car-basepath="{$basePath}"
 												disabled
 										>
 										</select>

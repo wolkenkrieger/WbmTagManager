@@ -20,6 +20,7 @@ use ItswCar\Models\Car;
 use ItswCar\Models\ArticleCarLinks;
 use ItswCar\Models\GoogleMerchantCenterQueue;
 
+use Shopware\Components\Logger;
 use Shopware\Components\Plugin;
 use Shopware\Components\Plugin\Context\ActivateContext;
 use Shopware\Components\Plugin\Context\DeactivateContext;
@@ -38,6 +39,22 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 
 
 class ItswCar extends Plugin {
+	/**
+	 * @var \Shopware\Components\Logger|null
+	 */
+	public static ?Logger $logger;
+	
+	/**
+	 * @var \Shopware\Components\Logger|null
+	 */
+	public static ?Logger $warningLogger;
+	
+	/**
+	 * @var int
+	 */
+	public static int $logLevel;
+	
+	
 	/**
 	 * @param \Shopware\Components\Plugin\Context\InstallContext $context
 	 */
@@ -363,8 +380,8 @@ class ItswCar extends Plugin {
 		
 		$collection->add(new CookieStruct(
 			'itswCache',
-			'/^itsw-[a-z0-9]+-data$/',
-			'Modul "ITSW Car" - technische Daten',
+			'/^itsw-[a-z0-9-_]+-data$/',
+			'ITSW Module - technische Daten',
 			CookieGroupStruct::TECHNICAL
 		));
 		

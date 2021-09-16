@@ -10,32 +10,13 @@
 
 namespace ItswCar\Components\Eventhandlers;
 
-
 use Doctrine\DBAL\Connection;
+use ItswCar\Models\Car;
 use Shopware\Bundle\SearchBundle\ConditionInterface;
 use Shopware\Bundle\SearchBundleDBAL\QueryBuilder;
 use Shopware\Bundle\StoreFrontBundle\Struct\ShopContextInterface;
-use Shopware\Components\DependencyInjection\Container;
-
-use ItswCar\Components\Services\Services;
 
 class CategoryConditionHandler extends \Shopware\Bundle\SearchBundleDBAL\ConditionHandler\CategoryConditionHandler {
-	protected ?Services $service = NULL;
-	protected array $sessionData = [];
-	
-	/**
-	 * CategoryConditionHandler constructor.
-	 * @param \ItswCar\Components\Services\Services $service
-	 */
-	public function __construct(Services $service) {
-		if (!$this->service) {
-			$this->service = $service;
-		}
-		
-		if (!is_array($this->sessionData) || empty($this->sessionData)) {
-			$this->sessionData = $this->service->getSessionData();
-		}
-	}
 	
 	/**
 	 * @param \Shopware\Bundle\SearchBundle\ConditionInterface              $condition
@@ -43,11 +24,21 @@ class CategoryConditionHandler extends \Shopware\Bundle\SearchBundleDBAL\Conditi
 	 * @param \Shopware\Bundle\StoreFrontBundle\Struct\ShopContextInterface $context
 	 */
 	public function generateCondition(ConditionInterface $condition, QueryBuilder $query, ShopContextInterface $context): void {
+		$container = Shopware()->Container();
+		$repository = $container->get('models')->getRepository(Car::class);
+		
+		if (!$container->has('itsw.helper.session') ||
+			!$container->has('itsw.helper.config') ||
+			!$container->get('itsw.helper.config')->isFront()) {
+			return;
+		}
+		
+		$sessionData = $container->get('itsw.helper.session')->getSessionData();
+		
 		parent::generateCondition($condition, $query, $context);
 		
-		if (array_key_exists('car', $this->sessionData) && $this->sessionData['car']) {
-			
-			$variantIds = array_merge($this->service->getVariantIdsByTecdocId($this->sessionData['car']), $this->service->getVariantIdsWithoutArticleCarLink());
+		if ($sessionData['car']) {
+			$variantIds = array_merge($repository->getVariantIdsByTecdocId($sessionData['car']), $repository->getVariantIdsWithoutArticleCarLink());
 			$query->andWhere('product.main_detail_id IN (:variantIds)')
 				->setParameter('variantIds', $variantIds, Connection::PARAM_INT_ARRAY);
 		}

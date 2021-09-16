@@ -14,47 +14,21 @@ namespace ItswCar\Components\Subscribers;
 use Enlight\Event\SubscriberInterface;
 use ItswCar\Components\Eventhandlers\Eventhandlers as Eventhandler;
 use ItswCar\Components\Eventhandlers\CategoryConditionHandler;
-use ItswCar\Components\Services\Services;
-use Shopware\Components\DependencyInjection\Container;
-use Shopware\Components\Model\ModelManager;
-use Shopware\Components\Plugin\Configuration\CachedReader;
-use Shopware\Models\Shop\Shop;
-use Shopware\Bundle\AttributeBundle\Service\DataLoader;
-use Shopware\Bundle\AttributeBundle\Service\DataPersister;
 
 
 class Subscribers implements SubscriberInterface {
 	
 	protected Eventhandler $eventHandler;
-	protected Container $container;
-	protected Services $service;
-	protected ModelManager $modelManager;
 	protected string $pluginDir;
-	protected array $config;
-	protected Shop $shop;
+	protected bool $isFront;
 	
 	/**
-	 * @param \Shopware\Components\DependencyInjection\Container $container
-	 * @param \Shopware\Components\Model\ModelManager            $modelManager
-	 * @param string                                             $pluginDir
-	 * @param string                                             $pluginName
+	 * @param string $pluginDir
 	 */
-	public function __construct(Container $container,
-	                            ModelManager $modelManager,
-	                            string $pluginDir,
-	                            string $pluginName)	{
-		$this->container = $container;
-		$this->modelManager = $modelManager;
+	public function __construct(string $pluginDir)	{
 		$this->pluginDir = $pluginDir;
-		
-		if ($this->container->initialized('shop')) {
-			$this->shop = $this->container->get('shop');
-		} else {
-			$this->shop = $this->container->get('models')->getRepository(Shop::class)->getActiveDefault();
-		}
-		
-		$this->config = $this->container->get(CachedReader::class)->getByPluginName($pluginName, $this->shop->getID());
-		$this->eventHandler = new Eventhandler($container, $modelManager, $pluginDir, $this->config, $this->shop);
+		$this->eventHandler = new Eventhandler($pluginDir);
+		$this->isFront = Shopware()->Container()->get('itsw.helper.config')->isFront();
 	}
 	
 	/**
@@ -102,14 +76,18 @@ class Subscribers implements SubscriberInterface {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		$this->eventHandler->onFrontRouteStartup($controllerEventArgs);
+		if ($this->isFront) {
+			$this->eventHandler->onFrontRouteStartup($controllerEventArgs);
+		}
 	}
 	
 	/**
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		$this->eventHandler->onFrontRouteShutdown($controllerEventArgs);
+		if ($this->isFront) {
+			$this->eventHandler->onFrontRouteShutdown($controllerEventArgs);
+		}
 	}
 	
 	/**
@@ -123,11 +101,7 @@ class Subscribers implements SubscriberInterface {
 	 * @return \ItswCar\Components\Eventhandlers\CategoryConditionHandler|null
 	 */
 	public function onCollectConditionHandlers(): ?CategoryConditionHandler {
-		if ($this->container->initialized('shop')) {
-			return new CategoryConditionHandler($this->container->get('itswcar.services'));
-		}
-		
-		return NULL;
+		return new CategoryConditionHandler();
 	}
 	
 	/**

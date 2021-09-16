@@ -19,6 +19,7 @@ use ItswCar\Components\Google\ContentApi\ContentSession;
 use ItswCar\Components\Services\Services;
 use ItswCar\Models\Car;
 use ItswCar\Models\GoogleMerchantCenterQueue;
+use ItswCar\Traits\LoggingTrait;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Attribute\OrderBasket;
 use Shopware\Models\Order\Basket;
@@ -27,12 +28,17 @@ use Shopware\Models\Article\Article as ProductModel;
 use Shopware\Models\Shop\Shop;
 
 class Eventhandlers {
+	use LoggingTrait;
+	
 	protected Services $service;
 	protected string $pluginDir;
 	protected array $config;
 	private ModelManager $modelManager;
 	protected Container $container;
 	protected Shop $shop;
+	protected $configHelper;
+	protected $sessionHelper;
+	protected $seoHelper;
 	
 	/* Hydration mode constants */
 	/**
@@ -48,23 +54,32 @@ class Eventhandlers {
 	public const CRON_GMC_QUEUE_LIMIT = 10;
 	
 	/**
-	 * @param \Shopware\Components\DependencyInjection\Container $container
-	 * @param \Shopware\Components\Model\ModelManager            $modelManager
-	 * @param string                                             $pluginDir
-	 * @param array                                              $config
-	 * @param \Shopware\Models\Shop\Shop                         $shop
+	 * @param string $pluginDir
 	 */
-	public function __construct(Container $container,
-	                            ModelManager $modelManager,
-	                            string $pluginDir,
-	                            array $config,
-								Shop $shop) {
-		$this->container = $container;
+	public function __construct(string $pluginDir) {
+		$this->container = Shopware()->Container();
+		$this->modelManager = $this->container->get('models');
 		$this->pluginDir = $pluginDir;
-		$this->config = $config;
-		$this->modelManager = $modelManager;
+		
 		$this->service = $this->container->get('itswcar.services');
-		$this->shop = $shop;
+		
+		if ($this->container->initialized('shop')) {
+			$this->shop = $this->container->get('shop');
+		} else {
+			$this->shop = $this->modelManager->getRepository(Shop::class)->getActiveDefault();
+		}
+		
+		if ($this->container->has('itsw.helper.config')) {
+			$this->configHelper = $this->container->get('itsw.helper.config');
+		}
+		
+		if ($this->container->has('itsw.helper.session')) {
+			$this->sessionHelper = $this->container->get('itsw.helper.session');
+		}
+		
+		if ($this->container->has('itsw.helper.seo')) {
+			$this->seoHelper = $this->container->get('itsw.helper.seo');
+		}
 	}
 	
 	/**
@@ -84,12 +99,12 @@ class Eventhandlers {
 		}
 		
 		$templateVars = [
-			'session' => $this->service->getSessionData(),
+			'session' => $this->sessionHelper->getSessionData(),
 			'basketdata' => $basketData,
 			'google' => $this->getGoogleConfigOptions()
 		];
 		
-		$subject->View()->assign('ITSW', $templateVars, TRUE);
+		$subject->View()->assign('ItswCar', $templateVars, TRUE);
 	}
 	
 	/**
@@ -98,8 +113,8 @@ class Eventhandlers {
 	public function onPreDispatchFrontend(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
 		$subject = $actionEventArgs->getSubject();
 		
-		$subject->View()->assign('ITSW-MAINTENANCEMODE', $this->service->getServiceMode());
-		$subject->View()->assign('ITSW-DEVELOPMENTMODE', $this->service->getDevelopmentMode());
+		$subject->View()->assign('ITSW-MAINTENANCEMODE', $this->configHelper ? $this->configHelper->isMaintenanceMode() : FALSE);
+		$subject->View()->assign('ITSW-DEVELOPMENTMODE', $this->configHelper ? $this->configHelper->isDevelopmentMode() : FALSE);
 	}
 	
 	/**
@@ -112,7 +127,7 @@ class Eventhandlers {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		$sessionData = $this->service->getSessionData();
+		$sessionData = $this->sessionHelper->getSessionData();
 		$queryPath = $controllerEventArgs->getRequest()->getPathInfo();
 		if (!$queryPath || $queryPath === '/' || stripos($queryPath, 'carfinder') !== FALSE) {
 			return;
@@ -153,9 +168,9 @@ class Eventhandlers {
 								$this->setSessionData($sessionData);
 							}
 						} catch(NonUniqueResultException $nonUniqueResultException) {
-							$this->setLog($nonUniqueResultException);
+							$this->error($nonUniqueResultException);
 						} catch (\JsonException $jsonException) {
-							$this->setLog($jsonException);
+							$this->error($jsonException);
 						}
 					}
 					*/
@@ -210,7 +225,7 @@ class Eventhandlers {
 		$articles = $return['sArticles']??[];
 		foreach($articles as &$article) {
 			$this->setPseudoprice($article);
-			$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
+			$article['linkDetails'] = ($this->seoHelper->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
 		}
 		unset($article);
 		$return['sArticles'] = $articles;
@@ -223,7 +238,7 @@ class Eventhandlers {
 	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs): void {
 		$article = $eventArgs->getReturn();
 		$this->setPseudoprice($article);
-		$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
+		$article['linkDetails'] = ($this->seoHelper->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
 		$eventArgs->setReturn($article);
 	}
 	
@@ -267,7 +282,7 @@ class Eventhandlers {
 			'Versandkostenfreie Lieferung in Deutschland'
 		]);
 		
-		$article['linkDetails'] = ($this->service->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
+		$article['linkDetails'] = ($this->seoHelper->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
 		
 		if (empty($article['keywords'])) {
 			$article['keywords'] = $this->getKeywords($article['description_long']);
@@ -298,7 +313,7 @@ class Eventhandlers {
 	 */
 	private function setCategoryLink($category) {
 		if (!$category['external']) {
-			$category['link'] = ($this->service->getCategorySeoUrl($category['id'] ?: $category['link']));
+			$category['link'] = ($this->seoHelper->getCategorySeoUrl($category['id'] ?: $category['link']));
 		}
 		
 		return $category;
@@ -377,7 +392,7 @@ class Eventhandlers {
 	 */
 	private function getMaxShippingTime(array $basket): int {
 		if ($this->isUnavailableProductInBasket($basket)) {
-			$maxShippingTime = $this->config['google_default_shipping_time_not_in_stock']??14;
+			$maxShippingTime = $this->configHelper->getValue('google_default_shipping_time_not_in_stock', 'ItswCar')?:14;
 			
 			return (int)$maxShippingTime;
 		}
@@ -419,24 +434,24 @@ class Eventhandlers {
 	 */
 	private function getGoogleConfigOptions(): array {
 		
-		if (isset($this->config['merchant_info']) && $this->config['merchant_info']) {
-			$merchantInfo = json_decode($this->config['merchant_info'], TRUE, 512, JSON_THROW_ON_ERROR);
+		if ($merchantInfo = $this->configHelper->getValue('merchant_info', 'ItswCar')) {
+			$merchantInfo = json_decode($merchantInfo, TRUE, 512, JSON_THROW_ON_ERROR);
 			if (is_null($merchantInfo)) {
 				throw new InvalidArgumentException();
 			}
 		}
 		
-		if (isset($this->config['service_account']) && $this->config['service_account']) {
-			$accountInfo = json_decode($this->config['service_account'], TRUE, 512, JSON_THROW_ON_ERROR);
+		if ($accountInfo = $this->configHelper->getValue('service_account', 'ItswCar')) {
+			$accountInfo = json_decode($accountInfo, TRUE, 512, JSON_THROW_ON_ERROR);
 			if (is_null($accountInfo)) {
 				throw new InvalidArgumentException();
 			}
 		}
 		
 		return array_merge($merchantInfo, $accountInfo, [
-			'showbadge' => $this->config['google_show_badge'],
-			'badgeposition' => $this->config['google_badge_position'],
-			'surveyoptinstyle' => $this->config['google_survey_opt_in_style']
+			'showbadge' => $this->configHelper->getValue('google_show_badge', 'ItswCar'),
+			'badgeposition' => $this->configHelper->getValue('google_badge_position', 'ItswCar'),
+			'surveyoptinstyle' => $this->configHelper->getValue('google_survey_opt_in_style', 'ItswCar')
 		]);
 	}
 	
@@ -449,7 +464,7 @@ class Eventhandlers {
 			$article['pseudoprice'] = $fakePrice;
 			$article['pseudoprice_numeric'] = (float)$fakePrice;
 			$article['pseudopricePercent'] = $this->getFakePriceDiscountPercent($article['price_numeric'], $article['pseudoprice_numeric']);
-		} else if ($discount = $this->service->getUserGroupDiscount()) {
+		} else if ($discount = $this->configHelper->getUserGroupDiscount()) {
 			$article['has_pseudoprice'] = TRUE;
 			$article['pseudoprice'] = $this->getPrice($article['price_numeric'], $article['tax'], $discount);
 			$article['pseudoprice_numeric'] = $this->getPriceNum($article['price_numeric'], $article['tax'], $discount);
@@ -461,7 +476,7 @@ class Eventhandlers {
 	 * @param \Enlight_Event_EventArgs $eventArgs
 	 */
 	public function onBasketUpdateCartItemsUpdated(\Enlight_Event_EventArgs $eventArgs): void {
-		$sessionData = $this->service->getSessionData();
+		$sessionData = $this->sessionHelper->getSessionData();
 		
 		if (empty($sessionData) || is_null($sessionData['car'])) {
 			return;
@@ -530,7 +545,7 @@ class Eventhandlers {
 	 * @throws \Doctrine\ORM\NonUniqueResultException
 	 */
 	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): string {
-		$limit = $this->config['cronjob_handle_gmc_queue_limit']??self::CRON_GMC_QUEUE_LIMIT;
+		$limit = $this->configHelper->getValue('cronjob_handle_gmc_queue_limit', 'ItswCar') ?:self::CRON_GMC_QUEUE_LIMIT;
 		
 		try {
 			$list = $this->modelManager->getRepository(GoogleMerchantCenterQueue::class)->findBy([
@@ -539,7 +554,7 @@ class Eventhandlers {
 				'created' => 'ASC'
 			], (int)$limit);
 		} catch (\UnexpectedValueException $exception) {
-			$this->setLog($exception);
+			$this->error($exception);
 			$cronJob->setProcessed(TRUE);
 			return $exception->getMessage();
 		}
@@ -551,9 +566,9 @@ class Eventhandlers {
 		$counter = 0;
 		
 		try {
-			$googleContentApiSession = new ContentSession($this->config, $this->shop->getId());
+			$googleContentApiSession = new ContentSession($this->getGoogleConfigOptions(), $this->shop->getId());
 		} catch (Exception | \JsonException $exception) {
-			$this->setLog($exception);
+			$this->error($exception);
 			$cronJob->setProcessed(TRUE);
 			return $exception->getMessage();
 		}
@@ -587,7 +602,7 @@ class Eventhandlers {
 			try {
 				$contentProduct = new ContentProduct($product, $this->config, $this->shop->getId(), $googleContentApiSession);
 			} catch (Exception | \JsonException $exception) {
-				$this->setLog($exception);
+				$this->error($exception);
 				$cronJob->setProcessed(TRUE);
 				return $exception->getMessage();
 			}
@@ -609,7 +624,7 @@ class Eventhandlers {
 					$this->modelManager->persist($item);
 					$this->modelManager->flush($item);
 				} catch (\Exception $exception) {
-					$this->setLog($exception);
+					$this->error($exception);
 					$cronJob->setProcessed(TRUE);
 					return $exception->getMessage();
 				}
@@ -695,17 +710,5 @@ class Eventhandlers {
 		}
 		
 		return FALSE;
-	}
-	
-	/**
-	 * @param \Exception $e
-	 */
-	private function setLog(\Exception $e): void {
-		$this->service->pluginLogger->critical($e->getMessage(), [
-			'code' => $e->getCode(),
-			'file' => $e->getFile(),
-			'line' => $e->getLine(),
-			'trace' => $e->getTraceAsString()
-		]);
 	}
 }

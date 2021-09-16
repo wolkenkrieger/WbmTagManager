@@ -1,7 +1,7 @@
 {extends file="parent:frontend/detail/tabs.tpl"}
 
 {block name="frontend_detail_tabs_navigation_inner"}
-    {* ITSW Fits for cars tab *}
+    {* ItswCar Fits for cars tab *}
     {block name="itsw_frontend_detail_tabs_fitsforcars"}
         <a href="#" class="tab--link" title="{s name='DetailTabsFitsForCars' namespace="itsw/details"}Artikel passend für{/s}" data-tabName="fitsforcars">{s name='DetailTabsFitsForCars' namespace="itsw/details"}Artikel passend für{/s}</a>
     {/block}
@@ -21,7 +21,7 @@
 
 {block name="frontend_detail_tabs_content_inner"}
 
-    {* ITSW Fits for cars container *}
+    {* ItswCar Fits for cars container *}
     {block name="itsw_frontend_detail_tabs_content_fitsforcars"}
         <div class="tab--container">
             {block name="itsw_frontend_detail_tabs_content_fitsforcars_inner"}

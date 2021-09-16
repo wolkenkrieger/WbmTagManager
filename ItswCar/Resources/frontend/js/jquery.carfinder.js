@@ -114,9 +114,9 @@
             
             if (me.opts.trigger) {
                 $('#' + me.opts.trigger).
-                attr('data-itsw-manufacturer', me.opts.manufacturer).
-                attr('data-itsw-model', me.opts.model).
-                attr('data-itsw-type', me.opts.type).
+                attr('data-itsw-car-manufacturer', me.opts.manufacturer).
+                attr('data-itsw-car-model', me.opts.model).
+                attr('data-itsw-car-type', me.opts.type).
                 attr('data-itsw-car', me.opts.car).
                 trigger('empty');
             }
@@ -219,7 +219,7 @@
                     return;
                 }
             
-                attr = me.$el.attr('data-itsw-' + key);
+                attr = me.$el.attr('data-itsw-car-' + key);
             
                 if (typeof attr === 'undefined') {
                     attr = $('option:selected', me.$el).attr('data-' + key + 'id');
@@ -230,7 +230,7 @@
             
                 me.opts[key] = attr;
                 
-                //console.log(key + ':' + attr);
+                console.log(key + ':' + attr);
             
                 return true;
             });

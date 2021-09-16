@@ -8,7 +8,7 @@
  */
 (function($, window) {
     window.StateManager
-        .addPlugin('select[data-itsw-select="true"]', 'itswCarFinder', {
+        .addPlugin('select[data-itsw-car-select="true"]', 'itswCarFinder', {
             baseUrl: '/widgets/carfinder'
         })
         .addPlugin('.hsn-tsn--container button', 'itswCarFinder', {
@@ -23,7 +23,7 @@
     $(function($) {
         
         function unsetCar() {
-            var basePath = $('.itsw #manufacturers').attr('data-itsw-basepath');
+            var basePath = $('.itsw #manufacturers').attr('data-itsw-car-basepath');
             var baseUrl = '/widgets/carfinder';
             
             if (basePath) {
@@ -35,8 +35,8 @@
                 dataType: 'json'
             }).done(function (response) {
                 if (response.success === true) {
-                    $('.itsw #models').removeAttr('data-itsw-manufacturer');
-                    $('.itsw #types').removeAttr('data-itsw-manufacturer').removeAttr('data-itsw-model').removeAttr('data-itsw-type');
+                    $('.itsw #models').removeAttr('data-itsw-car-manufacturer');
+                    $('.itsw #types').removeAttr('data-itsw-car-manufacturer').removeAttr('data-itsw-car-model').removeAttr('data-itsw-car-type');
                     
                     if ($('.itsw #manufacturers').hasClass("select2-hidden-accessible")) {
                         $('.itsw #manufacturers').select2('destroy');

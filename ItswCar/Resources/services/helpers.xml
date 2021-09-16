@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+		   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		   xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+	
+    <parameters>
+        <parameter key="itsw.helper.config.class">ItswCar\Helpers\ConfigHelper</parameter>
+		<parameter key="itsw.helper.session.class">ItswCar\Helpers\SessionHelper</parameter>
+		<parameter key="itsw.helper.seo.class">ItswCar\Helpers\SeoHelper</parameter>
+    </parameters>
+
+    <services>
+        <service id="itsw.helper.config" class="%itsw.helper.config.class%" public="true">
+            <argument type="service" id="config" />
+        </service>
+	
+		<service id="itsw.helper.session" class="%itsw.helper.session.class%" public="true"/>
+		<service id="itsw.helper.seo" class="%itsw.helper.seo.class%" public="true"/>
+    </services>
+</container>
