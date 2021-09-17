@@ -39,6 +39,7 @@ class Eventhandlers {
 	protected $configHelper;
 	protected $sessionHelper;
 	protected $seoHelper;
+	public bool $isFrontEnd = FALSE;
 	
 	/* Hydration mode constants */
 	/**
@@ -65,6 +66,7 @@ class Eventhandlers {
 		
 		if ($this->container->initialized('shop')) {
 			$this->shop = $this->container->get('shop');
+			$this->isFrontEnd = TRUE;
 		} else {
 			$this->shop = $this->modelManager->getRepository(Shop::class)->getActiveDefault();
 		}
@@ -105,6 +107,8 @@ class Eventhandlers {
 		];
 		
 		$subject->View()->assign('ItswCar', $templateVars, TRUE);
+		
+		$this->debug(__METHOD__, $subject->View()->getAssign());
 	}
 	
 	/**
@@ -115,6 +119,8 @@ class Eventhandlers {
 		
 		$subject->View()->assign('ITSW-MAINTENANCEMODE', $this->configHelper ? $this->configHelper->isMaintenanceMode() : FALSE);
 		$subject->View()->assign('ITSW-DEVELOPMENTMODE', $this->configHelper ? $this->configHelper->isDevelopmentMode() : FALSE);
+		
+		$this->debug(__METHOD__, $subject->View()->getAssign());
 	}
 	
 	/**
@@ -127,12 +133,16 @@ class Eventhandlers {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		$sessionData = $this->sessionHelper->getSessionData();
 		$queryPath = $controllerEventArgs->getRequest()->getPathInfo();
-		if (!$queryPath || $queryPath === '/' || stripos($queryPath, 'carfinder') !== FALSE) {
+		
+		if (!$queryPath ||
+			$queryPath === '/' ||
+			$this->isStopWordInQueryPath($queryPath)
+		) {
 			return;
 		}
 		
+		$sessionData = $this->sessionHelper->getSessionData();
 		$queryPathParts = explode('/', $queryPath);
 		
 		$queryPathParts = array_filter($queryPathParts, static function ($value) {
@@ -143,13 +153,8 @@ class Eventhandlers {
 			$matches = $controllerEventArgs->getSubject()->Router()->match($queryPathPart);
 			if (is_array($matches)) {
 				if (isset($matches['m']) || isset($matches['mo']) || isset($matches['car'])) {
-					/*
-					if ( stripos($queryPath, 'carfinder') === FALSE) {
-						unset($queryPathParts[$index]);
-					}
-					*/
 					unset($queryPathParts[$index]);
-					/*
+					
 					if (((int)$matches['car'] && !$sessionData['car']) || ((int)$matches['car'] !== $sessionData['car'])) {
 						try {
 							$query = $this->modelManager->getRepository(Car::class)
@@ -165,7 +170,7 @@ class Eventhandlers {
 									'car' => $car['tecdocId']
 								];
 								
-								$this->setSessionData($sessionData);
+								$this->sessionHelper->setSessionData($sessionData);
 							}
 						} catch(NonUniqueResultException $nonUniqueResultException) {
 							$this->error($nonUniqueResultException);
@@ -173,14 +178,19 @@ class Eventhandlers {
 							$this->error($jsonException);
 						}
 					}
-					*/
 				}
 			}
 		}
 		
 		$uri = trim(implode('/', $queryPathParts), '/'). '/';
-		
 		$matches = $controllerEventArgs->getSubject()->Router()->match($uri);
+		
+		$this->debug(__METHOD__, [
+			'queryPath' => $queryPath,
+			'uri' => $uri,
+			'matches' => $matches,
+			'objectVars' => get_object_vars($this)
+		]);
 		
 		$controllerEventArgs->getRequest()->clearParams();
 		$controllerEventArgs->getRequest()->setParams($matches);
@@ -705,6 +715,25 @@ class Eventhandlers {
 		
 		foreach($stopWords as $stopWord) {
 			if (mb_stripos($source, $stopWord) !== FALSE || stripos($source, $stopWord) !== FALSE) {
+				return TRUE;
+			}
+		}
+		
+		return FALSE;
+	}
+	
+	/**
+	 * @param string $queryPath
+	 * @return bool
+	 */
+	private function isStopWordInQueryPath(string $queryPath): bool {
+		$stopWords = [
+			'widgets',
+			'backend'
+		];
+		
+		foreach($stopWords as $stopWord) {
+			if (stripos($queryPath, $stopWord) !== FALSE) {
 				return TRUE;
 			}
 		}

@@ -8,33 +8,43 @@
  * @package ItswCar\Controllers\Widgets
  */
 
+use ItswCar\Helpers\SessionHelper;
 use ItswCar\Models\ArticleCarLinks;
 use ItswCar\Models\Car;
+use ItswCar\Traits\LoggingTrait;
+use Shopware\Components\Model\ModelManager;
 
 class Shopware_Controllers_Widgets_Restrictions extends Enlight_Controller_Action {
+	use LoggingTrait;
+	
 	/**
-	 * @var ItswCar\Components\Services\Services
+	 * @var \ItswCar\Helpers\SessionHelper
 	 */
-	protected $service;
+	protected SessionHelper $sessionHelper;
+	/**
+	 * @var \Shopware\Components\Model\ModelManager
+	 */
+	private ModelManager $entityManager;
 	
 	/**
 	 *
 	 */
 	public function init(): void {
-		$this->service = Shopware()->Container()->get('itswcar.services');
-		$this->setContainer($this->service->getContainer());
+		$this->setContainer(Shopware()->Container());
+		$this->sessionHelper = $this->container->get('itsw.helper.session');
+		$this->entityManager = $this->container->get('models');
 	}
 	
 	/**
 	 *
 	 */
 	public function indexAction(): void {
-		$sessionData = $this->service->getSessionData();
+		$sessionData = $this->sessionHelper->getSessionData();
 		$tecdocId = $sessionData['car']??0;
 		$articleDetailsId = (int)$this->Request()->getParam('id', 0);
 		$viewData = [];
 		
-		$articleCarLinks = $this->service->getModelManager()
+		$articleCarLinks = $this->entityManager
 			->getRepository(ArticleCarLinks::class)
 			->getCarLinksQuery([
 				'select' => [
@@ -48,7 +58,7 @@ class Shopware_Controllers_Widgets_Restrictions extends Enlight_Controller_Actio
 			->getArrayResult();
 		
 		foreach($articleCarLinks as $articleCarLink) {
-			if ($car = $this->service->getModelManager()
+			if ($car = $this->entityManager
 					->getRepository(Car::class)
 					->getCarsQuery([
 						'select' => [
@@ -86,5 +96,7 @@ class Shopware_Controllers_Widgets_Restrictions extends Enlight_Controller_Actio
 		}
 		
 		$this->View()->assign('restrictionData', $viewData);
+		
+		$this->debug(__METHOD__, $this->View()->getAssign());
 	}
 }

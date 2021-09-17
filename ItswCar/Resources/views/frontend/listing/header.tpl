@@ -4,7 +4,7 @@
 {block name="frontend_index_header_meta_keywords"}{if $sCategoryContent.metaKeywords}{$sCategoryContent.metaKeywords|escapeHtml}{/if}{/block}
 
 {block name='frontend_index_header_meta_tags_opengraph'}
-    {s name="INDEX_META_DESCRIPTION_STANDARD" namespace="itsw/listing/header" assign="description"}{$sCategoryContent.name}{if $ITSW.session.description} für {$ITSW.session.description}{/if} zum Dauertiefpreis kaufen &star; Versandkostenfrei in Deutschland{/s}
+    {s name="INDEX_META_DESCRIPTION_STANDARD" namespace="itsw/listing/header" assign="description"}{$sCategoryContent.name}{if $ItswCar.session.description} für {$ItswCar.session.description}{/if} zum Dauertiefpreis kaufen &star; Versandkostenfrei in Deutschland{/s}
     {if $sCategoryContent.cmstext}
         {$description = "{$sCategoryContent.cmstext|trim|strip_tags|escapeHtml}"}
     {elseif $sCategoryContent.metaDescription}
@@ -76,7 +76,7 @@
     {elseif $sCategoryContent.title}
         {$sCategoryContent.title|escapeHtml} | {{config name="sShopname"}|escapeHtml}
     {else}
-        {s name="INDEX_META_TITLE_STANDARD" namespace="itsw/listing/header"}{$sCategoryContent.name}{if $ITSW.session.title} für {$ITSW.session.title}{/if}{/s}
+        {s name="INDEX_META_TITLE_STANDARD" namespace="itsw/listing/header"}{$sCategoryContent.name}{if $ItswCar.session.title} für {$ItswCar.session.title}{/if}{/s}
     {/if}
 {/strip}{/block}
 

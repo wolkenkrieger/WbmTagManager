@@ -58,8 +58,8 @@ class RebuildSeoIndexCommand extends ShopwareCommand {
 	 * @param \ItswCar\Components\Services\Services $itswCarServices
 	 */
 	public function __construct(Services $itswCarServices) {
-		$this->setContainer($itswCarServices->getContainer());
-		$this->modelManager = $itswCarServices->getModelManager();
+		$this->setContainer(Shopware()->Container());
+		$this->modelManager = $this->container->get('models');
 		$this->modules = $this->container->get('modules');
 		$this->database = $this->container->get('dbal_connection');
 		$this->seoIndex = $this->container->get('seoindex');

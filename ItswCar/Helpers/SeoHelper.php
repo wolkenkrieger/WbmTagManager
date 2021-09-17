@@ -73,14 +73,16 @@ class SeoHelper {
 	 * @param int|null $manufacturer
 	 * @param int|null $model
 	 * @param int|null $car
-	 * @return string[]
+	 * @return string
 	 */
-	public function getCarSeoUrl(int $manufacturer = NULL, int $model = NULL, int $car = NULL): array {
+	public function getCarSeoUrl(int $manufacturer = NULL, int $model = NULL, int $car = NULL): string {
+		/*
 		$sessionHelper = Shopware()->Container()->get('itsw.helper.session');
 		
 		$manufacturer = $manufacturer ?: $sessionHelper->getSessionData()['manufacturer'];
 		$model = $model ?: $sessionHelper->getSessionData()['model'];
 		$car = $car ?: $sessionHelper->getSessionData()['car'];
+		*/
 		
 		$seoUrl = '';
 		
@@ -101,10 +103,7 @@ class SeoHelper {
 			$seoUrl = ($seoUrl && $urlPart)? $seoUrl.$urlPart : $seoUrl;
 		}
 		
-		return [
-			'realUrl' => '',
-			'seoUrl' => $seoUrl
-		];
+		return $seoUrl;
 	}
 	
 	/**
@@ -132,8 +131,8 @@ class SeoHelper {
 			'realUrl' => '',
 			'seoUrl' => ''
 		];
-		
-		return preg_replace("/\/\//", '/', $this->cleanSeoPath($this->getCarSeoUrl()['seoUrl']) . $this->cleanSeoPath($categoryUrl['seoUrl']));
+		$sessionData = Shopware()->Container()->get('itsw.helper.session')->getSessionData();
+		return preg_replace("/\/\//", '/', $this->cleanSeoPath((string)$sessionData['url']) . $this->cleanSeoPath($categoryUrl['seoUrl']));
 	}
 	
 	/**
@@ -148,7 +147,7 @@ class SeoHelper {
 			'realUrl' => '',
 			'seoUrl' => ''
 		];
-		
-		return preg_replace("/\/\//", '/', $this->cleanSeoPath($this->getCarSeoUrl()['seoUrl']) . $this->cleanSeoPath($articleUrl['seoUrl']));
+		$sessionData = Shopware()->Container()->get('itsw.helper.session')->getSessionData();
+		return preg_replace("/\/\//", '/', $this->cleanSeoPath((string)$sessionData['url']) . $this->cleanSeoPath($articleUrl['seoUrl']));
 	}
 }

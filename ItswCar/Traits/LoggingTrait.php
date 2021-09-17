@@ -12,13 +12,12 @@ use ItswCar\ItswCar;
 use Shopware\Components\Logger;
 
 trait LoggingTrait {
-	
 	/**
 	 * @return int
 	 */
 	public function _getLogLevel(): int {
 		if(empty(ItswCar::$logLevel)){
-			ItswCar::$logLevel = Logger::WARNING;
+			ItswCar::$logLevel = Shopware()->Container()->get('itsw.helper.config')->getLogLevel();
 		}
 		return ItswCar::$logLevel;
 	}

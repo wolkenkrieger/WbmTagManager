@@ -12,6 +12,7 @@ use Shopware\Components\ConfigWriter;
 use Shopware\Models\Shop\DetachedShop;
 use Shopware\Models\Shop\Shop;
 use Shopware_Components_Config;
+use Monolog\Logger;
 
 class ConfigHelper {
 	/**
@@ -192,5 +193,14 @@ class ConfigHelper {
 		}
 		
 		return 0;
+	}
+	
+	/**
+	 * @return int
+	 */
+	public function getLogLevel(): int {
+		$logLevel = $this->getValue('log_level', 'ItswCar')?:Logger::WARNING;
+		
+		return (int)$logLevel;
 	}
 }

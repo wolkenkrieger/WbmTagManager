@@ -51,7 +51,10 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				]
 			]);
 			
-			$this->View()->assign('car', reset($car));
+			$result = reset($car);
+			$this->View()->assign('car', $result);
+			
+			$this->debug(__METHOD__, $this->View()->getAssign());
 		}
 	}
 	
@@ -98,6 +101,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 		}
 		
 		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
+		
+		$this->debug(__METHOD__, $result);
 	}
 	
 	/**
@@ -133,6 +138,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 		}
 		
 		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
+		
+		$this->debug(__METHOD__, $result);
 	}
 	
 	/**
@@ -171,6 +178,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 		}
 		
 		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
+		
+		$this->debug(__METHOD__, $result);
 	}
 	
 	/**
@@ -217,6 +226,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 		}
 		
 		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
+		
+		$this->debug(__METHOD__, $result);
 	}
 	
 	/**
@@ -270,6 +281,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 		}
 		
 		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
+		
+		$this->debug(__METHOD__, $result);
 	}
 	
 	/**
@@ -328,6 +341,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 		}
 		
 		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
+		
+		$this->debug(__METHOD__, $result);
 	}
 	
 	/**
@@ -441,6 +456,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 		}
 		
 		$this->Response()->setBody(json_encode($result, JSON_THROW_ON_ERROR));
+		
+		$this->debug(__METHOD__, $result);
 	}
 	
 	/**
@@ -479,6 +496,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'rewriteUrl' => 1
 			]);
 			
+			$this->debug(__METHOD__, ['url' => $url]);
 			$this->redirect($url);
 			
 		} catch (\Exception $e) {
@@ -518,6 +536,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 					'rewriteUrl' => 1
 				]);
 				
+				$this->debug(__METHOD__, ['url' => $url]);
 				$this->redirect($url);
 			} else {
 				$this->Front()->Plugins()->ViewRenderer()->setNoRender();

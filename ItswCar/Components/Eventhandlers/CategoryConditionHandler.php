@@ -25,7 +25,6 @@ class CategoryConditionHandler extends \Shopware\Bundle\SearchBundleDBAL\Conditi
 	 */
 	public function generateCondition(ConditionInterface $condition, QueryBuilder $query, ShopContextInterface $context): void {
 		$container = Shopware()->Container();
-		$repository = $container->get('models')->getRepository(Car::class);
 		
 		if (!$container->has('itsw.helper.session') ||
 			!$container->has('itsw.helper.config') ||
@@ -34,11 +33,17 @@ class CategoryConditionHandler extends \Shopware\Bundle\SearchBundleDBAL\Conditi
 		}
 		
 		$sessionData = $container->get('itsw.helper.session')->getSessionData();
+		$repository = $container->get('models')->getRepository(Car::class);
 		
 		parent::generateCondition($condition, $query, $context);
 		
 		if ($sessionData['car']) {
-			$variantIds = array_merge($repository->getVariantIdsByTecdocId($sessionData['car']), $repository->getVariantIdsWithoutArticleCarLink());
+			if ($container->get('itsw.helper.config')->getValue('category_condition_show_unlinked', 'ItswCar')) {
+				$variantIds = array_merge($repository->getVariantIdsByTecdocId($sessionData['car']), $repository->getVariantIdsWithoutArticleCarLink());
+			} else {
+				$variantIds = $repository->getVariantIdsByTecdocId($sessionData['car']);
+			}
+			
 			$query->andWhere('product.main_detail_id IN (:variantIds)')
 				->setParameter('variantIds', $variantIds, Connection::PARAM_INT_ARRAY);
 		}

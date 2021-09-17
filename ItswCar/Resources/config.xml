@@ -7,7 +7,7 @@
 	<elements>
 		<element type="textarea" scope="shop">
 			<name>merchant_info</name>
-			<label>Merchant Info</label>
+			<label>Google Merchant Center Konto Info</label>
 			<description><![CDATA[
                 <div>
                     <p>Angabe der relevanten Daten zum Google Merchant Center - Konto</p>
@@ -24,7 +24,7 @@
 		
 		<element type="textarea" scope="shop">
 			<name>service_account</name>
-			<label>Account Info</label>
+			<label>Google Service Account Info</label>
 			<description><![CDATA[
                 <div>
                     <p>Angabe der relevanten Daten zum Google Service Account</p>
@@ -42,7 +42,7 @@
 		
 		<element type="boolean" scope="shop">
 			<name>google_show_badge</name>
-			<label>Badge anzeigen?</label>
+			<label>Google Händlerrezension Badge anzeigen?</label>
 			<value>true</value>
 		</element>
 		
@@ -128,6 +128,44 @@
 			<label>Limit für die Anzahl der Produkte, die pro Cronjob-Durchlauf als Produktfeed an Google übertragen werden</label>
 			<value>10</value>
 			<description></description>
+		</element>
+		
+		<element type="boolean" scope="shop">
+			<name>category_condition_show_unlinked</name>
+			<label>Bei gewähltem Fahrzeug Artikel anzeigen, die keine Fahrzeuginfos haben?</label>
+			<value>false</value>
+		</element>
+		
+		<element type="select" scope="shop">
+			<name>log_level</name>
+			<label>Loglevel</label>
+			<value>WARNING</value>
+			<description></description>
+			
+			<!--
+				DEBUG = 100
+				INFO = 200
+				NOTICE = 250
+				WARNING = 300
+				ERROR = 400
+				CRITICAL = 500
+				ALERT = 550EMERGENCY = 600
+			-->
+			
+			<store>
+				<option>
+					<value>100</value>
+					<label>DEBUG</label>
+				</option>
+				<option>
+					<value>300</value>
+					<label>WARNING</label>
+				</option>
+				<option>
+					<value>400</value>
+					<label>ERROR</label>
+				</option>
+			</store>
 		</element>
 	</elements>
 </config>

@@ -19,7 +19,6 @@ class SessionHelper {
 	/**
 	 * @param array $data
 	 * @return array
-	 * @throws \JsonException
 	 */
 	public function setSessionData(array $data = []): array {
 		$container = Shopware()->Container();
@@ -30,11 +29,13 @@ class SessionHelper {
 			'type'          => NULL,
 			'car'           => NULL,
 			'description'   => NULL,
-			'title'         => NULL
+			'title'         => NULL,
+			'url'           => NULL,
 		];
 		
 		$session = $container->get('session');
 		$configHelper = $container->get('itsw.helper.config');
+		$seoHelper = $container->get('itsw.helper.seo');
 		
 		$data = array_merge($defaultData, $data);
 		
@@ -42,14 +43,32 @@ class SessionHelper {
 		
 		$data['description'] = $viewData['description']??NULL;
 		$data['title'] = $viewData['title']??NULL;
+		$data['url'] = $seoHelper->getCarSeoUrl($data['manufacturer'], $data['model'], $data['car'])?:NULL;
 		
 		$session->offsetSet('itsw-car-session-data', $data);
 		
-		if ($dataEncoded = json_encode($data, JSON_THROW_ON_ERROR)) {
+		try {
+			if ($dataEncoded = json_encode($data, JSON_THROW_ON_ERROR)) {
+				Shopware()->Front()->Response()->headers->setCookie(
+					new Cookie(
+						'itsw-car-session-data',
+						$dataEncoded,
+						0,
+						$configHelper->getBasePath(),
+						NULL,
+						FALSE,
+						FALSE,
+						TRUE
+					)
+				);
+				
+				$this->debug(__METHOD__, $data);
+			}
+			
 			Shopware()->Front()->Response()->headers->setCookie(
 				new Cookie(
-					'itsw-car-session-data',
-					$dataEncoded,
+					'itsw-car-cache-data',
+					(string)$data['car'],
 					0,
 					$configHelper->getBasePath(),
 					NULL,
@@ -58,20 +77,13 @@ class SessionHelper {
 					TRUE
 				)
 			);
+			
+			$this->debug(__METHOD__, ['car' => $data['car']]);
+			
+		} catch (\Exception $exception) {
+			$this->error($exception);
 		}
 		
-		Shopware()->Front()->Response()->headers->setCookie(
-			new Cookie(
-				'itsw-car-cache-data',
-				(string)$data['car'],
-				0,
-				$configHelper->getBasePath(),
-				NULL,
-				FALSE,
-				FALSE,
-				TRUE
-			)
-		);
 		
 		return $data;
 	}
@@ -88,7 +100,8 @@ class SessionHelper {
 			'type'          => NULL,
 			'car'           => NULL,
 			'description'   => NULL,
-			'title'         => NULL
+			'title'         => NULL,
+			'url'           => NULL,
 		];
 		
 		$session = $container->get('session');
@@ -106,6 +119,15 @@ class SessionHelper {
 			}
 		}
 		
+		$this->debug(__METHOD__, $sessionData);
+		
 		return $sessionData;
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function resetSession(): array {
+		return $this->setSessionData();
 	}
 }

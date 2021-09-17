@@ -13,17 +13,13 @@ namespace ItswCar\Components\Services;
 use Shopware\Bundle\StoreFrontBundle\Service\CategoryServiceInterface;
 use Shopware\Bundle\StoreFrontBundle\Struct\Category;
 use Shopware\Bundle\StoreFrontBundle\Struct;
-use ItswCar\Components\Services\Services;
 
 class CategoryService implements CategoryServiceInterface{
 	/**
 	 * @var \Shopware\Bundle\StoreFrontBundle\Service\CategoryServiceInterface
 	 */
-	private $originalService;
-	/**
-	 * @var \ItswCar\Components\Services\Services
-	 */
-	private $service;
+	private CategoryServiceInterface $originalService;
+	
 	
 	/**
 	 * CategoryService constructor.
@@ -32,7 +28,6 @@ class CategoryService implements CategoryServiceInterface{
 	 */
 	public function __construct(CategoryServiceInterface $originalService, Services $service) {
 		$this->originalService = $originalService;
-		$this->service = $service;
 	}
 	
 	/**
@@ -40,7 +35,7 @@ class CategoryService implements CategoryServiceInterface{
 	 * @param \Shopware\Bundle\StoreFrontBundle\Struct\ShopContextInterface $context
 	 * @return array
 	 */
-	public function getList($ids, Struct\ShopContextInterface $context) {
+	public function getList($ids, Struct\ShopContextInterface $context): array {
 		return $this->originalService->getList($ids, $context);
 	}
 	
@@ -49,7 +44,7 @@ class CategoryService implements CategoryServiceInterface{
 	 * @param \Shopware\Bundle\StoreFrontBundle\Struct\ShopContextInterface $context
 	 * @return \Shopware\Bundle\StoreFrontBundle\Struct\Category
 	 */
-	public function get($id, Struct\ShopContextInterface $context) {
+	public function get($id, Struct\ShopContextInterface $context): Category {
 		 return $this->originalService->get($id, $context);
 	}
 	
@@ -58,7 +53,7 @@ class CategoryService implements CategoryServiceInterface{
 	 * @param \Shopware\Bundle\StoreFrontBundle\Struct\ShopContextInterface $context
 	 * @return array
 	 */
-	public function getProductsCategories(array $products, Struct\ShopContextInterface $context) {
+	public function getProductsCategories(array $products, Struct\ShopContextInterface $context): array {
 		return $this->originalService->getProductsCategories($products, $context);
 	}
 }

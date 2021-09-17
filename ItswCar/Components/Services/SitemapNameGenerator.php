@@ -11,8 +11,11 @@ namespace ItswCar\Components\Services;
 
 use League\Flysystem\FilesystemInterface;
 use Shopware\Bundle\SitemapBundle\SitemapNameGeneratorInterface;
+use ItswCar\Traits\LoggingTrait;
 
 class SitemapNameGenerator implements SitemapNameGeneratorInterface {
+	use LoggingTrait;
+	
 	/**
 	 * @var FilesystemInterface
 	 */
@@ -46,6 +49,8 @@ class SitemapNameGenerator implements SitemapNameGeneratorInterface {
 				);
 			++$number;
 		} while ($this->filesystem->has($path));
+		
+		$this->debug(__METHOD__, ['path' => $path]);
 		
 		return $path;
 	}

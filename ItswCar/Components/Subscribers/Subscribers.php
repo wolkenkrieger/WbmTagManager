@@ -18,17 +18,13 @@ use ItswCar\Components\Eventhandlers\CategoryConditionHandler;
 
 class Subscribers implements SubscriberInterface {
 	
-	protected Eventhandler $eventHandler;
 	protected string $pluginDir;
-	protected bool $isFront;
 	
 	/**
 	 * @param string $pluginDir
 	 */
 	public function __construct(string $pluginDir)	{
 		$this->pluginDir = $pluginDir;
-		$this->eventHandler = new Eventhandler($pluginDir);
-		$this->isFront = Shopware()->Container()->get('itsw.helper.config')->isFront();
 	}
 	
 	/**
@@ -61,7 +57,8 @@ class Subscribers implements SubscriberInterface {
 	 * @param \Enlight_Controller_ActionEventArgs $actionEventArgs
 	 */
 	public function onPreDispatchFrontend(\Enlight_Controller_ActionEventArgs  $actionEventArgs): void {
-		$this->eventHandler->onPreDispatchFrontend($actionEventArgs);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onPreDispatchFrontend($actionEventArgs);
 	}
 	
 	/**
@@ -69,32 +66,32 @@ class Subscribers implements SubscriberInterface {
 	 * @throws \Exception
 	 */
 	public function onPostDispatchSecureFrontend(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
-		$this->eventHandler->onPostDispatchSecureFrontend($actionEventArgs);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onPostDispatchSecureFrontend($actionEventArgs);
 	}
 	
 	/**
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		if ($this->isFront) {
-			$this->eventHandler->onFrontRouteStartup($controllerEventArgs);
-		}
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onFrontRouteStartup($controllerEventArgs);
 	}
 	
 	/**
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		if ($this->isFront) {
-			$this->eventHandler->onFrontRouteShutdown($controllerEventArgs);
-		}
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onFrontRouteShutdown($controllerEventArgs);
 	}
 	
 	/**
 	 * @param \Enlight_Controller_ActionEventArgs $actionEventArgs
 	 */
 	public function onPostDispatchSecureFrontendListing(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
-		$this->eventHandler->onPostDispatchSecureFrontendListing($actionEventArgs);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onPostDispatchSecureFrontendListing($actionEventArgs);
 	}
 	
 	/**
@@ -108,62 +105,72 @@ class Subscribers implements SubscriberInterface {
 	 * @param \Enlight_Event_EventArgs $eventArgs
 	 */
 	public function onAfterConvertCategoryByLegacyStructConverter(\Enlight_Event_EventArgs $eventArgs): void {
-		$this->eventHandler->onAfterConvertCategoryByLegacyStructConverter($eventArgs);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onAfterConvertCategoryByLegacyStructConverter($eventArgs);
 	}
 	
 	/**
 	 * @param \Enlight_Hook_HookArgs $hookArgs
 	 */
 	public function onAfterConvertCategory(\Enlight_Hook_HookArgs $hookArgs): void {
-		$this->eventHandler->onAfterConvertCategory($hookArgs);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onAfterConvertCategory($hookArgs);
 	}
 	
 	/**
 	 * @param \Enlight_Hook_HookArgs $hookArgs
 	 */
 	public function onAfterGetCategoriesByParent(\Enlight_Hook_HookArgs $hookArgs): void {
-		$this->eventHandler->onAfterGetCategoriesByParent($hookArgs);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onAfterGetCategoriesByParent($hookArgs);
 	}
 	
 	/**
 	 * @param \Enlight_Hook_HookArgs $hookArgs
 	 */
 	public function onAfterGetArticleByCategory(\Enlight_Hook_HookArgs $hookArgs): void {
-		$this->eventHandler->onAfterGetArticleByCategory($hookArgs);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onAfterGetArticleByCategory($hookArgs);
 	}
 	
 	/**
 	 * @param \Enlight_Event_EventArgs $eventArgs
 	 */
 	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs): void {
-		$this->eventHandler->onConvertListProduct($eventArgs);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onConvertListProduct($eventArgs);
 	}
 	
 	/**
 	 * @param \Enlight_Hook_HookArgs $hookArgs
 	 */
 	public function onAfterGetArticleById(\Enlight_Hook_HookArgs $hookArgs): void {
-		$this->eventHandler->onAfterGetArticleById($hookArgs);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onAfterGetArticleById($hookArgs);
 	}
 	
 	/**
 	 * @param \Enlight_Controller_ActionEventArgs $eventArgs
 	 */
 	public function onPostDispatchSecureBackendForm(\Enlight_Controller_ActionEventArgs $eventArgs): void {
-		$this->eventHandler->onPostDispatchSecureBackendForm($eventArgs);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onPostDispatchSecureBackendForm($eventArgs);
 	}
 	
 	/**
 	 * @param \Enlight_Event_EventArgs $eventArgs
 	 */
 	public function onBasketUpdateCartItemsUpdated(\Enlight_Event_EventArgs $eventArgs): void {
-		$this->eventHandler->onBasketUpdateCartItemsUpdated($eventArgs);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onBasketUpdateCartItemsUpdated($eventArgs);
 	}
 	
 	/**
 	 * @param \Shopware_Components_Cron_CronJob $cronJob
+	 * @throws \Doctrine\ORM\NonUniqueResultException
 	 */
 	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob) {
-		$this->eventHandler->onCronHandleGoogleMerchantCenterQueue($cronJob);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onCronHandleGoogleMerchantCenterQueue($cronJob);
 	}
 }

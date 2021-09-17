@@ -66,40 +66,6 @@ class ContentSession {
 			$this->config = array_merge($clientConfig, $authConfig);
 		}
 		
-		/*
-		if (!empty($config) && isset($config['merchant_info']) && $config['merchant_info']) {
-			$this->config = json_decode($config['merchant_info'], TRUE, 512, JSON_THROW_ON_ERROR);
-			if (is_null($this->config)) {
-				throw new InvalidArgumentException();
-			}
-		} else {
-			$configDir = implode(DIRECTORY_SEPARATOR, [__DIR__, 'config']);
-			$configFile = implode(DIRECTORY_SEPARATOR, [$configDir, self::CONFIGFILE_NAME]);
-			if (file_exists($configFile)) {
-				$this->config = json_decode(file_get_contents($configFile), TRUE, 512, JSON_THROW_ON_ERROR);
-				if (is_null($this->config)) {
-					throw new InvalidArgumentException();
-				}
-			}
-		}
-		
-		if (!empty($config) && isset($config['service_account']) && $config['service_account']) {
-			$this->authConfig = json_decode($config['service_account'], TRUE, 512, JSON_THROW_ON_ERROR);
-			if (is_null($this->authConfig)) {
-				throw new InvalidArgumentException();
-			}
-		} else {
-			$configDir = implode(DIRECTORY_SEPARATOR, [__DIR__, 'config']);
-			$accountFile = implode(DIRECTORY_SEPARATOR, [$configDir, self::SERVICE_ACCOUNT_FILE_NAME]);
-			if (file_exists($accountFile)) {
-				$this->authConfig = json_decode(file_get_contents($accountFile), TRUE, 512, JSON_THROW_ON_ERROR);
-				if (is_null($this->authConfig)) {
-					throw new InvalidArgumentException();
-				}
-			}
-		}
-		*/
-		
 		$client = new Google_Client();
 		$client->setApplicationName('ATW Onlineshop Google Shopping');
 		$client->setScopes(Google_Service_ShoppingContent::CONTENT);

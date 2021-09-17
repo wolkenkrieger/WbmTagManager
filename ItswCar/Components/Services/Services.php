@@ -45,13 +45,6 @@ class Services {
 	
 	
 	/**
-	 * @return \Shopware\Components\Model\ModelManager
-	 */
-	public function getModelManager(): ModelManager {
-		return $this->modelManager;
-	}
-	
-	/**
 	 * @return \Shopware\Components\DependencyInjection\Container
 	 */
 	public function getContainer(): Container {
