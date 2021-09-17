@@ -243,22 +243,6 @@ class RebuildSeoIndexCommand extends ShopwareCommand {
 	 */
 	protected function renderAndWriteSeoUrl($car)	{
 		/*
-		$path = $this->buildManufacturerPath($car);
-		$org_path = sprintf('sViewport=cat&m=%d', $car->manufacturer_id);
-		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
-		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
-		
-		$path = $this->buildModelPath($car);
-		$org_path = sprintf('sViewport=cat&m=%d&mo=%d', $car->manufacturer_id, $car->model_id);
-		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
-		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
-		
-		$path = $this->buildCarPath($car);
-		$org_path = sprintf('sViewport=cat&m=%d&mo=%d&car=%d', $car->manufacturer_id, $car->model_id, $car->tecdoc_id);
-		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
-		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
-		*/
-		
 		$path = $this->cleanStringForUrl($car->manufacturer_name);
 		$org_path = sprintf('sViewport=cat&m=%d', $car->manufacturer_id);
 		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
@@ -272,6 +256,28 @@ class RebuildSeoIndexCommand extends ShopwareCommand {
 		$path = $this->cleanStringForUrl(sprintf('%s-%d', $car->type_name, $car->tecdoc_id));
 		$org_path = sprintf('sViewport=cat&car=%d', $car->tecdoc_id);
 		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
+		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
+		*/
+		/*
+		$path = sprintf('%s/%s/%s-%d/', $this->cleanStringForUrl($car->manufacturer_name), $this->cleanStringForUrl($car->model_name), $this->cleanStringForUrl($car->type_name), $this->cleanStringForUrl($car->tecdoc_id));
+		$org_path = sprintf('sViewport=cat&car=%d', $car->tecdoc_id);
+		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path));
+		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
+		*/
+		
+		$manufacturer = $this->cleanStringForUrl($car->manufacturer_name);
+		$org_path = sprintf('sViewport=cat&m=%d', $car->manufacturer_id);
+		$seoPath  = strtolower($this->rewriteTable->sCleanupPath(sprintf('%s/', $manufacturer)));
+		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
+		
+		$model = $this->cleanStringForUrl($car->model_name);
+		$org_path = sprintf('sViewport=cat&m=%d&mo=%d', $car->manufacturer_id, $car->model_id);
+		$seoPath  = strtolower($this->rewriteTable->sCleanupPath(sprintf('%s/%s/', $manufacturer, $model)));
+		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
+		
+		$_car = $this->cleanStringForUrl(sprintf('%s-%d', $car->type_name, $car->tecdoc_id));
+		$org_path = sprintf('sViewport=cat&m=%d&mo=%d&car=%d', $car->manufacturer_id, $car->model_id, $car->tecdoc_id);
+		$seoPath  = strtolower($this->rewriteTable->sCleanupPath(sprintf('%s/%s/%s/', $manufacturer, $model, $_car)));
 		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
 		
 	}

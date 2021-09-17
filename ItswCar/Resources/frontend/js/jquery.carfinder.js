@@ -79,7 +79,12 @@
             
             if (me.$el.is('button')) {
                 me.itswApplyDataAttributes();
-                console.log(me.opts);
+                //console.log(me.opts);
+                
+                if (!me.opts.tsn || !me.opts.hsn) {
+                    return;
+                }
+                
                 var url = me.opts.baseUrl + me.opts.carGetter +
                     '/hsn/' + me.opts.hsn +
                     '/tsn/' + me.opts.tsn;
@@ -230,7 +235,7 @@
             
                 me.opts[key] = attr;
                 
-                console.log(key + ':' + attr);
+                //console.log(key + ':' + attr);
             
                 return true;
             });

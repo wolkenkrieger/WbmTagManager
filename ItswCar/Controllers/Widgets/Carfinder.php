@@ -359,8 +359,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			$hsn = $this->Request()->getParam('hsn', '');
 			$tsn = $this->Request()->getParam('tsn', '');
 			$cars = [];
-			
-			if ($hsn !== '' || $tsn !== '') {
+			$this->debug(__METHOD__, $this->Request()->getParams());
+			if ($hsn !== '' && $tsn !== '') {
 				$codes = $this->entityManager->getRepository(Car::class)->getCodes([
 					'select' => [
 						'kba_codes.tecdocId'

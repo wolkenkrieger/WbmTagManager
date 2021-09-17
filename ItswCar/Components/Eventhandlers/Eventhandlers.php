@@ -127,6 +127,7 @@ class Eventhandlers {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
+		//var_dump($controllerEventArgs->getRequest()->getParams());die;
 	}
 	
 	/**
@@ -149,37 +150,56 @@ class Eventhandlers {
 			return ($value !== NULL && $value !== FALSE && $value !== '');
 		});
 		
+		$partsToUnset = [];
+		$startIndex = NULL;
+		
 		foreach($queryPathParts as $index => $queryPathPart) {
-			$matches = $controllerEventArgs->getSubject()->Router()->match($queryPathPart);
-			if (is_array($matches)) {
-				if (isset($matches['m']) || isset($matches['mo']) || isset($matches['car'])) {
-					unset($queryPathParts[$index]);
-					
-					if (((int)$matches['car'] && !$sessionData['car']) || ((int)$matches['car'] !== $sessionData['car'])) {
-						try {
-							$query = $this->modelManager->getRepository(Car::class)
-								->getIdsByTecdocIdQueryBuilder((int)$matches['car'])
-								->getQuery()
-								->useQueryCache(TRUE);
-							
-							if (!is_null($car = $query->getOneOrNullResult())) {
-								$sessionData = [
-									'manufacturer' => $car['manufacturerId'],
-									'model' => $car['modelId'],
-									'type' => $car['typeId'],
-									'car' => $car['tecdocId']
-								];
-								
-								$this->sessionHelper->setSessionData($sessionData);
+			if (is_array($matches = $controllerEventArgs->getSubject()->Router()->match($queryPathPart)) && isset($matches['m'])) {
+				$startIndex = $index;
+				$partsToUnset[$index] = $queryPathPart;
+				break;
+			}
+		}
+		
+		if ($startIndex !== NULL) {
+			for($index = $startIndex + 1, $indexMax = count($queryPathParts); $index <= $indexMax; $index++ ) {
+				$url = sprintf('%s/%s/', implode('/', $partsToUnset), $queryPathParts[$index]);
+				$matches = $controllerEventArgs->getSubject()->Router()->match($url);
+				if (is_array($matches)) {
+					if (isset($matches['m'])) {
+						$partsToUnset[$index] = $queryPathParts[$index];
+						if (isset($matches['car'])) {
+							if (((int)$matches['car'] && !$sessionData['car']) || ((int)$matches['car'] !== $sessionData['car'])) {
+								try {
+									$query = $this->modelManager->getRepository(Car::class)
+										->getIdsByTecdocIdQueryBuilder((int)$matches['car'])
+										->getQuery()
+										->useQueryCache(TRUE);
+									
+									if (!is_null($car = $query->getOneOrNullResult())) {
+										$sessionData = [
+											'manufacturer' => $car['manufacturerId'],
+											'model' => $car['modelId'],
+											'type' => $car['typeId'],
+											'car' => $car['tecdocId']
+										];
+										$this->sessionHelper->setSessionData($sessionData);
+									}
+								} catch(NonUniqueResultException $nonUniqueResultException) {
+									$this->error($nonUniqueResultException);
+								} catch (\JsonException $jsonException) {
+									$this->error($jsonException);
+								}
 							}
-						} catch(NonUniqueResultException $nonUniqueResultException) {
-							$this->error($nonUniqueResultException);
-						} catch (\JsonException $jsonException) {
-							$this->error($jsonException);
+							break;
 						}
 					}
 				}
 			}
+		}
+		
+		foreach(array_keys($partsToUnset) as $index) {
+			unset($queryPathParts[$index]);
 		}
 		
 		$uri = trim(implode('/', $queryPathParts), '/'). '/';
@@ -194,9 +214,9 @@ class Eventhandlers {
 		
 		$controllerEventArgs->getRequest()->clearParams();
 		$controllerEventArgs->getRequest()->setParams($matches);
-		$controllerEventArgs->getRequest()->setControllerName($matches['controller']);
-		$controllerEventArgs->getRequest()->setModuleName($matches['module']);
-		$controllerEventArgs->getRequest()->setActionName($matches['action']);
+		//$controllerEventArgs->getRequest()->setControllerName($matches['controller']);
+		//$controllerEventArgs->getRequest()->setModuleName($matches['module']);
+		//$controllerEventArgs->getRequest()->setActionName($matches['action']);
 	}
 	
 	/**
@@ -492,25 +512,21 @@ class Eventhandlers {
 			return;
 		}
 		
-		try {
-			$query = $this->modelManager->getRepository(Car::class)->getCarsQuery([
-				'select' => 'cars',
-				'conditions' => [
-					'cars.tecdocId' => $sessionData['car']
-				]
-			]);
-			
-			$query->useQueryCache(TRUE);
-			$query->setMaxResults(1);
-			
-			if (is_null($car = $query->getOneOrNullResult())) {
-				return;
-			}
-			
-			$carDisplay = sprintf('%s %s %s (%d/%d - %d/%d)', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay(), $car->getBuildFromMonth(), $car->getBuildFromYear(), $car->getBuildToMonth(), $car->getBuildToYear());
-		} catch (NonUniqueResultException $nonUniqueResultException) {
+		$query = $this->modelManager->getRepository(Car::class)->getCarsQuery([
+			'select' => 'cars',
+			'conditions' => [
+				'cars.tecdocId' => $sessionData['car']
+			]
+		]);
+		
+		$query->useQueryCache(TRUE);
+		$query->setMaxResults(1);
+		
+		if (is_null($car = $query->getOneOrNullResult())) {
 			return;
 		}
+		
+		$carDisplay = sprintf('%s %s %s (%d/%d - %d/%d)', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay(), $car->getBuildFromMonth(), $car->getBuildFromYear(), $car->getBuildToMonth(), $car->getBuildToYear());
 		
 		$ids = [];
 		
@@ -521,7 +537,7 @@ class Eventhandlers {
 				continue;
 			}
 			
-			array_push($ids, $id);
+			$ids[] = $id;
 			
 			if (is_object($basketEntity = $this->modelManager->getRepository(Basket::class)->find($id)) &&
 				is_null($basketEntity->getAttribute()->getTecdocId())) {
@@ -551,10 +567,8 @@ class Eventhandlers {
 	
 	/**
 	 * @param \Shopware_Components_Cron_CronJob $cronJob
-	 * @return string
-	 * @throws \Doctrine\ORM\NonUniqueResultException
 	 */
-	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): string {
+	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): void {
 		$limit = $this->configHelper->getValue('cronjob_handle_gmc_queue_limit', 'ItswCar') ?:self::CRON_GMC_QUEUE_LIMIT;
 		
 		try {
@@ -566,21 +580,19 @@ class Eventhandlers {
 		} catch (\UnexpectedValueException $exception) {
 			$this->error($exception);
 			$cronJob->setProcessed(TRUE);
-			return $exception->getMessage();
+			return;
 		}
 		
 		if (!count($list)) {
 			$cronJob->setProcessed(TRUE);
-			return 'no items to handle';
+			return;
 		}
 		$counter = 0;
 		
 		try {
 			$googleContentApiSession = new ContentSession($this->getGoogleConfigOptions(), $this->shop->getId());
-		} catch (Exception | \JsonException $exception) {
+		} catch (\Exception $exception) {
 			$this->error($exception);
-			$cronJob->setProcessed(TRUE);
-			return $exception->getMessage();
 		}
 		
 		foreach ($list as $item) {
@@ -602,19 +614,24 @@ class Eventhandlers {
 				->where('product.id = ?1')
 				->setParameter(1, $item->getArticleId());
 			
-			/** @var ProductModel|null $product */
-			$product = $builder->getQuery()->getOneOrNullResult(self::HYDRATE_OBJECT);
-			
-			if (!$product) {
-				throw new ApiException\NotFoundException(sprintf('Product by id "%d" not found', $item->getArticleId()));
+			try {
+				/** @var ProductModel|null $product */
+				$product = $builder->getQuery()->getOneOrNullResult(self::HYDRATE_OBJECT);
+				
+				if (!$product) {
+					throw new \Exception(sprintf('Product by id "%d" not found', $item->getArticleId()));
+				}
+			} catch(\Exception $exception) {
+				$this->error($exception);
+				continue;
 			}
+			
 			
 			try {
 				$contentProduct = new ContentProduct($product, $this->config, $this->shop->getId(), $googleContentApiSession);
 			} catch (Exception | \JsonException $exception) {
 				$this->error($exception);
-				$cronJob->setProcessed(TRUE);
-				return $exception->getMessage();
+				continue;
 			}
 			
 			$response = NULL;
@@ -635,8 +652,7 @@ class Eventhandlers {
 					$this->modelManager->flush($item);
 				} catch (\Exception $exception) {
 					$this->error($exception);
-					$cronJob->setProcessed(TRUE);
-					return $exception->getMessage();
+					continue;
 				}
 			}
 			
@@ -644,8 +660,6 @@ class Eventhandlers {
 		}
 		
 		$cronJob->setProcessed(TRUE);
-		
-		return sprintf('%d items processed', $counter);
 	}
 	
 	
@@ -728,12 +742,16 @@ class Eventhandlers {
 	 */
 	private function isStopWordInQueryPath(string $queryPath): bool {
 		$stopWords = [
-			'widgets',
-			'backend'
+			'/widgets',
+			'/backend',
+			'/note'
 		];
 		
 		foreach($stopWords as $stopWord) {
-			if (stripos($queryPath, $stopWord) !== FALSE) {
+			if (stripos($queryPath, $stopWord) === 0) {
+				$this->debug(__METHOD__, [
+					'stopWord' => $stopWord
+				]);
 				return TRUE;
 			}
 		}

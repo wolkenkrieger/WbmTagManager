@@ -76,34 +76,22 @@ class SeoHelper {
 	 * @return string
 	 */
 	public function getCarSeoUrl(int $manufacturer = NULL, int $model = NULL, int $car = NULL): string {
-		/*
-		$sessionHelper = Shopware()->Container()->get('itsw.helper.session');
-		
-		$manufacturer = $manufacturer ?: $sessionHelper->getSessionData()['manufacturer'];
-		$model = $model ?: $sessionHelper->getSessionData()['model'];
-		$car = $car ?: $sessionHelper->getSessionData()['car'];
-		*/
-		
-		$seoUrl = '';
-		
-		if ($manufacturer) {
-			$orgPath = sprintf('sViewPort=cat&m=%d', $manufacturer);
-			$seoUrl = $this->getSeoUrlPart($orgPath);
+		if ($car) {
+			$orgPath = sprintf('sViewPort=cat&m=%d&mo=%d&car=%d', $manufacturer, $model, $car);
+			return $this->getSeoUrlPart($orgPath);
 		}
 		
 		if ($model) {
-			$orgPath = sprintf('sViewPort=cat&mo=%d', $model);
-			$urlPart = $this->getSeoUrlPart($orgPath);
-			$seoUrl = ($seoUrl && $urlPart)? $seoUrl.$urlPart : $seoUrl;
+			$orgPath = sprintf('sViewPort=cat&m=%d&mo=%d', $manufacturer, $model);
+			return $this->getSeoUrlPart($orgPath);
 		}
 		
-		if ($car) {
-			$orgPath = sprintf('sViewPort=cat&car=%d', $car);
-			$urlPart = $this->getSeoUrlPart($orgPath);
-			$seoUrl = ($seoUrl && $urlPart)? $seoUrl.$urlPart : $seoUrl;
+		if ($manufacturer) {
+			$orgPath = sprintf('sViewPort=cat&m=%d', $manufacturer);
+			return $this->getSeoUrlPart($orgPath);
 		}
 		
-		return $seoUrl;
+		return '';
 	}
 	
 	/**
@@ -149,5 +137,26 @@ class SeoHelper {
 		];
 		$sessionData = Shopware()->Container()->get('itsw.helper.session')->getSessionData();
 		return preg_replace("/\/\//", '/', $this->cleanSeoPath((string)$sessionData['url']) . $this->cleanSeoPath($articleUrl['seoUrl']));
+	}
+	
+	/**
+	 * @param int|null $subshopId
+	 * @return array|mixed
+	 */
+	public function getAllCarSeoUrls(?int $subshopId) {
+		$configHelper = Shopware()->Container()->get('itsw.helper.config');
+		
+		$builder = $this->getDbalQueryBuilder();
+		return $builder->select([
+			'seoUrl'
+		])
+			->from('s_core_rewrite_urls', 'r')
+			->where('r.org_path LIKE "sViewport=cat&car=%"')
+			->andWhere('main = :main')
+			->andWhere('subshopId = :subshopId')
+			->setParameter('main', 1)
+			->setParameter('subshopId', ($subshopId ?: $configHelper->getShopId()))
+			->execute()
+			->fetch(\PDO::FETCH_ASSOC) ?: [];
 	}
 }
