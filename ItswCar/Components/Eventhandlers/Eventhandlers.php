@@ -139,8 +139,6 @@ class Eventhandlers {
 	 */
 	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
 		$queryPath = $controllerEventArgs->getRequest()->getPathInfo();
-		$query = parse_url($controllerEventArgs->getRequest()->getRequestUri(), PHP_URL_QUERY);
-		$fragment = parse_url($controllerEventArgs->getRequest()->getRequestUri(), PHP_URL_FRAGMENT);
 		
 		if (!$queryPath ||
 			$queryPath === '/' ||
