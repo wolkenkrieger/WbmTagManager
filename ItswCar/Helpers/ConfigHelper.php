@@ -99,6 +99,25 @@ class ConfigHelper {
 	}
 	
 	/**
+	 * @return \Shopware\Models\Shop\DetachedShop
+	 */
+	public function getShop(): DetachedShop {
+		try {
+			$shop = Shopware()->Shop();
+			if (empty($shop)) {
+				throw new Exception();
+			}
+			return $shop;
+		} catch (Exception $exception) {
+			$modelManager = Shopware()->Container()->get('models');
+			/** @var \Shopware\Models\Shop\Repository $shopRepo */
+			$repository = $modelManager->getRepository(Shop::class);
+			$shop = $repository->getDefault();
+			return DetachedShop::createFromShop($shop);
+		}
+	}
+	
+	/**
 	 * @return object|\Shopware\Models\Shop\Shop|null
 	 */
 	public function getMainShop() {
@@ -168,6 +187,17 @@ class ConfigHelper {
 		}
 		
 		return '/';
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getBaseUrl(): string {
+		if ($this->isFront()) {
+			return Shopware()->Shop()->getBaseUrl();
+		}
+		
+		return '';
 	}
 	
 	/**

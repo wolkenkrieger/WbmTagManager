@@ -10,13 +10,10 @@
 
 namespace ItswCar\Components\Services;
 
-use ItswCar\Models\Car;
-use ItswCar\Models\KbaCodes;
 use ItswCar\Traits\LoggingTrait;
 use Shopware\Components\DependencyInjection\Container;
 use Shopware\Components\Model\ModelManager;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 
 class Services {
 	use LoggingTrait;
@@ -111,15 +108,6 @@ class Services {
 	 */
 	public function __isset($property) {
 		return isset($this->$property);
-	}
-	
-	
-	/**
-	 * @param array $url
-	 * @return mixed
-	 */
-	public function getUrl(array $url) {
-		return $this->container->get('router')->assemble($url);
 	}
 	
 	/**

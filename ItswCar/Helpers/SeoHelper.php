@@ -10,6 +10,8 @@
 namespace ItswCar\Helpers;
 
 use ItswCar\Traits\LoggingTrait;
+use Shopware\Models\Shop\DetachedShop;
+use Shopware\Models\Shop\Shop;
 
 class SeoHelper {
 	use LoggingTrait;
@@ -158,5 +160,46 @@ class SeoHelper {
 			->setParameter('subshopId', ($subshopId ?: $configHelper->getShopId()))
 			->execute()
 			->fetch(\PDO::FETCH_ASSOC) ?: [];
+	}
+	
+	/**
+	 * @param string $url
+	 * @return string
+	 */
+	public function completeUrl(string $url = ''): string {
+		$shop = Shopware()->Container()->get('itsw.helper.config')->getShop();
+		$host = ($shop->getSecure() ? "https://" : "http://") . $shop->getHost();
+		$baseUrl = rtrim($shop->getBaseUrl(), '/');
+		
+		if (strpos($url, '://') === FALSE) {
+			if (stripos($url, $baseUrl) !== 0) {
+				$url = implode('/', [
+					trim($baseUrl, '/'),
+					ltrim($url, '/')
+				]);
+			}
+			$url = $host . $url;
+		}
+		
+		return $url;
+	}
+	
+	/**
+	 * @param string $url
+	 * @return string
+	 */
+	public function extractPathFromUrl(string $url = ''): string {
+		if ($path = parse_url($url, PHP_URL_PATH)) {
+			return $path;
+		}
+		
+		$shop = Shopware()->Container()->get('itsw.helper.config')->getShop();
+		$baseUrl = $this->completeUrl('');
+		
+		if (($position = stripos($url, $baseUrl)) !== FALSE) {
+			return substr($url, $position + strlen($baseUrl));
+		}
+		
+		return $url;
 	}
 }

@@ -16,20 +16,19 @@ use ItswCar\Traits\LoggingTrait;
 class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	use LoggingTrait;
 	
-	protected Services $service;
 	protected $sessionHelper;
 	protected $configHelper;
 	protected $entityManager;
+	protected $seoHelper;
 	
 	/**
 	 * @throws \Exception
 	 */
 	public function init(): void {
 		$this->setContainer(Shopware()->Container());
-		
-		$this->service = $this->get('itswcar.services');
 		$this->sessionHelper = $this->get('itsw.helper.session');
 		$this->configHelper = $this->get('itsw.helper.config');
+		$this->seoHelper = $this->get('itsw.helper.seo');
 		$this->entityManager = $this->get('models');
 	}
 	
@@ -487,14 +486,20 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'type' => $typeId,
 				'car' => $tecdocId]);
 			
-			$url = $this->service->getUrl([
+			$url = Shopware()->Front()->Router()->assemble([
 				'controller' => 'cat',
 				'module' => 'frontend',
 				'action' => 'index',
-				//'sCategory' => $this->service->getRootCategoryId(),
 				'sCategory' => 6,
 				'rewriteUrl' => 1
 			]);
+			
+			$url = implode('/', [
+				trim($this->seoHelper->getCarSeoUrl($manufacturerId, $modelId, $tecdocId), '/'),
+				trim($this->seoHelper->extractPathFromUrl($url), '/')
+			]);
+			
+			$url = $this->seoHelper->completeUrl($url);
 			
 			$this->debug(__METHOD__, ['url' => $url]);
 			$this->redirect($url);
@@ -520,18 +525,13 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				'car' => NULL
 			];
 			
-			$this->sessionHelper->setSessionData([
-				'manufacturer' => NULL,
-				'model' => NULL,
-				'type' => NULL,
-				'car' => NULL]);
+			$this->sessionHelper->resetSession();
 			
 			if ($withRedirect) {
-				$url = $this->service->getUrl([
+				$url = Shopware()->Front()->Router()->assemble([
 					'controller' => 'cat',
 					'module' => 'frontend',
 					'action' => 'index',
-					//'sCategory' => $this->service->getRootCategoryId(),
 					'sCategory' => 6,
 					'rewriteUrl' => 1
 				]);

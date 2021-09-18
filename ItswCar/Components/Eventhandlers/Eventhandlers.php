@@ -117,8 +117,8 @@ class Eventhandlers {
 	public function onPreDispatchFrontend(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
 		$subject = $actionEventArgs->getSubject();
 		
-		$subject->View()->assign('ITSW-MAINTENANCEMODE', $this->configHelper ? $this->configHelper->isMaintenanceMode() : FALSE);
-		$subject->View()->assign('ITSW-DEVELOPMENTMODE', $this->configHelper ? $this->configHelper->isDevelopmentMode() : FALSE);
+		$subject->View()->assign('ITSW-MAINTENANCEMODE', $this->configHelper ? $this->configHelper->isMaintenanceMode() : FALSE, TRUE);
+		$subject->View()->assign('ITSW-DEVELOPMENTMODE', $this->configHelper ? $this->configHelper->isDevelopmentMode() : FALSE, TRUE);
 		
 		$this->debug(__METHOD__, $subject->View()->getAssign());
 	}
