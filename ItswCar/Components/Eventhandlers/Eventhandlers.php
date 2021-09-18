@@ -166,38 +166,40 @@ class Eventhandlers {
 			}
 		}
 		
-		if ($startIndex !== NULL) {
-			for($index = $startIndex + 1, $indexMax = count($queryPathParts); $index < $indexMax; $index++ ) {
-				$url = sprintf('%s/%s/', implode('/', $partsToUnset), $queryPathParts[$index]);
-				$matches = $controllerEventArgs->getSubject()->Router()->match($url);
-				if (is_array($matches)) {
-					if (isset($matches['m'])) {
-						$partsToUnset[$index] = $queryPathParts[$index];
-						if (isset($matches['car'])) {
-							if (((int)$matches['car'] && !$sessionData['car']) || ((int)$matches['car'] !== $sessionData['car'])) {
-								try {
-									$query = $this->modelManager->getRepository(Car::class)
-										->getIdsByTecdocIdQueryBuilder((int)$matches['car'])
-										->getQuery()
-										->useQueryCache(TRUE);
-									
-									if (!is_null($car = $query->getOneOrNullResult())) {
-										$sessionData = [
-											'manufacturer' => $car['manufacturerId'],
-											'model' => $car['modelId'],
-											'type' => $car['typeId'],
-											'car' => $car['tecdocId']
-										];
-										$this->sessionHelper->setSessionData($sessionData);
-									}
-								} catch(NonUniqueResultException $nonUniqueResultException) {
-									$this->error($nonUniqueResultException);
-								} catch (\JsonException $jsonException) {
-									$this->error($jsonException);
+		if ($startIndex === NULL) {
+			return;
+		}
+		
+		for($index = $startIndex + 1, $indexMax = count($queryPathParts); $index < $indexMax; $index++ ) {
+			$url = sprintf('%s/%s/', implode('/', $partsToUnset), $queryPathParts[$index]);
+			$matches = $controllerEventArgs->getSubject()->Router()->match($url);
+			if (is_array($matches)) {
+				if (isset($matches['m'])) {
+					$partsToUnset[$index] = $queryPathParts[$index];
+					if (isset($matches['car'])) {
+						if (((int)$matches['car'] && !$sessionData['car']) || ((int)$matches['car'] !== $sessionData['car'])) {
+							try {
+								$query = $this->modelManager->getRepository(Car::class)
+									->getIdsByTecdocIdQueryBuilder((int)$matches['car'])
+									->getQuery()
+									->useQueryCache(TRUE);
+								
+								if (!is_null($car = $query->getOneOrNullResult())) {
+									$sessionData = [
+										'manufacturer' => $car['manufacturerId'],
+										'model' => $car['modelId'],
+										'type' => $car['typeId'],
+										'car' => $car['tecdocId']
+									];
+									$this->sessionHelper->setSessionData($sessionData);
 								}
+							} catch(NonUniqueResultException $nonUniqueResultException) {
+								$this->error($nonUniqueResultException);
+							} catch (\JsonException $jsonException) {
+								$this->error($jsonException);
 							}
-							break;
 						}
+						break;
 					}
 				}
 			}
