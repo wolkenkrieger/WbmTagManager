@@ -14,9 +14,11 @@ namespace ItswCar\Components\Subscribers;
 use Enlight\Event\SubscriberInterface;
 use ItswCar\Components\Eventhandlers\Eventhandlers as Eventhandler;
 use ItswCar\Components\Eventhandlers\CategoryConditionHandler;
+use ItswCar\Traits\LoggingTrait;
 
 
 class Subscribers implements SubscriberInterface {
+	use LoggingTrait;
 	
 	protected string $pluginDir;
 	
@@ -49,7 +51,8 @@ class Subscribers implements SubscriberInterface {
 			'Enlight_Controller_Action_PostDispatchSecure_Backend_Form'     => 'onPostDispatchSecureBackendForm',
 			'Shopware_Modules_Basket_UpdateCartItems_Updated'               => 'onBasketUpdateCartItemsUpdated',
 			
-			'Shopware_CronJob_ItswHandleGoogleMerchantCenterQueue'          => 'onCronHandleGoogleMerchantCenterQueue'
+			'Shopware_CronJob_ItswHandleGoogleMerchantCenterQueue'          => 'onCronHandleGoogleMerchantCenterQueue',
+			'Shopware_Controllers_Widgets_Listing_fetchPagination_preFetch' => 'onListingFetchPaginationPreFetch',
 		];
 	}
 	
@@ -167,10 +170,18 @@ class Subscribers implements SubscriberInterface {
 	
 	/**
 	 * @param \Shopware_Components_Cron_CronJob $cronJob
-	 * @throws \Doctrine\ORM\NonUniqueResultException
 	 */
-	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob) {
+	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): void {
 		$eventHandler = new Eventhandler($this->pluginDir);
 		$eventHandler->onCronHandleGoogleMerchantCenterQueue($cronJob);
+	}
+	
+	/**
+	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
+	 */
+	public function onListingFetchPaginationPreFetch(\Enlight_Controller_EventArgs $controllerEventArgs): void {
+		$this->debug(__METHOD__, $controllerEventArgs);
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onListingFetchPaginationPreFetch($controllerEventArgs);
 	}
 }

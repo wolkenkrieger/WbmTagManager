@@ -10,7 +10,6 @@
 
 namespace ItswCar\Commands;
 
-use ItswCar\Components\Services\Services;
 use Shopware\Commands\ShopwareCommand;
 use Shopware\Components\ContainerAwareEventManager;
 use Symfony\Component\Console\Input\InputArgument;
@@ -31,7 +30,7 @@ class RebuildSeoIndexCommand extends ShopwareCommand {
 	/**
 	 * @var \sCategories
 	 */
-	protected $categories;
+	protected \sCategories $categories;
 	
 	/**
 	 * @var \Doctrine\DBAL\Connection
@@ -53,11 +52,8 @@ class RebuildSeoIndexCommand extends ShopwareCommand {
 	 */
 	protected $events;
 	
-	/**
-	 * ArticleCarLinksImporterCommand constructor.
-	 * @param \ItswCar\Components\Services\Services $itswCarServices
-	 */
-	public function __construct(Services $itswCarServices) {
+	
+	public function __construct() {
 		$this->setContainer(Shopware()->Container());
 		$this->modelManager = $this->container->get('models');
 		$this->modules = $this->container->get('modules');
@@ -86,7 +82,7 @@ class RebuildSeoIndexCommand extends ShopwareCommand {
 	 * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
 	 * @throws \Enlight_Event_Exception
 	 * @throws \SmartyException
-	 * @throws \Zend_Db_Adapter_Exception
+	 * @throws \Zend_Db_Adapter_Exception|\Doctrine\DBAL\Exception
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output): void {
 		$shops = $input->getArgument('shopId');
@@ -160,7 +156,7 @@ class RebuildSeoIndexCommand extends ShopwareCommand {
 	
 	/**
 	 * @return int
-	 * @throws \Doctrine\DBAL\Exception\InvalidArgumentException
+	 * @throws \Doctrine\DBAL\Exception\InvalidArgumentException|\Doctrine\DBAL\Exception
 	 */
 	protected function rewriteTableCleanup():int {
 		return $this->database->delete('s_core_rewrite_urls',
@@ -173,7 +169,7 @@ class RebuildSeoIndexCommand extends ShopwareCommand {
 	 * @param string $text
 	 * @return string
 	 */
-	public function cleanStringForUrl($text = ''):string {
+	public function cleanStringForUrl(string $text = ''):string {
 		$text = mb_strtolower(trim($text));
 		$umlaute = [
 			'/ß/',
@@ -241,30 +237,7 @@ class RebuildSeoIndexCommand extends ShopwareCommand {
 	/**
 	 * @param $car
 	 */
-	protected function renderAndWriteSeoUrl($car)	{
-		/*
-		$path = $this->cleanStringForUrl($car->manufacturer_name);
-		$org_path = sprintf('sViewport=cat&m=%d', $car->manufacturer_id);
-		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
-		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
-		
-		$path = $this->cleanStringForUrl($car->model_name);
-		$org_path = sprintf('sViewport=cat&mo=%d', $car->model_id);
-		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
-		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
-		
-		$path = $this->cleanStringForUrl(sprintf('%s-%d', $car->type_name, $car->tecdoc_id));
-		$org_path = sprintf('sViewport=cat&car=%d', $car->tecdoc_id);
-		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path)) . '/';
-		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
-		*/
-		/*
-		$path = sprintf('%s/%s/%s-%d/', $this->cleanStringForUrl($car->manufacturer_name), $this->cleanStringForUrl($car->model_name), $this->cleanStringForUrl($car->type_name), $this->cleanStringForUrl($car->tecdoc_id));
-		$org_path = sprintf('sViewport=cat&car=%d', $car->tecdoc_id);
-		$seoPath  = strtolower($this->rewriteTable->sCleanupPath($path));
-		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
-		*/
-		
+	protected function renderAndWriteSeoUrl($car): void {
 		$manufacturer = $this->cleanStringForUrl($car->manufacturer_name);
 		$org_path = sprintf('sViewport=cat&m=%d', $car->manufacturer_id);
 		$seoPath  = strtolower($this->rewriteTable->sCleanupPath(sprintf('%s/', $manufacturer)));
@@ -279,13 +252,12 @@ class RebuildSeoIndexCommand extends ShopwareCommand {
 		$org_path = sprintf('sViewport=cat&m=%d&mo=%d&car=%d', $car->manufacturer_id, $car->model_id, $car->tecdoc_id);
 		$seoPath  = strtolower($this->rewriteTable->sCleanupPath(sprintf('%s/%s/%s/', $manufacturer, $model, $_car)));
 		$this->rewriteTable->sInsertUrl($org_path, $seoPath);
-		
 	}
 	
 	/**
 	 *
 	 */
-	protected function createRewriteTableTecdoc() {
+	protected function createRewriteTableTecdoc(): void {
 		$query = $this->database->createQueryBuilder();
 		$result = $query->select([
 			'm.id as manufacturer_id',

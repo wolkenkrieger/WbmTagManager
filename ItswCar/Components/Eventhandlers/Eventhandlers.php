@@ -127,7 +127,7 @@ class Eventhandlers {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		//var_dump($controllerEventArgs->getRequest()->getParams());die;
+		//var_dump($controllerEventArgs->getResponse()->getHeaders());die;
 	}
 	
 	/**
@@ -662,6 +662,13 @@ class Eventhandlers {
 		$cronJob->setProcessed(TRUE);
 	}
 	
+	/**
+	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
+	 */
+	public function onListingFetchPaginationPreFetch(\Enlight_Controller_EventArgs $controllerEventArgs): void {
+		var_dump($controllerEventArgs->getReturn());die;
+	}
+	
 	
 	// Helpers and private functions
 	
@@ -744,7 +751,12 @@ class Eventhandlers {
 		$stopWords = [
 			'/widgets',
 			'/backend',
-			'/note'
+			'/note',
+			'/custom',
+			'/compare',
+			'/account',
+			'/address',
+			'/checkout',
 		];
 		
 		foreach($stopWords as $stopWord) {

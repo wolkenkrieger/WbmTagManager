@@ -29,6 +29,10 @@
 	</div>
 {else}
 	<div class="itsw modal--container">
-		keine Fahrzeuge gefunden!
-	</div>
+		<div class="alert is--error is--rounded">
+			<div class="alert--icon">
+				<i class="icon--element icon--cross"></i>
+			</div>
+			<div class="alert--content">{s name="MODAL_NO_CARS_FOUND"}Leider können wir kein Fahrzeug finden, das Ihren Angaben entspricht{/s}</div>
+		</div>
 {/if}

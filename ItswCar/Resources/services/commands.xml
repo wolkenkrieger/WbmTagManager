@@ -39,7 +39,6 @@
 		
 		<service id="itswcar.commands.rebuild_seo_index_command"
 				 class="%itswcar.commands.rebuild_seo_index_class%">
-			<argument type="service" id="itswcar.services" />
 			<tag name="console.command" command="itsw:seo:index:rebuild" />
 		</service>
 	</services>
