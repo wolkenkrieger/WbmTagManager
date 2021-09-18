@@ -666,7 +666,7 @@ class Eventhandlers {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onListingFetchPaginationPreFetch(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		var_dump($controllerEventArgs->getReturn());die;
+	
 	}
 	
 	
