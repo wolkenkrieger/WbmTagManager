@@ -139,6 +139,8 @@ class Eventhandlers {
 	 */
 	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
 		$queryPath = $controllerEventArgs->getRequest()->getPathInfo();
+		$query = parse_url($controllerEventArgs->getRequest()->getRequestUri(), PHP_URL_QUERY);
+		$fragment = parse_url($controllerEventArgs->getRequest()->getRequestUri(), PHP_URL_FRAGMENT);
 		
 		if (!$queryPath ||
 			$queryPath === '/' ||
@@ -166,7 +168,7 @@ class Eventhandlers {
 		}
 		
 		if ($startIndex !== NULL) {
-			for($index = $startIndex + 1, $indexMax = count($queryPathParts); $index <= $indexMax; $index++ ) {
+			for($index = $startIndex + 1, $indexMax = count($queryPathParts); $index < $indexMax; $index++ ) {
 				$url = sprintf('%s/%s/', implode('/', $partsToUnset), $queryPathParts[$index]);
 				$matches = $controllerEventArgs->getSubject()->Router()->match($url);
 				if (is_array($matches)) {
@@ -206,7 +208,7 @@ class Eventhandlers {
 			unset($queryPathParts[$index]);
 		}
 		
-		$uri = trim(implode('/', $queryPathParts), '/');
+		$uri = trim(implode('/', $queryPathParts), '/') . '/';
 		$matches = $controllerEventArgs->getSubject()->Router()->match($uri);
 		
 		$this->debug(__METHOD__, [
@@ -216,11 +218,10 @@ class Eventhandlers {
 			'objectVars' => get_object_vars($this)
 		]);
 		
-		$controllerEventArgs->getRequest()->clearParams();
 		$controllerEventArgs->getRequest()->setParams($matches);
-		//$controllerEventArgs->getRequest()->setControllerName($matches['controller']);
-		//$controllerEventArgs->getRequest()->setModuleName($matches['module']);
-		//$controllerEventArgs->getRequest()->setActionName($matches['action']);
+		$controllerEventArgs->getRequest()->setControllerName($matches['controller']);
+		$controllerEventArgs->getRequest()->setModuleName($matches['module']);
+		$controllerEventArgs->getRequest()->setActionName($matches['action']);
 	}
 	
 	/**
