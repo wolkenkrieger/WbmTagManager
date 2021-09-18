@@ -140,7 +140,6 @@ class Eventhandlers {
 	public function onFrontRouteStartup(\Enlight_Controller_EventArgs $controllerEventArgs): void {
 		$queryPath = $controllerEventArgs->getRequest()->getPathInfo();
 		
-		
 		if (!$queryPath ||
 			$queryPath === '/' ||
 			$this->isStopWordInQueryPath($queryPath)
