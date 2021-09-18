@@ -100,10 +100,18 @@ class Eventhandlers {
 			$basketData['gtins'] = $this->getGTINs($basket);
 		}
 		
+		$sessionData = $this->sessionHelper->getSessionData();
+		
+		$url = $this->seoHelper->getCarSeoUrl($sessionData['manufacturer'], $sessionData['model'], $sessionData['car']);
+		$url = $this->seoHelper->completeUrl($url);
+		
 		$templateVars = [
-			'session' => $this->sessionHelper->getSessionData(),
+			'session' => $sessionData,
 			'basketdata' => $basketData,
-			'google' => $this->getGoogleConfigOptions()
+			'google' => $this->getGoogleConfigOptions(),
+			'maintenance' => $this->configHelper ? $this->configHelper->isMaintenanceMode() : FALSE,
+			'development' => $this->configHelper ? $this->configHelper->isDevelopmentMode() : FALSE,
+			'rootUrl' => $url
 		];
 		
 		$subject->View()->assign('ItswCar', $templateVars, TRUE);
@@ -116,10 +124,6 @@ class Eventhandlers {
 	 */
 	public function onPreDispatchFrontend(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
 		$subject = $actionEventArgs->getSubject();
-		
-		$subject->View()->assign('ITSW-MAINTENANCEMODE', $this->configHelper ? $this->configHelper->isMaintenanceMode() : FALSE, TRUE);
-		$subject->View()->assign('ITSW-DEVELOPMENTMODE', $this->configHelper ? $this->configHelper->isDevelopmentMode() : FALSE, TRUE);
-		
 		$this->debug(__METHOD__, $subject->View()->getAssign());
 	}
 	
@@ -202,7 +206,7 @@ class Eventhandlers {
 			unset($queryPathParts[$index]);
 		}
 		
-		$uri = trim(implode('/', $queryPathParts), '/'). '/';
+		$uri = trim(implode('/', $queryPathParts), '/');
 		$matches = $controllerEventArgs->getSubject()->Router()->match($uri);
 		
 		$this->debug(__METHOD__, [

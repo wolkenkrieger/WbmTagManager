@@ -31,4 +31,7 @@
 			{/if}
         {/block}
 	</div>
+    {if $ItswCar.development}
+        {debug}
+    {/if}
 {/block}

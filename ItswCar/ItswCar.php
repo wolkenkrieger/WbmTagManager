@@ -8,6 +8,7 @@
  * @package ItswCar
  */
 
+
 namespace ItswCar;
 
 use Doctrine\ORM\Tools\SchemaTool;
