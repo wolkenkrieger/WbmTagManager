@@ -178,7 +178,12 @@ class SeoHelper {
 					ltrim($url, '/')
 				]);
 			}
-			$url = $host . $url;
+			
+			$url = implode('/', [
+				trim($host, '/'),
+				trim($url, '/'),
+				''
+			]);
 		}
 		
 		return $url;
