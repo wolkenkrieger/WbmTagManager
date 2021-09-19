@@ -169,7 +169,8 @@ class SeoHelper {
 	public function completeUrl(string $url = ''): string {
 		$shop = Shopware()->Container()->get('itsw.helper.config')->getShop();
 		$host = ($shop->getSecure() ? "https://" : "http://") . $shop->getHost();
-		$baseUrl = rtrim($shop->getBaseUrl(), '/');
+		//$baseUrl = rtrim($shop->getBaseUrl(), '/');
+		$baseUrl = '';
 		
 		if (strpos($url, '://') === FALSE) {
 			if (stripos($url, $baseUrl) !== 0) {
@@ -179,11 +180,11 @@ class SeoHelper {
 				]);
 			}
 			
-			$url = implode('/', [
+			$url = implode('/', array_filter([
 				trim($host, '/'),
 				trim($url, '/'),
 				''
-			]);
+			]));
 		}
 		
 		return $url;
