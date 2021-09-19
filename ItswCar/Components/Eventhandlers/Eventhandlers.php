@@ -260,7 +260,9 @@ class Eventhandlers {
 		$articles = $return['sArticles']??[];
 		foreach($articles as &$article) {
 			$this->setPseudoprice($article);
-			$article['linkDetails'] = ($this->seoHelper->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
+			$url = $this->seoHelper->getArticleSeoUrl($article['articleID']);
+			$link = ($url) ? $this->seoHelper->completeUrl($url) : $this->seoHelper->completeUrl($article['linkDetails']);
+			$article['linkDetails'] = $link;
 		}
 		unset($article);
 		$return['sArticles'] = $articles;
@@ -273,8 +275,9 @@ class Eventhandlers {
 	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs): void {
 		$article = $eventArgs->getReturn();
 		$this->setPseudoprice($article);
-		$article['linkDetails'] = ($this->seoHelper->getArticleSeoUrl($article['articleID']) ?: $article['linkDetails']);
-		$eventArgs->setReturn($article);
+		$url = $this->seoHelper->getArticleSeoUrl($article['articleID']);
+		$link = ($url) ? $this->seoHelper->completeUrl($url) : $this->seoHelper->completeUrl($article['linkDetails']);
+		$article['linkDetails'] = $link;
 	}
 	
 	/**
@@ -288,6 +291,7 @@ class Eventhandlers {
 	
 	/**
 	 * @param \Enlight_Hook_HookArgs $hookArgs
+	 * @throws \Exception
 	 */
 	public function onAfterGetArticleById(\Enlight_Hook_HookArgs $hookArgs): void {
 		$article = $hookArgs->getReturn();
@@ -348,7 +352,9 @@ class Eventhandlers {
 	 */
 	private function setCategoryLink($category) {
 		if (!$category['external']) {
-			$category['link'] = ($this->seoHelper->getCategorySeoUrl($category['id'] ?: $category['link']));
+			$url = $this->seoHelper->getCategorySeoUrl($category['id']);
+			$link = ($url)? $this->seoHelper->completeUrl($url) : $this->seoHelper->completeUrl($category['link']);
+			$category['link'] = $link;
 		}
 		
 		return $category;
