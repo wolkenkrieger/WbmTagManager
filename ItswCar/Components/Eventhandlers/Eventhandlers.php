@@ -169,7 +169,7 @@ class Eventhandlers {
 			return;
 		}
 		
-		for($index = $startIndex + 1, $indexMax = count($queryPathParts); $index < $indexMax; $index++ ) {
+		for($index = $startIndex + 1, $indexMax = count($queryPathParts); $index <= $indexMax; $index++ ) {
 			$url = sprintf('%s/%s/', implode('/', $partsToUnset), $queryPathParts[$index]);
 			$matches = $controllerEventArgs->getSubject()->Router()->match($url);
 			if (is_array($matches)) {
