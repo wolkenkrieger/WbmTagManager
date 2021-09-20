@@ -771,6 +771,7 @@ class Eventhandlers {
 			'/account',
 			'/address',
 			'/checkout',
+			'/api'
 		];
 		
 		foreach($stopWords as $stopWord) {
