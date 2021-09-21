@@ -131,7 +131,7 @@ class Eventhandlers {
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onFrontRouteShutdown(\Enlight_Controller_EventArgs $controllerEventArgs): void {
-		//var_dump($controllerEventArgs->getResponse()->getHeaders());die;
+	
 	}
 	
 	/**
@@ -209,7 +209,6 @@ class Eventhandlers {
 		}
 		
 		$uri = trim(implode('/', $queryPathParts), '/') . '/';
-		
 		$matches = $controllerEventArgs->getSubject()->Router()->match($uri);
 		
 		$this->debug(__METHOD__, [
@@ -219,12 +218,16 @@ class Eventhandlers {
 			'objectVars' => get_object_vars($this)
 		]);
 		
-		if (is_array($matches)) {
-			$controllerEventArgs->getRequest()->setParams($matches);
-			$controllerEventArgs->getRequest()->setControllerName($matches['controller']);
-			$controllerEventArgs->getRequest()->setModuleName($matches['module']);
-			$controllerEventArgs->getRequest()->setActionName($matches['action']);
+		if (!is_array($matches)) {
+			$matches['controller'] = '';
+			$matches['module'] = '';
+			$matches['action'] = '';
 		}
+		
+		$controllerEventArgs->getRequest()->setParams($matches);
+		$controllerEventArgs->getRequest()->setControllerName($matches['controller']);
+		$controllerEventArgs->getRequest()->setModuleName($matches['module']);
+		$controllerEventArgs->getRequest()->setActionName($matches['action']);
 	}
 	
 	/**
