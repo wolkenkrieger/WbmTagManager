@@ -4,10 +4,10 @@
  * Datum:   13.08.2021
  * Zeit:    09:27
  * Datei:   SitemapNameGenerator.php
- * @package ItswCar\Components\Services
+ * @package ItswCar\SitemapBundle\Service
  */
 
-namespace ItswCar\Components\Services;
+namespace ItswCar\SitemapBundle\Service;
 
 use League\Flysystem\FilesystemInterface;
 use Shopware\Bundle\SitemapBundle\SitemapNameGeneratorInterface;

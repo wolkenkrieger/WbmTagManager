@@ -4,28 +4,24 @@
  * Datum:   13.08.2021
  * Zeit:    08:15
  * Datei:   SitemapWriter.php
- * @package ItswCar\Components\Services
+ * @package ItswCar\SitemapBundle\Service
  */
 
-namespace ItswCar\Components\Services;
+namespace ItswCar\SitemapBundle\Service;
 
 use League\Flysystem\FilesystemInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Shopware\Bundle\SitemapBundle\Exception\UnknownFileException;
+use Shopware\Bundle\SitemapBundle\SitemapWriterInterface;
 use Shopware\Bundle\SitemapBundle\Struct\Sitemap;
 use Shopware\Models\Shop\Shop;
 use ItswCar\Traits\LoggingTrait;
 
-class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInterface {
+class SitemapWriter implements SitemapWriterInterface {
 	use LoggingTrait;
 	
 	private const SITEMAP_LIMIT = 1000;
-	
-	/**
-	 * @var \Shopware\Bundle\SitemapBundle\Service\SitemapWriter
-	 */
-	private \Shopware\Bundle\SitemapBundle\Service\SitemapWriter $originalService;
 	
 	/**
 	 * @var FilesystemInterface
@@ -33,7 +29,7 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 	private FilesystemInterface $filesystem;
 	
 	/**
-	 * @var \ItswCar\Components\Services\SitemapNameGenerator
+	 * @var \ItswCar\SitemapBundle\Service\SitemapNameGenerator
 	 */
 	private SitemapNameGenerator $sitemapNameGenerator;
 	
@@ -53,16 +49,17 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 	private $logger;
 	
 	/**
-	 * @param \Shopware\Bundle\SitemapBundle\Service\SitemapWriter $originalService
+	 * @param \ItswCar\SitemapBundle\Service\SitemapNameGenerator $sitemapNameGenerator
+	 * @param \League\Flysystem\FilesystemInterface               $filesystem
+	 * @param \Psr\Log\LoggerInterface|null                       $logger
 	 */
 	public function __construct(SitemapNameGenerator $sitemapNameGenerator,
 	                            FilesystemInterface $filesystem,
-	                            LoggerInterface $logger = null,
-	                            \Shopware\Bundle\SitemapBundle\Service\SitemapWriter $originalService) {
+	                            LoggerInterface $logger = null)
+	{
 		$this->sitemapNameGenerator = $sitemapNameGenerator;
 		$this->filesystem = $filesystem;
 		$this->logger = $logger ?: new NullLogger();
-		$this->originalService = $originalService;
 	}
 	
 	/**
@@ -71,7 +68,7 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 	 * @return bool
 	 * @throws \Shopware\Bundle\SitemapBundle\Exception\UnknownFileException
 	 */
-	public function writeFile(Shop $shop, array $urls = []) {
+	public function writeFile(Shop $shop, array $urls = []): bool {
 		if (empty($urls)) {
 			return false;
 		}
@@ -94,8 +91,10 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 	
 	/**
 	 * @inheritDoc
+	 * @throws \Shopware\Bundle\SitemapBundle\Exception\UnknownFileException
+	 * @throws \League\Flysystem\FileNotFoundException
 	 */
-	public function closeFiles() {
+	public function closeFiles(): void {
 		foreach ($this->files as $shopId => $params) {
 			$this->closeFile($shopId);
 		}
@@ -110,8 +109,7 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 	 *
 	 * @return bool
 	 */
-	private function closeFile($shopId)
-	{
+	private function closeFile(int $shopId): bool {
 		if (!array_key_exists($shopId, $this->files)) {
 			throw new UnknownFileException(sprintf('No open file "%s"', $shopId));
 		}
@@ -140,8 +138,7 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 	 *
 	 * @return bool
 	 */
-	private function openFile($shopId)
-	{
+	private function openFile(int $shopId): bool {
 		if (array_key_exists($shopId, $this->files)) {
 			return true;
 		}
@@ -182,16 +179,15 @@ class SitemapWriter implements \Shopware\Bundle\SitemapBundle\SitemapWriterInter
 	 * @param resource $fileHandler
 	 * @param string   $content
 	 */
-	private function write($fileHandler, string $content)
-	{
+	private function write($fileHandler, string $content): void {
 		fwrite($fileHandler, $content . PHP_EOL);
 	}
 	
 	/**
 	 * Makes sure all files get closed and replaces the old sitemaps with the freshly generated ones
+	 * @throws \League\Flysystem\FileNotFoundException
 	 */
-	private function moveFiles()
-	{
+	private function moveFiles(): void {
 		/** @var Sitemap[] $sitemaps */
 		foreach ($this->sitemaps as $shopId => $sitemaps) {
 			// Delete old sitemaps for this siteId

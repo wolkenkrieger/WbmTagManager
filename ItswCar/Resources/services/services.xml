@@ -8,8 +8,9 @@
         <parameter key="itswcar.services.class">ItswCar\Components\Services\Services</parameter>
 		<parameter key="itswcar.category_service.class">ItswCar\Components\Services\CategoryService</parameter>
 		<parameter key="itswcar.customer_group_condition_handler.class">ItswCar\SearchBundleDBAL\Condition\CustomerGroupConditionHandler</parameter>
-		<parameter key="itswcar.sitemap_writer_service.class">ItswCar\Components\Services\SitemapWriter</parameter>
-		<parameter key="itswcar.sitemap_name_generator_service.class">ItswCar\Components\Services\SitemapNameGenerator</parameter>
+		<parameter key="itswcar.sitemap_writer_service.class">ItswCar\SitemapBundle\Service\SitemapWriter</parameter>
+		<parameter key="itswcar.sitemap_name_generator_service.class">ItswCar\SitemapBundle\Service\SitemapNameGenerator</parameter>
+		<parameter key="itswcar.car_url_provider.class">ItswCar\SitemapBundle\Provider\ItswCarUrlProvider</parameter>
     </parameters>
 
     <services>
@@ -39,14 +40,23 @@
 			<argument type="service" id="itswcar.service.sitemap_name_generator"/>
 			<argument type="service" id="Shopware\Components\Filesystem\PrefixFilesystem"/>
 			<argument type="service" id="corelogger"/>
-			<argument type="service" id="itswcar.service.sitemap_writer.inner"/>
 		</service>
-	
+		
 		<service id="itswcar.service.sitemap_name_generator"
 				 class="%itswcar.sitemap_name_generator_service.class%" >
 			<argument type="service" id="Shopware\Components\Filesystem\PrefixFilesystem"/>
 		</service>
 	
+		<service id="itswcar.provider.car_url_provider" class="%itswcar.car_url_provider.class%"
+				 public="false">
+			<argument type="service" id="Shopware\Components\Model\ModelManager"/>
+			<argument type="service" id="itsw.helper.seo"/>
+			<argument>%shopware.sitemap.batchsize%</argument>
+			
+			<tag name="sitemap_url_provider" />
+		</service>
+		
+		
 		<service id="itswcar.service.debug_logger" class="Shopware\Components\Logger" public="true">
 			<argument>itsw_car_debug</argument>
 			<call method="pushHandler">

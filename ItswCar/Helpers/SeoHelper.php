@@ -164,13 +164,13 @@ class SeoHelper {
 	
 	/**
 	 * @param string $url
+	 * @param string $suffix
 	 * @return string
 	 */
-	public function completeUrl(string $url = ''): string {
+	public function completeUrl(string $url = '', string $suffix = '/'): string {
 		$shop = Shopware()->Container()->get('itsw.helper.config')->getShop();
 		$host = ($shop->getSecure() ? "https://" : "http://") . $shop->getHost();
-		$baseUrl = rtrim($shop->getBaseUrl(), '/');
-		//$baseUrl = '';
+		$baseUrl = rtrim((string)$shop->getBaseUrl(), '/');
 		
 		if (strpos($url, '://') === FALSE) {
 			if (stripos($url, $baseUrl) !== 0) {
@@ -182,12 +182,11 @@ class SeoHelper {
 			
 			$url = implode('/', array_filter([
 				trim($host, '/'),
-				trim($url, '/'),
-				''
+				trim($url, '/')
 			]));
 		}
 		
-		return $url;
+		return sprintf('%s%s', $url, $suffix);
 	}
 	
 	/**

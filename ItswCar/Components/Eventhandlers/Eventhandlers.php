@@ -267,7 +267,7 @@ class Eventhandlers {
 		foreach($articles as &$article) {
 			$this->setPseudoprice($article);
 			$url = $this->seoHelper->getArticleSeoUrl($article['articleID']);
-			$link = ($url) ? $this->seoHelper->completeUrl($url) : $this->seoHelper->completeUrl($article['linkDetails']);
+			$link = ($url) ?: $article['linkDetails'];
 			$article['linkDetails'] = $link;
 		}
 		unset($article);
@@ -282,7 +282,7 @@ class Eventhandlers {
 		$article = $eventArgs->getReturn();
 		$this->setPseudoprice($article);
 		$url = $this->seoHelper->getArticleSeoUrl($article['articleID']);
-		$link = ($url) ? $this->seoHelper->completeUrl($url) : $this->seoHelper->completeUrl($article['linkDetails']);
+		$link = ($url) ?: $article['linkDetails'];
 		$article['linkDetails'] = $link;
 	}
 	
@@ -359,7 +359,7 @@ class Eventhandlers {
 	private function setCategoryLink($category) {
 		if (!$category['external']) {
 			$url = $this->seoHelper->getCategorySeoUrl($category['id']);
-			$link = ($url)? $this->seoHelper->completeUrl($url) : $this->seoHelper->completeUrl($category['link']);
+			$link = ($url) ?: $category['link'];
 			$category['link'] = $link;
 		}
 		

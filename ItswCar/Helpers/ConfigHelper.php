@@ -8,6 +8,7 @@
 
 namespace ItswCar\Helpers;
 
+use Google\Exception;
 use Shopware\Components\ConfigWriter;
 use Shopware\Models\Shop\DetachedShop;
 use Shopware\Models\Shop\Shop;
@@ -103,6 +104,9 @@ class ConfigHelper {
 	 */
 	public function getShop(): DetachedShop {
 		try {
+			if (!$this->isFront()) {
+				throw new Exception();
+			}
 			$shop = Shopware()->Shop();
 			if (empty($shop)) {
 				throw new Exception();
