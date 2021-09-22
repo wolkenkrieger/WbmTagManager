@@ -610,6 +610,7 @@ class Eventhandlers {
 			$googleContentApiSession = new ContentSession($this->getGoogleConfigOptions(), $this->shop->getId());
 		} catch (\Exception $exception) {
 			$this->error($exception);
+			$googleContentApiSession = NULL;
 		}
 		
 		foreach ($list as $item) {
@@ -645,7 +646,7 @@ class Eventhandlers {
 			
 			
 			try {
-				$contentProduct = new ContentProduct($product, $this->config, $this->shop->getId(), $googleContentApiSession);
+				$contentProduct = new ContentProduct($product, $this->getGoogleConfigOptions(), $this->shop->getId(), $googleContentApiSession);
 			} catch (Exception | \JsonException $exception) {
 				$this->error($exception);
 				continue;
