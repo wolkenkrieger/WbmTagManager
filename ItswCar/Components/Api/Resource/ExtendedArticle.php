@@ -12,6 +12,7 @@ namespace ItswCar\Components\Api\Resource;
 
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\TransactionRequiredException;
 use ItswCar\Models\GoogleMerchantCenterQueue;
 use Shopware\Components\Api\BatchInterface;
 use Shopware\Components\Api\Exception as ApiException;
@@ -39,28 +40,20 @@ use Shopware\Models\Property\Value;
 use Shopware\Models\Shop\Shop;
 use Shopware\Models\Tax\Tax;
 use ItswCar\Models\ArticleCarLinks as CarLinks;
-use Shopware\Components\Plugin\Configuration\CachedReader;
+
+use ItswCar\Traits\LoggingTrait;
 
 
 class ExtendedArticle extends Resource implements BatchInterface {
+	use LoggingTrait;
+	
 	/**
 	 * @var \Shopware_Components_Translation
 	 */
 	private $translationComponent;
 	
-	private array $config;
-	private $shop = FALSE;
-	
 	public function __construct(\Shopware_Components_Translation $translationComponent = null) {
 		$this->translationComponent = $translationComponent ?: Shopware()->Container()->get('translation');
-		
-		if ($this->getContainer()->initialized('shop')) {
-			$this->shop = $this->getContainer()->get('shop');
-		} else {
-			$this->shop = $this->getContainer()->get('models')->getRepository(Shop::class)->getActiveDefault();
-		}
-		
-		$this->config = $this->getContainer()->get(CachedReader::class)->getByPluginName('ItswCar', $this->shop->getId());
 	}
 	
 	/**
@@ -78,7 +71,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * @return \Doctrine\Common\Persistence\ObjectRepository|\Doctrine\ORM\EntityRepository|\ItswCar\Models\Repository
+	 * @return \Doctrine\ORM\EntityRepository|\Doctrine\Persistence\ObjectRepository|\ItswCar\Models\Repository
 	 */
 	public function getCarLinkRepository() {
 		return $this->getManager()->getRepository(CarLinks::class);
@@ -222,6 +215,8 @@ class ExtendedArticle extends Resource implements BatchInterface {
 					$shop
 				);
 			}
+			
+			$this->filterBadWords($product);
 		}
 		
 		return $product;
@@ -253,8 +248,9 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 * @param array $options
 	 * @return array
 	 * @throws \Shopware\Components\Api\Exception\PrivilegeException
+	 * @throws \Exception
 	 */
-	public function getList($offset = 0, $limit = 25, array $criteria = [], array $orderBy = [], array $options = []): array {
+	public function getList(int $offset = 0, int $limit = 25, array $criteria = [], array $orderBy = [], array $options = []): array {
 		$this->checkPrivilege('read');
 		
 		$builder = $this->getRepository()->createQueryBuilder('article')
@@ -290,6 +286,8 @@ class ExtendedArticle extends Resource implements BatchInterface {
 					$product,
 					$shop
 				);
+				
+				$this->filterBadWords($product);
 			}
 		}
 		
@@ -334,6 +332,8 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		}
 		
 		$params = $this->prepareAssociatedData($params, $product);
+		
+		$this->filterBadWords($params);
 		
 		$product->fromArray($params);
 		
@@ -453,6 +453,8 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		}
 		
 		$params = $this->prepareAssociatedData($params, $product);
+		
+		$this->filterBadWords($params);
 		
 		$product->fromArray($params);
 		$violations = $this->getManager()->validate($product);
@@ -574,8 +576,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 *
 	 * @return array
 	 */
-	public function prepareMainDetail(array $data, ProductModel $article)
-	{
+	public function prepareMainDetail(array $data, ProductModel $article): array {
 		$detail = $article->getMainDetail();
 		if (!$detail) {
 			$detail = new Detail();
@@ -595,14 +596,12 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	
 	/**
 	 * Short method to completely generate all images from an product, main images and variant images
-	 *
 	 * @param bool $force Force all images to be regenerated
-	 *
-	 * @see \Shopware\Components\Api\Resource\Article::generateMainThumbnails()
+	 * @throws \Exception
 	 * @see \Shopware\Components\Api\Resource\Article::generateVariantImages()
+	 * @see \Shopware\Components\Api\Resource\Article::generateMainThumbnails()
 	 */
-	public function generateImages(ProductModel $article, $force = false)
-	{
+	public function generateImages(ProductModel $article, bool $force = false): void {
 		$this->generateMainThumbnails($article, $force);
 		$this->generateVariantImages($article, $force);
 	}
@@ -612,7 +611,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 * @param false                            $force
 	 * @throws \Exception
 	 */
-	public function generateMainThumbnails(ProductModel $article, $force = false): void {
+	public function generateMainThumbnails(ProductModel $article, bool $force = false): void {
 		/** @var \Shopware\Components\Thumbnail\Manager $generator */
 		$generator = $this->getContainer()->get('thumbnail_manager');
 		
@@ -642,11 +641,10 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	/**
 	 * This method generates all variant image entities for a given product model instance.
 	 * The method expects that the variants and the mapping of the product images already exist.
-	 *
 	 * @param bool $force Force variant image regeneration
+	 * @throws \Exception
 	 */
-	public function generateVariantImages(ProductModel $article, $force = false)
-	{
+	public function generateVariantImages(ProductModel $article, bool $force = false): void {
 		$builder = $this->getArticleImageMappingsQuery($article->getId());
 		
 		/** @var Image\Mapping $mapping */
@@ -764,29 +762,33 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 * {@inheritdoc}
 	 */
 	public function getIdByData($data)	{
-		$id = null;
+		$id = NULL;
 		
 		if (isset($data['id'])) {
 			$id = $data['id'];
 		} elseif (isset($data['mainDetail']['number'])) {
 			try {
 				$id = $this->getIdFromNumber($data['mainDetail']['number']);
-			} catch (ApiException\NotFoundException $e) {
-				return false;
+			} catch (\Exception $e) {
+				return FALSE;
 			}
 		}
 		
 		if (!$id) {
-			return false;
+			return FALSE;
 		}
 		
-		$model = $this->getManager()->find(ProductModel::class, $id);
+		try {
+			$model = $this->getManager()->find(ProductModel::class, $id);
+		} catch (OptimisticLockException | TransactionRequiredException | ORMException $e) {
+			return FALSE;
+		}
 		
 		if ($model) {
 			return $id;
 		}
 		
-		return false;
+		return FALSE;
 	}
 	
 	/**
@@ -2640,7 +2642,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			try {
 				$em->persist($carLink);
 				$em->flush($carLink);
-			} catch (OptimisticLockException | ORMException | Exception $e) {
+			} catch (OptimisticLockException | ORMException | \Exception $e) {
 			}
 		}
 	}
@@ -2707,5 +2709,30 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			->findOneBy([
 				'articleId' => $product->getId()
 			]);
+	}
+	
+	/**
+	 * @param array $product
+	 */
+	private function filterBadWords(array &$product): void {
+		$filterName = isset($product['name']);
+		$filterDescription = isset($product['description']);
+		$filterDescriptionLong = isset($product['descriptionLong']);
+		
+		if (!$filterName && !$filterDescription && !$filterDescriptionLong) {
+			return;
+		}
+		
+		$textHelper = Shopware()->Container()->get('itsw.helper.text');
+		
+		if ($filterName) {
+			$product['name'] = $textHelper->filterBadWords($product['name']);
+		}
+		if ($filterDescription) {
+			$product['description'] = $textHelper->filterBadWords($product['description']);
+		}
+		if ($filterDescriptionLong) {
+			$product['descriptionLong'] = $textHelper->filterBadWords($product['descriptionLong']);
+		}
 	}
 }

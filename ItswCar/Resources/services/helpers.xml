@@ -8,6 +8,7 @@
         <parameter key="itsw.helper.config.class">ItswCar\Helpers\ConfigHelper</parameter>
 		<parameter key="itsw.helper.session.class">ItswCar\Helpers\SessionHelper</parameter>
 		<parameter key="itsw.helper.seo.class">ItswCar\Helpers\SeoHelper</parameter>
+		<parameter key="itsw.helper.text.class">ItswCar\Helpers\TextHelper</parameter>
     </parameters>
 
     <services>
@@ -17,5 +18,6 @@
 	
 		<service id="itsw.helper.session" class="%itsw.helper.session.class%" public="true"/>
 		<service id="itsw.helper.seo" class="%itsw.helper.seo.class%" public="true"/>
+		<service id="itsw.helper.text" class="%itsw.helper.text.class%" public="true"/>
     </services>
 </container>

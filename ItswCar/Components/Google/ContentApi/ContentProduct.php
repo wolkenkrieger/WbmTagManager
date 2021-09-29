@@ -30,6 +30,7 @@ class ContentProduct {
 	private int $shopID;
 	private $mediaService;
 	private bool $force;
+	private $textHelper;
 	
 	
 	/**
@@ -46,6 +47,7 @@ class ContentProduct {
 		$this->shopID = $shopID;
 		$this->force = $force;
 		$this->mediaService = Shopware()->Container()->get('shopware_media.media_service');
+		$this->textHelper = Shopware()->Container()->get('itsw.helper.text');
 		
 		if (is_null($session)) {
 			$this->session = new ContentSession($config, $this->shopID);
@@ -59,6 +61,7 @@ class ContentProduct {
 	 * @return \Google\Service\ShoppingContent\Product
 	 */
 	private function buildProduct(): Product {
+		
 		$productImageUrls = [];
 		
 		foreach($this->product->getImages() as $image) {
@@ -95,7 +98,7 @@ class ContentProduct {
 			'<li>',
 			'</li></ul>'
 		],
-			$this->product->getDescriptionLong());
+			$this->textHelper->filterBadWords($this->product->getDescriptionLong()));
 		
 		$productMpn = $this->product->getMainDetail()->getSupplierNumber()? : 'ATW-'.$this->product->getMainDetail()->getId();
 		
@@ -106,10 +109,10 @@ class ContentProduct {
 			'atw',
 			'autoteile-wiesel'
 		])) {
-			$product->setTitle($this->product->getSupplier()->getName() . ' ' . $this->product->getName());
+			$product->setTitle($this->product->getSupplier()->getName() . ' ' . $this->textHelper->filterBadWords($this->product->getName()));
 			$product->setBrand($this->product->getSupplier()->getName());
 		} else {
-			$product->setTitle($this->product->getName());
+			$product->setTitle($this->textHelper->filterBadWords($this->product->getName()));
 			$product->setBrand('ATW');
 		}
 		
