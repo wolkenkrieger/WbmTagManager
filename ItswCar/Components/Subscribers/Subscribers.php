@@ -170,10 +170,11 @@ class Subscribers implements SubscriberInterface {
 	
 	/**
 	 * @param \Shopware_Components_Cron_CronJob $cronJob
+	 * @return string
 	 */
-	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): void {
+	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): string {
 		$eventHandler = new Eventhandler($this->pluginDir);
-		$eventHandler->onCronHandleGoogleMerchantCenterQueue($cronJob);
+		return $eventHandler->onCronHandleGoogleMerchantCenterQueue($cronJob);
 	}
 	
 	/**

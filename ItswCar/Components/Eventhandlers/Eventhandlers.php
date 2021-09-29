@@ -584,8 +584,9 @@ class Eventhandlers {
 	
 	/**
 	 * @param \Shopware_Components_Cron_CronJob $cronJob
+	 * @return string
 	 */
-	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): void {
+	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): string {
 		$limit = $this->configHelper->getValue('cronjob_handle_gmc_queue_limit', 'ItswCar') ?:self::CRON_GMC_QUEUE_LIMIT;
 		
 		try {
@@ -597,13 +598,14 @@ class Eventhandlers {
 		} catch (\UnexpectedValueException $exception) {
 			$this->error($exception);
 			$cronJob->setProcessed(TRUE);
-			return;
+			return $exception->getMessage();
 		}
 		
 		if (!count($list)) {
 			$cronJob->setProcessed(TRUE);
-			return;
+			return 'no items to sync';
 		}
+		
 		$counter = 0;
 		
 		try {
@@ -668,16 +670,17 @@ class Eventhandlers {
 					$item->setResponse(json_encode($response, JSON_THROW_ON_ERROR));
 					$this->modelManager->persist($item);
 					$this->modelManager->flush($item);
+					$counter++;
 				} catch (\Exception $exception) {
 					$this->error($exception);
 					continue;
 				}
 			}
-			
-			$counter++;
 		}
 		
 		$cronJob->setProcessed(TRUE);
+		
+		return sprintf('%d of %d items synced', $counter, count($list));
 	}
 	
 	/**
