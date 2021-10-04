@@ -154,14 +154,23 @@ class Eventhandlers {
 			return ($value !== NULL && $value !== FALSE && $value !== '');
 		});
 		
+		$indexMax = count($queryPathParts);
+		
+		if ($indexMax < 2) {
+			return;
+		}
+		
+		
 		$partsToUnset = [];
 		$startIndex = NULL;
 		
 		foreach($queryPathParts as $index => $queryPathPart) {
-			if (is_array($matches = $controllerEventArgs->getSubject()->Router()->match($queryPathPart)) && isset($matches['m'])) {
-				$startIndex = $index;
-				$partsToUnset[$index] = $queryPathPart;
-				break;
+			if (is_array($matches = $controllerEventArgs->getSubject()->Router()->match($queryPathPart))) {
+				if (isset($matches['m']) || isset($matches['sSupplier'])) {
+					$startIndex = $index;
+					$partsToUnset[$index] = $queryPathPart;
+					break;
+				}
 			}
 		}
 		
@@ -169,7 +178,7 @@ class Eventhandlers {
 			return;
 		}
 		
-		for($index = $startIndex + 1, $indexMax = count($queryPathParts); $index <= $indexMax; $index++ ) {
+		for($index = $startIndex + 1; $index <= $indexMax; $index++ ) {
 			$url = sprintf('%s/%s/', implode('/', $partsToUnset), $queryPathParts[$index]);
 			$matches = $controllerEventArgs->getSubject()->Router()->match($url);
 			if (is_array($matches)) {
@@ -716,7 +725,7 @@ class Eventhandlers {
 				continue;
 			}
 			
-			$words = array_merge($words, explode(' ', $nodeValue));
+			$words[] = explode(' ', $nodeValue);
 		}
 		
 		if (!is_null($oeElement = $dom->getElementById('description_oe'))) {
@@ -726,10 +735,11 @@ class Eventhandlers {
 				':'
 			], ' ', strip_tags(html_entity_decode($oeElement->nodeValue, ENT_COMPAT | ENT_HTML401, 'UTF-8')));
 			
-			$words = array_merge($words, explode(' ', $nodeValue));
+			$words[] = explode(' ', $nodeValue);
 		}
 		
-		$words = array_count_values(array_diff($words, $badWords));
+		$words = array_merge([], ...$words);
+		$words = array_count_values(array_diff(array_unique($words), $badWords));
 		foreach (array_keys($words) as $word) {
 			if (strlen((string)$word) < 2) {
 				unset($words[$word]);
