@@ -47,7 +47,11 @@
     {/if}
 
     {if $SeoMetaRobots|strpos:'noindex' === false}
-        <link rel="canonical" href="{url params = $sCategoryContent.canonicalParams}"/>
+        {if $ItswCar.categoryCanonical}
+            <link rel="canonical" href="{$ItswCar.categoryCanonical}"/>
+        {else}
+            <link rel="canonical" href="{url params = $sCategoryContent.canonicalParams}"/>
+        {/if}
     {/if}
 
     {if {config name="seoIndexPaginationLinks"}}

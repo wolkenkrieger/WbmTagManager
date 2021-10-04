@@ -105,14 +105,20 @@ class Eventhandlers {
 		$url = $this->seoHelper->getCarSeoUrl($sessionData['manufacturer'], $sessionData['model'], $sessionData['car']);
 		$url = $this->seoHelper->completeUrl($url);
 		
+		$viewVars = $subject->View()->getAssign('sCategoryContent');
+		$categoryCanonical = (isset($viewVars['link']) && $viewVars['link'])? $this->seoHelper->completeUrl($viewVars['link']) : '';
+		
+		
 		$templateVars = [
 			'session' => $sessionData,
 			'basketdata' => $basketData,
 			'google' => $this->getGoogleConfigOptions(),
 			'maintenance' => $this->configHelper ? $this->configHelper->isMaintenanceMode() : FALSE,
 			'development' => $this->configHelper ? $this->configHelper->isDevelopmentMode() : FALSE,
-			'rootUrl' => $url
+			'rootUrl' => $url,
+			'categoryCanonical' => $categoryCanonical
 		];
+		
 		
 		$subject->View()->assign('ItswCar', $templateVars, TRUE);
 		
