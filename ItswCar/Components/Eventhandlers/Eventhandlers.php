@@ -108,7 +108,6 @@ class Eventhandlers {
 		$viewVars = $subject->View()->getAssign('sCategoryContent');
 		$categoryCanonical = (isset($viewVars['link']) && $viewVars['link'])? $this->seoHelper->completeUrl($viewVars['link']) : '';
 		
-		
 		$templateVars = [
 			'session' => $sessionData,
 			'basketdata' => $basketData,
@@ -118,7 +117,6 @@ class Eventhandlers {
 			'rootUrl' => $url,
 			'categoryCanonical' => $categoryCanonical
 		];
-		
 		
 		$subject->View()->assign('ItswCar', $templateVars, TRUE);
 		
