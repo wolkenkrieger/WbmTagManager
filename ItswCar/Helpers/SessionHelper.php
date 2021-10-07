@@ -31,13 +31,16 @@ class SessionHelper {
 			'description'   => NULL,
 			'title'         => NULL,
 			'url'           => NULL,
+			'uuid'          => NULL,
 		];
 		
 		$session = $container->get('session');
 		$configHelper = $container->get('itsw.helper.config');
 		$seoHelper = $container->get('itsw.helper.seo');
+		$uniqueIdGenerator = $container->get('shopware_plugininstaller.unique_id_generator');
 		
 		$data = array_merge($defaultData, $data);
+		$data['uuid'] = $data['uuid']?: $uniqueIdGenerator->getUniqueId();
 		
 		$viewData = $container->get('models')->getRepository(Car::class)->getCarDisplayForView((int)$data['car']);
 		
@@ -102,6 +105,7 @@ class SessionHelper {
 			'description'   => NULL,
 			'title'         => NULL,
 			'url'           => NULL,
+			'uuid'          => NULL,
 		];
 		
 		$session = $container->get('session');
@@ -112,11 +116,13 @@ class SessionHelper {
 			try {
 				$cookieSessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR);
 				$sessionData = array_merge($sessionData, $cookieSessionData);
-				$session->offsetSet('itsw-car-session-data', $sessionData);
+				$this->setSessionData($sessionData);
 			} catch (\JsonException $exception) {
 				$this->error($exception);
-				$session->offsetSet('itsw-car-session-data', $sessionData);
+				$this->setSessionData($sessionData);
 			}
+		} else {
+			$this->setSessionData($sessionData);
 		}
 		
 		$this->debug(__METHOD__, $sessionData);
