@@ -10,6 +10,7 @@
 namespace ItswCar\Helpers;
 
 use ItswCar\Models\Car;
+use Shopware\Components\Random;
 use Symfony\Component\HttpFoundation\Cookie;
 use ItswCar\Traits\LoggingTrait;
 
@@ -37,10 +38,10 @@ class SessionHelper {
 		$session = $container->get('session');
 		$configHelper = $container->get('itsw.helper.config');
 		$seoHelper = $container->get('itsw.helper.seo');
-		$uniqueIdGenerator = $container->get('shopware_plugininstaller.unique_id_generator');
+		
 		
 		$data = array_merge($defaultData, $data);
-		$data['uuid'] = $data['uuid']?: $uniqueIdGenerator->getUniqueId();
+		$data['uuid'] = $data['uuid']?: Random::getAlphanumericString(32);
 		
 		$viewData = $container->get('models')->getRepository(Car::class)->getCarDisplayForView((int)$data['car']);
 		
