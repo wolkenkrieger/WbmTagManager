@@ -53,6 +53,7 @@ class Subscribers implements SubscriberInterface {
 			
 			'Shopware_CronJob_ItswHandleGoogleMerchantCenterQueue'          => 'onCronHandleGoogleMerchantCenterQueue',
 			'Shopware_Controllers_Widgets_Listing_fetchPagination_preFetch' => 'onListingFetchPaginationPreFetch',
+			'Shopware_Modules_Order_SaveOrder_FilterAttributes'             => 'onOrderSaveOrderFilterAttributes',
 		];
 	}
 	
@@ -184,5 +185,13 @@ class Subscribers implements SubscriberInterface {
 		$this->debug(__METHOD__, $controllerEventArgs);
 		$eventHandler = new Eventhandler($this->pluginDir);
 		$eventHandler->onListingFetchPaginationPreFetch($controllerEventArgs);
+	}
+	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 */
+	public function onOrderSaveOrderFilterAttributes(\Enlight_Event_EventArgs $eventArgs): void {
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onOrderSaveOrderFilterAttributes($eventArgs);
 	}
 }

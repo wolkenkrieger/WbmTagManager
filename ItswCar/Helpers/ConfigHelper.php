@@ -15,7 +15,14 @@ use Shopware\Models\Shop\Shop;
 use Shopware_Components_Config;
 use Monolog\Logger;
 
+use ItswCar\Traits\LoggingTrait;
+
 class ConfigHelper {
+	use LoggingTrait;
+	
+	
+	public const PAY_UNTIL_DAYS = 10;
+	
 	/**
 	 * @var \Shopware_Components_Config
 	 */
@@ -236,5 +243,41 @@ class ConfigHelper {
 		$logLevel = $this->getValue('log_level', 'ItswCar')?:Logger::WARNING;
 		
 		return (int)$logLevel;
+	}
+	
+	/**
+	 * @return false|string
+	 */
+	public function getPayUntilDate() {
+		$days = $this->getValue('pay_until_days', 'ItswCar')?:self::PAY_UNTIL_DAYS;
+		
+		try {
+			$date = new \DateTime();
+			$payUntilDate = $date->add(new \DateInterval(sprintf('P%dD', $days)));
+			
+			/*
+			 * Numeric representation of the day of the week 0 (for Sunday) through 6 (for Saturday)
+			 */
+			if ((int)$payUntilDate->format('w') === 0) {
+				$payUntilDate = $payUntilDate->add(new \DateInterval('P1D'));
+			} else if ((int)$payUntilDate->format('w') === 6) {
+				$payUntilDate = $payUntilDate->add(new \DateInterval('P2D'));
+			}
+			
+			return $payUntilDate->format('d.m.Y');
+		} catch (\Exception $exception) {
+			$this->error($exception);
+			
+			$then = time() + (86400 * $days);
+			$day = getdate($then);
+			
+			if ($day['wday'] === 0) {
+				$then += 86400;
+			} else if ($day['wday'] === 6) {
+				$then += (86400 * 2);
+			}
+			
+			return date("d.m.Y", $then);
+		}
 	}
 }

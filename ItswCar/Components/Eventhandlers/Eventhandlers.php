@@ -115,7 +115,7 @@ class Eventhandlers {
 			'maintenance' => $this->configHelper ? $this->configHelper->isMaintenanceMode() : FALSE,
 			'development' => $this->configHelper ? $this->configHelper->isDevelopmentMode() : FALSE,
 			'rootUrl' => $url,
-			'categoryCanonical' => $categoryCanonical
+			'categoryCanonical' => $categoryCanonical,
 		];
 		
 		$subject->View()->assign('ItswCar', $templateVars, TRUE);
@@ -701,6 +701,15 @@ class Eventhandlers {
 	 */
 	public function onListingFetchPaginationPreFetch(\Enlight_Controller_EventArgs $controllerEventArgs): void {
 	
+	}
+	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 */
+	public function onOrderSaveOrderFilterAttributes(\Enlight_Event_EventArgs $eventArgs): void {
+		$attributeData = $eventArgs->getReturn();
+		$attributeData['itsw_pay_until_date'] = $this->configHelper->getPayUntilDate();
+		$eventArgs->setReturn($attributeData);
 	}
 	
 	

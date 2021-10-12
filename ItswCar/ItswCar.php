@@ -275,6 +275,15 @@ class ItswCar extends Plugin {
 			'custom' => FALSE
 		]);
 		
+		$service->update('s_order_attributes', 'itsw_pay_until_date', 'string', [
+			'label' => 'Zahldatum bei Vorkasse',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'custom' => FALSE
+		]);
+		
 		if ($service->get('s_order_attributes', 'tecdoc_id')) {
 			$service->delete('s_order_attributes', 'tecdoc_id');
 		}
@@ -285,6 +294,10 @@ class ItswCar extends Plugin {
 		
 		if ($service->get('s_articles_attributes', 'position_1')) {
 			$service->delete('s_articles_attributes', 'position_1');
+		}
+		
+		if ($service->get('s_order_attributes', 'pay_until_date')) {
+			$service->delete('s_order_attributes', 'pay_until_date');
 		}
 		
 		if ($service->get('s_articles_attributes', 'position_2')) {

@@ -196,5 +196,12 @@
                 </div>
             ]]></description>
 		</element>
+		
+		<element type="number" scope="shop">
+			<name>pay_until_days</name>
+			<label>Zahlungsfrist von Vorkassebestellungen in Werktagen</label>
+			<value>5</value>
+			<description></description>
+		</element>
 	</elements>
 </config>
