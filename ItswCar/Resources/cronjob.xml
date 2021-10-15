@@ -8,4 +8,12 @@
 		<interval>120</interval>
 		<disableOnError>false</disableOnError>
 	</cronjob>
+	
+	<cronjob>
+		<name>ITSW - Check Prepayment Orders Payment Status</name>
+		<action>Shopware_CronJob_ItswCheckPrepaymentOrdersPaymentStatus</action>
+		<active>true</active>
+		<interval>86400</interval>
+		<disableOnError>true</disableOnError>
+	</cronjob>
 </cronjobs>

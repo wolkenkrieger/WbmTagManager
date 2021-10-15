@@ -35,25 +35,32 @@ class Subscribers implements SubscriberInterface {
 	public static function getSubscribedEvents(): array {
 		return [
 			'Enlight_Controller_Action_PostDispatchSecure_Frontend'         => 'onPostDispatchSecureFrontend',
+			'Enlight_Controller_Action_PreDispatch_Frontend'                => 'onPreDispatchFrontend',
+			'Enlight_Controller_Action_PostDispatchSecure_Backend_Form'     => 'onPostDispatchSecureBackendForm',
+			
 			'Enlight_Controller_Front_RouteStartup'                         => 'onFrontRouteStartup',
 			'Enlight_Controller_Front_RouteShutdown'                        => 'onFrontRouteShutdown',
+			
+			'Shopware_Controllers_Widgets_Listing_fetchPagination_preFetch' => 'onListingFetchPaginationPreFetch',
+			
 			'Shopware_SearchBundleDBAL_Collect_Condition_Handlers'          => 'onCollectConditionHandlers',
+			
 			'Legacy_Struct_Converter_Convert_Category'                      => 'onAfterConvertCategoryByLegacyStructConverter',
+			'Legacy_Struct_Converter_Convert_List_Product'                  => 'onConvertListProduct',
+			
 			'sCategories::convertCategory::after'                           => 'onAfterConvertCategory',
 			'sCategories::sGetCategoriesByParent::after'                    => 'onAfterGetCategoriesByParent',
 			'sArticles::sGetArticlesByCategory::after'                      => 'onAfterGetArticleByCategory',
-			'Legacy_Struct_Converter_Convert_List_Product'                  => 'onConvertListProduct',
 			'sArticles::sGetArticleById::after'                             => 'onAfterGetArticleById',
 			
-			'Enlight_Controller_Action_PreDispatch_Frontend'                => 'onPreDispatchFrontend',
-			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
-			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
-			'Enlight_Controller_Action_PostDispatchSecure_Backend_Form'     => 'onPostDispatchSecureBackendForm',
 			'Shopware_Modules_Basket_UpdateCartItems_Updated'               => 'onBasketUpdateCartItemsUpdated',
+			'Shopware_Modules_Order_SaveOrder_FilterAttributes'             => 'onOrderSaveOrderFilterAttributes',
 			
 			'Shopware_CronJob_ItswHandleGoogleMerchantCenterQueue'          => 'onCronHandleGoogleMerchantCenterQueue',
-			'Shopware_Controllers_Widgets_Listing_fetchPagination_preFetch' => 'onListingFetchPaginationPreFetch',
-			'Shopware_Modules_Order_SaveOrder_FilterAttributes'             => 'onOrderSaveOrderFilterAttributes',
+			'Shopware_CronJob_ItswCheckPrepaymentOrdersPaymentStatus'       => 'onCronHandleOrdersPaymentStatus',
+			
+			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
+			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
 		];
 	}
 	
@@ -176,6 +183,15 @@ class Subscribers implements SubscriberInterface {
 	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): string {
 		$eventHandler = new Eventhandler($this->pluginDir);
 		return $eventHandler->onCronHandleGoogleMerchantCenterQueue($cronJob);
+	}
+	
+	/**
+	 * @param \Shopware_Components_Cron_CronJob $cronJob
+	 * @return string
+	 */
+	public function onCronHandleOrdersPaymentStatus(\Shopware_Components_Cron_CronJob $cronJob): string {
+		$eventHandler = new Eventhandler($this->pluginDir);
+		return $eventHandler->onCronHandleOrdersPaymentStatus($cronJob);
 	}
 	
 	/**

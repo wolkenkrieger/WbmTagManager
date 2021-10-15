@@ -23,6 +23,7 @@ use ItswCar\Traits\LoggingTrait;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Attribute\OrderBasket;
 use Shopware\Models\Order\Basket;
+use Shopware\Models\Order\Order;
 use Shopware\Components\DependencyInjection\Container;
 use Shopware\Models\Article\Article as ProductModel;
 use Shopware\Models\Shop\Shop;
@@ -697,6 +698,53 @@ class Eventhandlers {
 	}
 	
 	/**
+	 * @param \Shopware_Components_Cron_CronJob $cronJob
+	 * @return string
+	 */
+	public function onCronHandleOrdersPaymentStatus(\Shopware_Components_Cron_CronJob $cronJob): string {
+		$orders = $this->modelManager->getRepository(Order::class)
+			->findBy([
+				'cleared' => [17, 13],
+				'paymentId' => 5,
+				'id' => 241
+			]);
+		
+		$counter = 0;
+		
+		foreach($orders as $order) {
+			$attribute = $order->getAttribute();
+			
+			if (!$attribute instanceof \Shopware\Models\Attribute\Order) {
+				continue;
+			}
+			
+			$payUntilDate = $attribute->getItswPayUntilDate();
+			
+			if ($payUntilDate === NULL) {
+				/*
+				 * @ToDo: set date for orders prior plugin version 2.1.3
+				 */
+				continue;
+			}
+			
+			$today = new \DateTime();
+			$payUntilDate = \DateTime::createFromFormat('d.m.Y', $payUntilDate);
+			
+			if ($payUntilDate->add(new \DateInterval('P1D')) < $today) {
+				switch($order->getPaymentStatus()->getId()) {
+					// 1st reminder
+					case 13: $counter += $this->cancelOrder($order); break;
+					// still open
+					case 17:
+					default: $counter += $this->send1stReminder($order); break;
+				}
+			}
+		}
+		
+		return sprintf('%d of %d orders handled', $counter, count($orders));
+	}
+	
+	/**
 	 * @param \Enlight_Controller_EventArgs $controllerEventArgs
 	 */
 	public function onListingFetchPaginationPreFetch(\Enlight_Controller_EventArgs $controllerEventArgs): void {
@@ -814,5 +862,47 @@ class Eventhandlers {
 		}
 		
 		return FALSE;
+	}
+	
+	/**
+	 * @param \Shopware\Models\Order\Order $order
+	 * @return int
+	 */
+	private function cancelOrder(Order $order): int {
+		return 1;
+	}
+	
+	/**
+	 * @param \Shopware\Models\Order\Order $order
+	 * @return int
+	 */
+	private function send1stReminder(Order $order): int {
+		$newPayUntilDate = $this->configHelper->getPayUntilDate();
+		
+		try {
+			$attribute = $this->modelManager->getRepository(\Shopware\Models\Attribute\Order::class)
+				->findOneBy([
+					'orderId' => $order->getId()
+				]);
+			
+			if (!$attribute instanceof \Shopware\Models\Attribute\Order) {
+				throw new \Exception(sprintf('no attribute found for orderID %d', $order->getId()));
+			}
+			
+			$attribute->setItswPayUntilDate($newPayUntilDate);
+			$this->modelManager->persist($attribute);
+			$this->modelManager->flush($attribute);
+			
+			Shopware()->Modules()->Order()->setPaymentStatus($order->getId(), 13, FALSE, NULL);
+			$statusMail = Shopware()->Modules()->Order()->createStatusMail($order->getId(), 0, 'ItswCar_1st_Reminder');
+			Shopware()->Modules()->Order()->sendStatusMail($statusMail);
+			
+		} catch (\Exception $exception) {
+			$this->error($exception);
+			
+			return 0;
+		}
+		
+		return 1;
 	}
 }
