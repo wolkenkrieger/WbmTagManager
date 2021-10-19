@@ -705,7 +705,7 @@ class Eventhandlers {
 		$orders = $this->modelManager->getRepository(Order::class)
 			->findBy([
 				'cleared' => [17, 13],
-				'state' => 0,
+				'status' => 0,
 				'paymentId' => 5,
 				//'id' => 241
 			]);
