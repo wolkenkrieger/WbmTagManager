@@ -604,11 +604,19 @@ class Eventhandlers {
 		$limit = $this->configHelper->getValue('cronjob_handle_gmc_queue_limit', 'ItswCar') ?:self::CRON_GMC_QUEUE_LIMIT;
 		
 		try {
-			$list = $this->modelManager->getRepository(GoogleMerchantCenterQueue::class)->findBy([
-				'handled' => NULL
-			], [
-				'created' => 'ASC'
-			], (int)$limit);
+			$builder = $this->modelManager->createQueryBuilder();
+			$query = $builder
+				->select([
+					'gmcq'
+				])
+				->from(GoogleMerchantCenterQueue::class, 'gmcq')
+				->where('gmcq.handled IS NULL')
+				->orWhere('DATE_DIFF(CURRENT_DATE(), gmcq.handled) >= 29')
+				->orderBy('gmcq.handled')
+				->setMaxResults($limit)
+				->getQuery();
+			
+			$list = $query->getArrayResult();
 		} catch (\UnexpectedValueException $exception) {
 			$this->error($exception);
 			$cronJob->setProcessed(TRUE);
