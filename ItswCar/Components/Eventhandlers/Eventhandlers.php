@@ -713,7 +713,7 @@ class Eventhandlers {
 		$orders = $this->modelManager->getRepository(Order::class)
 			->findBy([
 				'cleared' => [17, 13],
-				'status' => 0,
+				'status' => [0, 1],
 				'paymentId' => 5,
 				//'id' => 241
 			]);
@@ -914,7 +914,7 @@ class Eventhandlers {
 			$this->modelManager->flush($attribute);
 			
 			Shopware()->Modules()->Order()->setPaymentStatus($order->getId(), 13, FALSE, NULL);
-			Shopware()->Modules()->Order()->setOrderStatus($order->getId(), 0, FALSE, NULL);
+			Shopware()->Modules()->Order()->setOrderStatus($order->getId(), 1, FALSE, NULL);
 			$statusMail = Shopware()->Modules()->Order()->createStatusMail($order->getId(), 0, 'ItswCar_1st_Reminder');
 			Shopware()->Modules()->Order()->sendStatusMail($statusMail);
 			
