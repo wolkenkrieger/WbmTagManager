@@ -616,7 +616,7 @@ class Eventhandlers {
 				->setMaxResults($limit)
 				->getQuery();
 			
-			$list = $query->getArrayResult();
+			$list = $query->getResult();
 		} catch (\UnexpectedValueException $exception) {
 			$this->error($exception);
 			$cronJob->setProcessed(TRUE);
