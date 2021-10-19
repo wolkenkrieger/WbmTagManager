@@ -705,8 +705,9 @@ class Eventhandlers {
 		$orders = $this->modelManager->getRepository(Order::class)
 			->findBy([
 				'cleared' => [17, 13],
+				'state' => 0,
 				'paymentId' => 5,
-				'id' => 241
+				//'id' => 241
 			]);
 		
 		$counter = 0;
@@ -869,6 +870,17 @@ class Eventhandlers {
 	 * @return int
 	 */
 	private function cancelOrder(Order $order): int {
+		try {
+			Shopware()->Modules()->Order()->setOrderStatus($order->getId(), 4, FALSE, NULL);
+			Shopware()->Modules()->Order()->setPaymentStatus($order->getId(), 35, FALSE, NULL);
+			$statusMail = Shopware()->Modules()->Order()->createStatusMail($order->getId(), 4, 'ItswCar_Order_Canceled');
+			Shopware()->Modules()->Order()->sendStatusMail($statusMail);
+		} catch (\Exception $exception) {
+			$this->error($exception);
+			
+			return 0;
+		}
+		
 		return 1;
 	}
 	
@@ -894,6 +906,7 @@ class Eventhandlers {
 			$this->modelManager->flush($attribute);
 			
 			Shopware()->Modules()->Order()->setPaymentStatus($order->getId(), 13, FALSE, NULL);
+			Shopware()->Modules()->Order()->setOrderStatus($order->getId(), 0, FALSE, NULL);
 			$statusMail = Shopware()->Modules()->Order()->createStatusMail($order->getId(), 0, 'ItswCar_1st_Reminder');
 			Shopware()->Modules()->Order()->sendStatusMail($statusMail);
 			
