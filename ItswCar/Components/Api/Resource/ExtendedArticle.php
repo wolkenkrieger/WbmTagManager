@@ -2706,6 +2706,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			$this->getManager()->persist($entity);
 			$this->getManager()->flush($entity);
 		} catch (\Exception $exception) {
+			$this->error($exception);
 			return 0;
 		}
 		
