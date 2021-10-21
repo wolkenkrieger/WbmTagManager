@@ -93,7 +93,6 @@ class SessionHelper {
 			$this->error($exception);
 		}
 		
-		
 		return $data;
 	}
 	
@@ -140,6 +139,13 @@ class SessionHelper {
 	 * @return array
 	 */
 	public function resetSession(): array {
+		try {
+			Shopware()->Front()->Response()->headers->clearCookie('itsw-car-session-data');
+			Shopware()->Front()->Response()->headers->clearCookie('itsw-car-cache-data');
+		} catch (\Exception $exception) {
+			$this->error($exception);
+		}
+		
 		return $this->setSessionData();
 	}
 }
