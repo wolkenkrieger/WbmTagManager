@@ -2688,9 +2688,21 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 */
 	private function addToGoogleMerchantCenterQueue(ProductModel $product, string $jobType = 'create'): int {
 		try {
-			$entity = new GoogleMerchantCenterQueue();
-			$entity->setArticleId($product->getId());
-			$entity->setJobType($jobType);
+			$entity = $this->getManager()->getRepository(GoogleMerchantCenterQueue::class)
+				->findOneBy([
+					'articleId' => $product->getId()
+				]);
+			
+			if ($entity instanceof GoogleMerchantCenterQueue) {
+				$entity->setHandled(NULL);
+				$entity->setJobType('update');
+				
+			} else {
+				$entity = new GoogleMerchantCenterQueue();
+				$entity->setArticleId($product->getId());
+				$entity->setJobType($jobType);
+			}
+			
 			$this->getManager()->persist($entity);
 			$this->getManager()->flush($entity);
 		} catch (\Exception $exception) {

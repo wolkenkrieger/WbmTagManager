@@ -194,7 +194,8 @@ class ConfigHelper {
 	 */
 	public function getBasePath(): string {
 		if ($this->isFront()) {
-			return Shopware()->Shop()->getBasePath();
+			//return (Shopware()->Shop()->getBasePath()) ? : '/';
+			return (string)Shopware()->Shop()->getBasePath();
 		}
 		
 		return '/';
