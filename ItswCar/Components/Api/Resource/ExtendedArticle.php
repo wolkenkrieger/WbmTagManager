@@ -2694,7 +2694,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 				]);
 			
 			if ($entity instanceof GoogleMerchantCenterQueue) {
-				$entity->setHandled(new \DateTime('0000-00-00'));
+				$entity->setHandled(new \DateTime('1970-01-01'));
 				$entity->setJobType('update');
 				
 			} else {
