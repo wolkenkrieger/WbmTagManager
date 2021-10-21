@@ -39,9 +39,14 @@ class SessionHelper {
 		$configHelper = $container->get('itsw.helper.config');
 		$seoHelper = $container->get('itsw.helper.seo');
 		
+		$sessionData = [];
+		if ($session->offsetExists('itsw-car-session-data')) {
+			$sessionData = $session->offsetGet('itsw-car-session-data');
+		}
 		
 		$data = array_merge($defaultData, $data);
-		$data['uuid'] = $data['uuid']?: Random::getAlphanumericString(32);
+		
+		$data['uuid'] = $sessionData['uuid']?? $data['uuid']?: Random::getAlphanumericString(32);
 		
 		$viewData = $container->get('models')->getRepository(Car::class)->getCarDisplayForView((int)$data['car']);
 		
