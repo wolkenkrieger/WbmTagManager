@@ -114,14 +114,17 @@ class GoogleMerchantCenterQueue extends ModelEntity {
 	}
 	
 	/**
-	 * @param \DateTime|null $handled
+	 * @param \DateTime|string|null $handled
 	 * @return $this
+	 * @throws \Exception
 	 */
-	public function setHandled(?\DateTime $handled): GoogleMerchantCenterQueue {
+	public function setHandled($handled = NULL): GoogleMerchantCenterQueue {
 		if ($handled instanceof \DateTime) {
 			$this->handled = $handled;
+		} else if (is_string($handled)) {
+			$this->handled = new \DateTime($handled);
 		} else {
-			$this->handled = new \DateTime();
+			$this->handled = NULL;
 		}
 		
 		return $this;

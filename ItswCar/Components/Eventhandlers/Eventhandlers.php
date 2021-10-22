@@ -663,6 +663,9 @@ class Eventhandlers {
 				if (!$product) {
 					throw new \Exception(sprintf('Product by id "%d" not found', $item->getArticleId()));
 				}
+				
+				$productHelper = Shopware()->Container()->get('itsw.helper.product');
+				$productHelper->setProductFakePrice($product);
 			} catch(\Exception $exception) {
 				$this->error($exception);
 				continue;

@@ -10,7 +10,6 @@
 
 namespace ItswCar\Components\Api\Resource;
 
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\TransactionRequiredException;
 use ItswCar\Models\GoogleMerchantCenterQueue;
@@ -30,7 +29,6 @@ use Shopware\Models\Article\Link;
 use Shopware\Models\Article\Repository;
 use Shopware\Models\Article\SeoCategory;
 use Shopware\Models\Article\Supplier;
-use Shopware\Models\Attribute\Article as Attribute;
 use Shopware\Models\Category\Category;
 use Shopware\Models\Media\Media as MediaModel;
 use Shopware\Models\Price\Group;
@@ -51,9 +49,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	 * @var \Shopware_Components_Translation
 	 */
 	private $translationComponent;
+	private $productHelper;
 	
 	public function __construct(\Shopware_Components_Translation $translationComponent = null) {
 		$this->translationComponent = $translationComponent ?: Shopware()->Container()->get('translation');
+		$this->productHelper = Shopware()->Container()->get('itsw.helper.product');
 	}
 	
 	/**
@@ -353,12 +353,10 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			$this->writeCarLinks($carLinks, $product);
 		}
 		
-		try {
-			$this->setProductFakePrice($product);
-		} catch (OptimisticLockException | ORMException $e) {}
+		$this->productHelper->setProductFakePrice($product);
 		
 		if ($googleContentApi) {
-			$queueId = $this->addToGoogleMerchantCenterQueue($product, 'create');
+			$queueId = $this->addToGoogleMerchantCenterQueue($product);
 		}
 		
 		return $product;
@@ -475,9 +473,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			}
 		}
 		
-		try {
-			$this->setProductFakePrice($product);
-		} catch (OptimisticLockException | ORMException $e) {}
+		$this->productHelper->setProductFakePrice($product);
 		
 		if ($googleContentApi || $this->isInQueue($product)) {
 			$queueId = $this->addToGoogleMerchantCenterQueue($product, 'update');
@@ -1915,39 +1911,6 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * @param \Shopware\Models\Article\Article $product
-	 * @throws \Doctrine\ORM\ORMException
-	 * @throws \Doctrine\ORM\OptimisticLockException
-	 */
-	private function setProductFakePrice(ProductModel $product): void {
-		$attribute = $this->getManager()->getRepository(Attribute::class)
-			->findOneBy([
-				'articleDetailId' => $product->getMainDetail()->getId()
-			]);
-		
-		if ($attribute) {
-			$productPrice = 0;
-			
-			foreach($product->getMainDetail()->getPrices() as $price) {
-				if ($price->getCustomerGroup()->getKey() === 'EK') {
-					$productPrice = $price->getPrice();
-					if ($discount = $price->getCustomerGroup()->getDiscount()) {
-						$productPrice -= ($productPrice / 100 * $discount);
-					}
-					break;
-				}
-			}
-			
-			$productPrice *= (($product->getTax()->getTax() + 100) / 100);
-			$fakePrice = $productPrice * $this->getPriceFactor(1, 1.543);
-			
-			$this->getManager()->persist($attribute);
-			$attribute->setFakePrice($fakePrice);
-			$this->getManager()->flush($attribute);
-		}
-	}
-	
-	/**
 	 * @deprecated in 5.6, will be removed in 5.7 without a replacement
 	 *
 	 * Checks if the passed product image is already created
@@ -2672,16 +2635,6 @@ class ExtendedArticle extends Resource implements BatchInterface {
 	}
 	
 	/**
-	 * @param int   $min
-	 * @param float $max
-	 * @return float
-	 */
-	private function getPriceFactor(int $min = 1, float $max = 1.654): float {
-		//return ((float)mt_rand() / (float)mt_getrandmax()) + 1.1111;
-		return $min + mt_rand() / mt_getrandmax() * ($max - $min);
-	}
-	
-	/**
 	 * @param \Shopware\Models\Article\Article $product
 	 * @param string                           $jobType
 	 * @return int
@@ -2694,7 +2647,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 				]);
 			
 			if ($entity instanceof GoogleMerchantCenterQueue) {
-				$entity->setHandled(new \DateTime('1970-01-01'));
+				$entity->setHandled(NULL);
 				$entity->setJobType('update');
 				
 			} else {
