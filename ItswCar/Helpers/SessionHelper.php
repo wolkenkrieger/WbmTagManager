@@ -127,7 +127,10 @@ class SessionHelper {
 				$this->setSessionData($sessionData);
 			} catch (\JsonException $exception) {
 				$this->error($exception);
-				$this->error('$cookieData', [$cookieData]);
+				$this->error('$cookieData', [
+					'data' => $cookieData,
+					'server' => $_SERVER
+				]);
 				$this->setSessionData($sessionData);
 			}
 		} else {
