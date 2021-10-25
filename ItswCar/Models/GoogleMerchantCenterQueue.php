@@ -16,7 +16,8 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="ItswCar\Models\Repository")
  * @ORM\Table(name="itsw_gmc_queue", indexes={
  *     @ORM\Index(name="get_by_id", columns={"id"}),
- *     @ORM\Index(name="get_by_article_id", columns={"article_id"})
+ *     @ORM\Index(name="get_by_article_id", columns={"article_id"}),
+ *     @ORM\Index(name="get_by_handled", columns={"handled"}),
  * })
  */
 class GoogleMerchantCenterQueue extends ModelEntity {
@@ -44,11 +45,18 @@ class GoogleMerchantCenterQueue extends ModelEntity {
 	protected \DateTime $created;
 	
 	/**
-	 * @var \DateTime
+	 * @var ?\DateTime
 	 *
 	 * @ORM\Column(name="handled", type="datetime", nullable=true)
 	 */
-	protected \DateTime $handled;
+	protected ?\DateTime $handled;
+	
+	/**
+	 * @var ?\DateTime
+	 *
+	 * @ORM\Column(name="modified", type="datetime", nullable=true)
+	 */
+	protected ?\DateTime $modified;
 	
 	/**
 	 * @var string
@@ -128,6 +136,37 @@ class GoogleMerchantCenterQueue extends ModelEntity {
 		}
 		
 		return $this;
+	}
+	
+	/**
+	 * @return \DateTime|null
+	 */
+	public function getHandled(): ?\DateTime {
+		return $this->handled;
+	}
+	
+	/**
+	 * @param null $modified
+	 * @return $this
+	 * @throws \Exception
+	 */
+	public function setModified($modified = NULL): GoogleMerchantCenterQueue {
+		if ($modified instanceof \DateTime) {
+			$this->modified = $modified;
+		} else if (is_string($modified)) {
+			$this->modified = new \DateTime($modified);
+		} else {
+			$this->modified = new \DateTime();
+		}
+		
+		return $this;
+	}
+	
+	/**
+	 * @return \DateTime|null
+	 */
+	public function getModified(): ?\DateTime {
+		return $this->modified;
 	}
 	
 	/**
