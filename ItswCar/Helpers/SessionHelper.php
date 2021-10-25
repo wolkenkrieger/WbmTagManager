@@ -63,7 +63,7 @@ class SessionHelper {
 				Shopware()->Front()->Response()->headers->setCookie(
 					new Cookie(
 						'itsw-car-session-data',
-						base64_encode($dataEncoded),
+						$dataEncoded,
 						0,
 						$configHelper->getBasePath(),
 						NULL,
@@ -121,7 +121,7 @@ class SessionHelper {
 			$sessionData = array_merge($sessionData, $session->offsetGet('itsw-car-session-data'));
 		} else if ($cookieData = Shopware()->Front()->Request()->getCookie('itsw-car-session-data')) {
 			try {
-				$cookieSessionData = json_decode(base64_decode($cookieData), TRUE, 512, JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_IGNORE);
+				$cookieSessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_IGNORE);
 				$sessionData = array_merge($sessionData, $cookieSessionData);
 				$this->setSessionData($sessionData);
 			} catch (\JsonException $exception) {
