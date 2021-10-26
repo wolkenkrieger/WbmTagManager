@@ -382,7 +382,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 							'cars'
 						],
 						'conditions' => [
-							'cars.tecdocId' => $tecdocIds,
+							'cars.tecdocId IN (' . implode(',', $tecdocIds) . ')',
 						'cars.active' => 1
 						],
 						'orders' => [
