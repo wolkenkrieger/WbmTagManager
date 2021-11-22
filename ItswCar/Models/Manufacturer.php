@@ -42,25 +42,25 @@ class Manufacturer extends ModelEntity {
 	 * @var string
 	 * @ORM\Column(name="name", type="string", nullable=false, length=65)
 	 */
-	private $name;
+	private string $name;
 	
 	/**
 	 * @var string
 	 * @ORM\Column(name="display", type="string", nullable=true, length=65)
 	 */
-	private $display;
+	private string $display;
 	
 	/**
 	 * @var bool
 	 * @ORM\Column(name="active", type="boolean", nullable=false)
 	 */
-	private $active = TRUE;
+	private bool $active = TRUE;
 	
 	/**
 	 * @var bool
 	 * @ORM\Column(name="top_brand", type="boolean", nullable=false)
 	 */
-	private $topBrand;
+	private bool $topBrand = FALSE;
 	
 	/**
 	 * @return \Doctrine\Common\Collections\ArrayCollection

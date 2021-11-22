@@ -691,7 +691,7 @@ class Eventhandlers {
 				$response = $response['response'];
 				try {
 					$item->setHandled(new \DateTime());
-					$item->setGoogleProductId($response->getId());
+					$item->setGoogleProductId($contentProduct->buildProductId($product->getMainDetail()->getNumber()));
 					$item->setResponse(json_encode($response, JSON_THROW_ON_ERROR));
 					$this->modelManager->persist($item);
 					$this->modelManager->flush($item);

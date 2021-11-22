@@ -90,6 +90,9 @@ class EbayCarsImporterCommand extends ShopwareCommand {
 			throw new FileNotFoundException(sprintf("%s not found", $fileName));
 		}
 		
+		$output->writeln(sprintf('importing file: %s', $fileName));
+		$output->writeln('');
+		
 		$_handle = file($fileName, FILE_SKIP_EMPTY_LINES);
 		$handle = fopen($fileName, 'r');
 		$csvHeader = fgetcsv($handle, 8192, ';', '"' );
@@ -110,7 +113,7 @@ class EbayCarsImporterCommand extends ShopwareCommand {
 			$data['codes'] = $this->splitCodes($csvRow[$this->itswCarServices->validate($csvCols, 'HSN_TSN_nur_zur_Hilfe')], $data['tecdocId']);
 			
 			$this->importData($data, $forceUpdate);
-			$this->itswCarServices->showProgress(++$rowCount, count($_handle) - 1, $output);
+			$this->showProgress(++$rowCount, count($_handle) - 1, $output);
 			
 		}
 	}
@@ -302,5 +305,19 @@ class EbayCarsImporterCommand extends ShopwareCommand {
 	 */
 	private function cleanString(string $string): string {
 		return strtolower(str_ireplace(' ', '_', trim($string)));
+	}
+	
+	/**
+	 * @param                                                   $current
+	 * @param                                                   $end
+	 * @param \Symfony\Component\Console\Output\OutputInterface $output
+	 */
+	private function showProgress($current, $end, OutputInterface $output): void {
+		if ($current % 10 === 0) {
+			$output->write('.');
+		}
+		if (($current % 500 === 0) || ($current === $end)) {
+			$output->writeln(sprintf(' %d/%d', $current, $end));
+		}
 	}
 }

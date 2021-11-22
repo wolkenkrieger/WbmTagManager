@@ -9,12 +9,14 @@
 
 namespace ItswCar\Components\Google\ContentApi;
 
+use Google\Exception;
 use Google\Service\ShoppingContent\Product;
 use Google\Service\ShoppingContent\Price;
 use Google\Service\ShoppingContent\ProductShipping;
 use Google\Service\ShoppingContent\ProductShippingWeight;
 use Google_Service_ShoppingContent_Price;
 use Google_Service_ShoppingContent_ProductShipping;
+use Google_Service_ShoppingContent_CustomAttribute;
 use Shopware\Models\Article\Article as ProductModel;
 
 class ContentProduct {
@@ -118,6 +120,7 @@ class ContentProduct {
 		
 		
 		$product->setOfferId($this->product->getMainDetail()->getNumber());
+		$product->setId($this->buildProductId($product->getOfferId()));
 		$product->setDescription($description);
 		$product->setLink(implode('/', [$this->session->websiteUrl, ltrim($this->getSeoLink(), '/')]));
 		$product->setCanonicalLink(implode('/', [$this->session->websiteUrl, ltrim($this->getSeoLink(), '/')]));
@@ -167,6 +170,13 @@ class ContentProduct {
 			$product->setAdditionalImageLinks($productImageUrls);
 		}
 		
+		if (!$this->product->getActive()) {
+			$customAttribute = new Google_Service_ShoppingContent_CustomAttribute();
+			$customAttribute->setName('active');
+			$customAttribute->setValue(FALSE);
+			$product->setCustomAttributes([$customAttribute]);
+		}
+		
 		return $product;
 	}
 	
@@ -174,8 +184,28 @@ class ContentProduct {
 	 * @return array
 	 */
 	public function create(): array {
+		$toDelete = FALSE;
 		$contentProduct = $this->buildProduct();
-		$response = $this->session->service->products->insert($this->session->merchantId, $contentProduct);
+		foreach ($contentProduct->getCustomAttributes() as $customAttribute) {
+			if ($customAttribute->getName() === 'active' && $customAttribute->getValue() === FALSE) {
+				$toDelete = TRUE;
+				break;
+			}
+		}
+		
+		try {
+			if ($toDelete) {
+				$response = $this->session->service->products->delete($this->session->merchantId, $contentProduct->getId());
+			} else {
+				$response = $this->session->service->products->insert($this->session->merchantId, $contentProduct);
+			}
+		} catch (\Exception $exception) {
+			try {
+				$response = json_decode($exception->getMessage(), TRUE, 512, JSON_THROW_ON_ERROR);
+			} catch (\JsonException $jsonException) {
+				$response = $exception->getMessage();
+			}
+		}
 		
 		if ($this->force) {
 			$this->session->retry($this, 'get', $this->product->getMainDetail()->getNumber(), self::MAX_RETRIES);
@@ -191,8 +221,29 @@ class ContentProduct {
 	 * @return array
 	 */
 	public function update(): array {
+		$toDelete = FALSE;
 		$contentProduct = $this->buildProduct();
-		$response = $this->session->service->products->insert($this->session->merchantId, $contentProduct);
+		
+		foreach ($contentProduct->getCustomAttributes() as $customAttribute) {
+			if ($customAttribute->getName() === 'active' && $customAttribute->getValue() === FALSE) {
+				$toDelete = TRUE;
+				break;
+			}
+		}
+		
+		try {
+			if ($toDelete) {
+				$response = $this->session->service->products->delete($this->session->merchantId, $contentProduct->getId());
+			} else {
+				$response = $this->session->service->products->insert($this->session->merchantId, $contentProduct);
+			}
+		} catch (\Exception $exception) {
+			try {
+				$response = json_decode($exception->getMessage(), TRUE, 512, JSON_THROW_ON_ERROR);
+			} catch (\JsonException $jsonException) {
+				$response = $exception->getMessage();
+			}
+		}
 		
 		if ($this->force) {
 			$this->session->retry($this, 'get', $this->product->getMainDetail()->getNumber(), self::MAX_RETRIES);
@@ -241,7 +292,7 @@ class ContentProduct {
 	 * @param $offerId
 	 * @return string
 	 */
-	private function buildProductId($offerId): string {
+	public function buildProductId($offerId): string {
 		return sprintf('%s:%s:%s:%s', self::CHANNEL, self::CONTENT_LANGUAGE,	self::TARGET_COUNTRY_DE, $offerId);
 	}
 	
