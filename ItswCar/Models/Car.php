@@ -93,6 +93,17 @@ class Car extends ModelEntity {
 	protected $articleLinks;
 	
 	/**
+	 * @var \Doctrine\Common\Collections\ArrayCollection<\ItswCar\Models\Garage>|null
+	 * @ORM\OneToMany (
+	 *     targetEntity="ItswCar\Models\Garage",
+	 *     mappedBy="car",
+	 *     orphanRemoval=true,
+	 *     cascade={"persist", "remove"}
+	 * )
+	 */
+	protected $garage;
+	
+	/**
 	 * @var int
 	 * @ORM\Id
 	 * @ORM\Column(name="tecdoc_id", type="integer", nullable=false, unique=true)
@@ -359,6 +370,7 @@ class Car extends ModelEntity {
 	public function getArticleLinks(): ?ArrayCollection {
 		return $this->articleLinks;
 	}
+	
 	
 	/**
 	 * @param int $tecdocId

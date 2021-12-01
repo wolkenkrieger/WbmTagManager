@@ -34,33 +34,33 @@ class ArticleCarLinks extends ModelEntity {
 	 * @ORM\ManyToOne(targetEntity="ItswCar\Models\Car", inversedBy="articleLinks")
 	 * @ORM\JoinColumn(name="tecdoc_id", referencedColumnName="tecdoc_id", nullable=false, unique=false)
 	 */
-	protected $car;
+	protected Car $car;
 	
 	/**
 	 * @var int
 	 * @ORM\Id
 	 * @ORM\Column(name="article_details_id", type="integer", nullable=false)
 	 */
-	protected $articleDetailsId;
+	protected int $articleDetailsId;
 	
 	/**
 	 * @var int
 	 * @ORM\Id
 	 * @ORM\Column(name="tecdoc_id", type="integer", nullable=false)
 	 */
-	protected $tecdocId;
+	protected int $tecdocId;
 	
 	/**
 	 * @var string
 	 * @ORM\Column(name="restriction", type="string", nullable=false, length=1024)
 	 */
-	protected $restriction = '';
+	protected string $restriction = '';
 	
 	/**
 	 * @var bool
 	 * @ORM\Column(name="active", type="boolean", nullable=false)
 	 */
-	protected $active = TRUE;
+	protected bool $active = TRUE;
 	
 	/**
 	 * @param $car

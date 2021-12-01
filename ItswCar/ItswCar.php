@@ -20,6 +20,7 @@ use ItswCar\Models\Type;
 use ItswCar\Models\Car;
 use ItswCar\Models\ArticleCarLinks;
 use ItswCar\Models\GoogleMerchantCenterQueue;
+use ItswCar\Models\Garage;
 
 use Shopware\Components\Logger;
 use Shopware\Components\Plugin;
@@ -316,8 +317,12 @@ class ItswCar extends Plugin {
 			$service->delete('s_articles_attributes', 'position_aggregated');
 		}
 		
-		$metaDataCache  = Shopware()->Models()->getConfiguration()->getMetadataCacheImpl();
-		$metaDataCache->deleteAll();
+		//$metaDataCache  = Shopware()->Models()->getConfiguration()->getMetadataCacheImpl();
+		//$metaDataCache->deleteAll();
+		
+		if (!is_null($metaDataCache = Shopware()->Models()->getConfiguration()->getMetadataCache())) {
+			$metaDataCache->clear();
+		}
 		
 		Shopware()->Models()->generateAttributeModels([
 			's_categories_attributes',
@@ -345,9 +350,14 @@ class ItswCar extends Plugin {
 			$entityManager->getClassMetadata(Car::class),
 			$entityManager->getClassMetadata(ArticleCarLinks::class),
 			$entityManager->getClassMetadata(GoogleMerchantCenterQueue::class),
+			$entityManager->getClassMetadata(Garage::class),
 		];
 		
-		$entityManager->getConfiguration()->getMetadataCacheImpl()->deleteAll();
+		//$entityManager->getConfiguration()->getMetadataCacheImpl()->deleteAll();
+		if (!is_null($metaDataCache = $entityManager->getConfiguration()->getMetadataCache())) {
+			$metaDataCache->clear();
+		}
+		
 		$entityManager->regenerateProxies();
 		$schemaTool->updateSchema($classes, TRUE);
 	}
@@ -367,9 +377,14 @@ class ItswCar extends Plugin {
 			$entityManager->getClassMetadata(Car::class),
 			$entityManager->getClassMetadata(ArticleCarLinks::class),
 			$entityManager->getClassMetadata(GoogleMerchantCenterQueue::class),
+			$entityManager->getClassMetadata(Garage::class),
 		];
 		
-		$entityManager->getConfiguration()->getMetadataCacheImpl()->deleteAll();
+		//$entityManager->getConfiguration()->getMetadataCacheImpl()->deleteAll();
+		if (!is_null($metaDataCache = $entityManager->getConfiguration()->getMetadataCache())) {
+			$metaDataCache->clear();
+		}
+		
 		$schemaManager = $entityManager->getConnection()->getSchemaManager();
 		foreach($classes as $schema) {
 			if (!$schemaManager->tablesExist($schema->getTableName())) {
