@@ -123,13 +123,39 @@ class SessionHelper {
 			try {
 				$cookieSessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_IGNORE);
 				$sessionData = array_merge($sessionData, $cookieSessionData);
-				$this->setSessionData($sessionData);
 			} catch (\JsonException $exception) {
-				$this->error($exception);
-				$this->error('$cookieData', [
-					'data' => $cookieData,
-					'server' => $_SERVER
-				]);
+				$x = [];
+				if ($exception->getCode() === 4) {
+					$cookieData = explode(',', trim($cookieData, '{}'));
+					foreach ($cookieData as $datum) {
+						$tmp = explode(':', $datum);
+						if (trim($tmp[0], '"') === 'uuid') {
+							$x[] = '"uuid":"' . trim($tmp[1], "") . '"';
+						} else {
+							$x[] = '"' . trim($tmp[0], '"') . '":' . $tmp[1];
+						}
+					}
+					$cookieData = '{'. implode(',', $x) . '}';
+					try {
+						$cookieSessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_IGNORE);
+						$sessionData = array_merge($sessionData, $cookieSessionData);
+					} catch (\JsonException $jsonException) {
+						$this->error($jsonException);
+						$this->error('$cookieData', [
+							'data' => $cookieData,
+							'server' => $_SERVER
+						]);
+					} finally {
+						$this->setSessionData($sessionData);
+					}
+				} else {
+					$this->error($exception);
+					$this->error('$cookieData', [
+						'data' => $cookieData,
+						'server' => $_SERVER
+					]);
+				}
+			} finally {
 				$this->setSessionData($sessionData);
 			}
 		} else {
