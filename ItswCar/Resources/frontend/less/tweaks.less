@@ -131,6 +131,32 @@ h1.listing--headline {
       }
     }
   }
+
+  .sidebar-main {
+    .is--ctl-garage.is--user & {
+      display: block;
+
+      & + .content--wrapper {
+        .unitize(margin-left, 260);
+      }
+    }
+
+    .is--ctl-garage & {
+      display: none;
+
+      & + .content--wrapper {
+        margin: 0;
+      }
+    }
+
+    .is--ctl-garage & {
+      .categories--headline,
+      .categories--navigation,
+      .shop-sites--container {
+        display: none;
+      }
+    }
+  }
 }
 
 @media screen and(min-width: @desktopViewportWidth) {

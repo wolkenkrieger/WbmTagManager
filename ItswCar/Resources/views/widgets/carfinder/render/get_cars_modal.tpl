@@ -23,7 +23,10 @@
 				<div>{$car.buildFrom} - {$car.buildTo}</div>
 				<div>{$car.platform.display}</div>
 				<div>{foreach name=codes item=code from=$car.codes}{$code.hsn}/{$code.tsn}{if !$smarty.foreach.codes.last} {/if}{/foreach}</div>
-				<div class="is--right"><a class="btn is--icon-right is--small is--primary" href="{url controller="carfinder" module="widgets" action="set-car" manufacturer=$car.manufacturer.id model=$car.model.id type=$car.type.id car=$car.tecdocId}">{s name="MODAL_CHOOSE_BUTTON"}Wählen{/s}<i class="icon--check"></i></a></div>
+				<div class="is--right">
+					<a class="btn is--icon-right is--small is--primary" href="{url controller="carfinder" module="widgets" action="set-car" manufacturer=$car.manufacturer.id model=$car.model.id type=$car.type.id car=$car.tecdocId}">{s name="MODAL_CHOOSE_BUTTON"}Wählen{/s}<i class="icon--check"></i></a>
+					{if $sUserLoggedIn}<a class="btn is--icon-right is--small is--secondary" href="{url controller="garage" module="frontend" action="add" manufacturer=$car.manufacturer.id model=$car.model.id type=$car.type.id car=$car.tecdocId}">{s name="MODAL_ADD_TO_GARAGE_BUTTON"}Wählen und zur Garage hinzufügen{/s}<i class="icon--plus"></i></a>{/if}
+				</div>
 			</div>
         {/foreach}
 	</div>

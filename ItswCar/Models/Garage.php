@@ -10,6 +10,7 @@
 namespace ItswCar\Models;
 
 use Doctrine\ORM\Mapping as ORM;
+use Shopware\Components\Model\ModelEntity;
 
 /**
  *
@@ -22,7 +23,7 @@ use Doctrine\ORM\Mapping as ORM;
  *          @ORM\Index(name="get_active", columns={"active"}, options={"where": "(active = 1)"})
  * })
  */
-class Garage extends \Shopware\Components\Model\ModelEntity {
+class Garage extends ModelEntity {
 	/**
 	 * @var \ItswCar\Models\Car
 	 * @ORM\ManyToOne(targetEntity="ItswCar\Models\Car", inversedBy="garage")

@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 
-use ItswCar\Components\Services\Services;
+use ItswCar\Helpers\ConfigHelper;
+use ItswCar\Helpers\SeoHelper;
+use ItswCar\Helpers\SessionHelper;
 use ItswCar\Models\Car;
 use ItswCar\Traits\LoggingTrait;
 
@@ -16,10 +18,10 @@ use ItswCar\Traits\LoggingTrait;
 class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 	use LoggingTrait;
 	
-	protected $sessionHelper;
-	protected $configHelper;
-	protected $entityManager;
-	protected $seoHelper;
+	protected SessionHelper $sessionHelper;
+	protected ConfigHelper $configHelper;
+	protected Shopware\Components\Model\ModelManager $entityManager;
+	protected SeoHelper $seoHelper;
 	
 	/**
 	 * @throws \Exception
@@ -435,6 +437,7 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 				->loadTemplate('widgets/carfinder/render/get_cars_modal.tpl')
 				->assign('cars', $cars)
 				->assign('session', $this->sessionHelper->getSessionData())
+				->assign('sUserLoggedIn', $this->sessionHelper->isUserLoggedIn())
 				->render();
 			
 			$result = [

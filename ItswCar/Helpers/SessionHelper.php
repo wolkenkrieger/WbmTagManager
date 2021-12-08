@@ -180,4 +180,19 @@ class SessionHelper {
 		
 		return $this->setSessionData();
 	}
+	
+	/**
+	 * @return mixed|null
+	 */
+	public function getUserId() {
+		$userId = Shopware()->Session()->offsetGet('sUserId');
+		return empty($userId) ? NULL : $userId;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function isUserLoggedIn(): bool {
+		return Shopware()->Modules()->Admin()->sCheckUser();
+	}
 }
