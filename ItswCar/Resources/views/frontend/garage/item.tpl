@@ -12,8 +12,9 @@
 			<div>{if $car.platform.display neq '--'}{$car.platform.display}{if !empty($car.codes)}, {/if}{/if}{foreach name=codes item=code from=$car.codes}{$code.hsn}/{$code.tsn}{if !$smarty.foreach.codes.last} {/if}{/foreach}</div>
 		</div>
 		<div class="table--cell is--right">
-			<a class="btn is--icon-right is--small is--primary" href="{url controller="carfinder" module="widgets" action="set-car" manufacturer=$car.manufacturer.id model=$car.model.id type=$car.type.id car=$car.tecdocId}">{s name="MODAL_CHOOSE_BUTTON"}Wählen{/s}<i class="icon--check"></i></a>
 			<a class="btn is--small is--basic" href="{url controller="garage" module="frontend" action="delete" car=$car.tecdocId}"><i class="icon--cross"></i></a>
+			<a class="btn is--small is--primary" href="{url controller="carfinder" module="widgets" action="set-car" manufacturer=$car.manufacturer.id model=$car.model.id type=$car.type.id car=$car.tecdocId}"><i class="icon--arrow-right"></i></a>
+
 		</div>
 	</div>
 {/block}
