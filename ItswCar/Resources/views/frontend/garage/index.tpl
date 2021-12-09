@@ -3,7 +3,7 @@
 
 {* Breadcrumb *}
 {block name='frontend_index_start'}
-    {s name="GARAGE_WIDGET_INDEX_LINK" assign="snippetGarageTitle"}{/s}
+    {s name="GARAGE_WIDGET_INDEX_LINK" assign="snippetGarageTitle"}Meine Fahrzeuge{/s}
     {$sBreadcrumb = [['name' => $snippetGarageTitle, 'link' => {url}]]}
     {$smarty.block.parent}
 {/block}
