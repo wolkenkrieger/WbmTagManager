@@ -51,6 +51,13 @@
                                 </div>
                             {/block}
                         {/if}
+                        {if $canAddCar}
+                            {block name="itsw_frontend_garage_index_add_car"}
+                                <div class="text-right margin-top-20">
+                                    <a class="btn is--icon-right is--secondary" href="{url controller="garage" module="frontend" action="add" car=$ItswCar.session.car}">{s name="GARAGE_FRONTEND_INDEX_ADD_CURRENT_CAR"}Aktuell gewähltes Fahrzeug zur Garage hinzufügen{/s}<i class="icon--plus"></i></a>
+                                </div>
+                            {/block}
+                        {/if}
                     </div>
                 </div>
             {/block}

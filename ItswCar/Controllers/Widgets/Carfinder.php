@@ -4,6 +4,7 @@ use ItswCar\Helpers\ConfigHelper;
 use ItswCar\Helpers\SeoHelper;
 use ItswCar\Helpers\SessionHelper;
 use ItswCar\Models\Car;
+use ItswCar\Models\Garage;
 use ItswCar\Traits\LoggingTrait;
 
 /**
@@ -54,6 +55,18 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 			
 			$result = reset($car);
 			$this->View()->assign('car', $result);
+			
+			if ($this->sessionHelper->isUserLoggedIn() && ($userId = $this->sessionHelper->getUserId())) {
+				$garageCar = $this->entityManager->getRepository(Garage::class)->findOneBy([
+					'tecdocId' => $sessionData['car'],
+					'userId' => $userId,
+					'active' => TRUE
+				]);
+				
+				if (!($garageCar instanceof Garage)) {
+					$this->View()->assign('canAddCar', TRUE);
+				}
+			}
 			
 			$this->debug(__METHOD__, $this->View()->getAssign());
 		}

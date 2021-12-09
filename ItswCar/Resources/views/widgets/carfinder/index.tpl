@@ -116,7 +116,8 @@
                                     {/if}
 								</div>
 								<div class="table--cell width--100">
-									<a class="btn is--primary is--icon-right" href="{url controller="carfinder" module="widgets" action="unset-car"}">Auswahl ändern<i class="icon--cross"></i></a>
+									<a class="btn is--primary is--icon-right" href="{url controller="carfinder" module="widgets" action="unset-car"}">{s name="CARFINDER_WIDGET_CHANGE_CAR"}Auswahl ändern{/s}<i class="icon--cross"></i></a>
+									{if $canAddCar}<a class="btn is--secondary is--icon-right" href="{url controller="garage" module="frontend" action="add" car=$car.tecdocId}">{s name="CARFINDER_WIDGET_ADD_TO_GARAGE"}Zur Garage hinzufügen{/s}<i class="icon--plus"></i></a>{/if}
 								</div>
 							</div>
 						</div>

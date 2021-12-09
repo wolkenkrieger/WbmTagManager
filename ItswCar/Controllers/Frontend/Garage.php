@@ -37,7 +37,9 @@ class Shopware_Controllers_Frontend_Garage extends Enlight_Controller_Action {
 	public function indexAction(): void {
 		$userLoggedIn = $this->sessionHelper->isUserLoggedIn();
 		$userId = $this->sessionHelper->getUserId();
+		$sessionCar = $this->sessionHelper->getSessionData()['car'];
 		$cars = [];
+		$tecdocIds = [];
 		
 		if ($userLoggedIn && $userId) {
 			
@@ -47,7 +49,6 @@ class Shopware_Controllers_Frontend_Garage extends Enlight_Controller_Action {
 					'active' => TRUE
 				]);
 			
-			$tecdocIds = [];
 			foreach($garageCars as $garageCar) {
 				$tecdocIds[] = $garageCar->getTecdocId();
 			}
@@ -67,6 +68,7 @@ class Shopware_Controllers_Frontend_Garage extends Enlight_Controller_Action {
 		
 		$this->View()->assign('sUserLoggedIn', $userLoggedIn, TRUE);
 		$this->View()->assign('sOneTimeAccount', Shopware()->Session()->offsetGet('sOneTimeAccount'));
+		$this->View()->assign('canAddCar', $sessionCar && !in_array($sessionCar, $tecdocIds, TRUE));
 		$this->View()->assign('cars', $cars);
 	}
 	
@@ -109,6 +111,7 @@ class Shopware_Controllers_Frontend_Garage extends Enlight_Controller_Action {
 		
 		$userId = $this->sessionHelper->getUserId();
 		$tecdocId = (int)$this->Request()->getParam('car', 0);
+		$redirect = (int)$this->Request()->getParam('redirect', 0);
 		
 		if ($userId && $tecdocId) {
 			$garageCar = $this->entityManager->getRepository(Garage::class)
@@ -134,6 +137,10 @@ class Shopware_Controllers_Frontend_Garage extends Enlight_Controller_Action {
 			}
 		}
 		
-		$this->forward('set-car', 'carfinder', 'widgets', $this->Request()->getParams());
+		if($redirect) {
+			$this->forward('set-car', 'carfinder', 'widgets', $this->Request()->getParams());
+		} else {
+			$this->forward('index');
+		}
 	}
 }

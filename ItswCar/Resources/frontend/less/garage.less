@@ -1,3 +1,11 @@
+.navigation--entry.entry--garage {
+  display: none;
+
+  @media screen and(min-width: @tabletViewportWidth) {
+    display: inherit;
+  }
+}
+
 .navigation--entry .icon--house {
   .unitize(font-size, 18);
   vertical-align: middle;
@@ -17,6 +25,10 @@
 
     &:first-child {
       border: none;
+    }
+
+    .table--cell > div {
+      .unitize-min-width(320);
     }
   }
 }
