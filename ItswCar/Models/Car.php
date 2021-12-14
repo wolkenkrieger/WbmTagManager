@@ -108,87 +108,104 @@ class Car extends ModelEntity {
 	 * @ORM\Id
 	 * @ORM\Column(name="tecdoc_id", type="integer", nullable=false, unique=true)
 	 */
-	protected $tecdocId;
+	protected int $tecdocId;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="manufacturer_id", type="integer", nullable=false)
 	 */
-	protected $manufacturerId;
+	protected int $manufacturerId;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="model_id", type="integer", nullable=false)
 	 */
-	protected $modelId;
+	protected int $modelId;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="type_id", type="integer", nullable=false)
 	 */
-	protected $typeId;
+	protected int $typeId;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="platform_id", type="integer", nullable=false)
 	 */
-	protected $platformId;
+	protected int $platformId;
 	
 	/**
 	 * @var \DateTimeImmutable
 	 * @ORM\Column(name="build_from", type="datetime_immutable", nullable=false)
 	 */
-	protected $buildFrom;
+	protected \DateTimeImmutable $buildFrom;
 	
 	/**
 	 * @var \DateTimeImmutable
 	 * @ORM\Column(name="build_to", type="datetime_immutable", nullable=true)
 	 */
-	protected $buildTo;
+	protected \DateTimeImmutable $buildTo;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="ccm", type="integer", nullable=false)
 	 */
-	protected $ccm;
+	protected int $ccm;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="kw", type="integer", nullable=false)
 	 */
-	protected $kw;
+	protected int $kw;
 	
 	/**
 	 * @var int
 	 * @ORM\Column(name="ps", type="integer", nullable=false)
 	 */
-	protected $ps;
+	protected int $ps;
 	
 	/**
 	 * @var bool
 	 * @ORM\Column(name="active", type="boolean", nullable=false)
 	 */
-	protected $active = TRUE;
+	protected bool $active = TRUE;
+	
+	/**
+	 * @var bool
+	 * @ORM\Column(name="is_car", type="boolean", nullable=false)
+	 */
+	protected bool $isCar = TRUE;
+	
+	/**
+	 * @var bool
+	 * @ORM\Column(name="is_truck", type="boolean", nullable=false)
+	 */
+	protected bool $isTruck = FALSE;
+	
+	/**
+	 * @var bool
+	 * @ORM\Column(name="is_bike", type="boolean", nullable=false)
+	 */
+	protected bool $isBike = FALSE;
+	/**
+	 * @var string
+	 */
+	protected string $buildFromMonth;
 	
 	/**
 	 * @var string
 	 */
-	protected $buildFromMonth;
+	protected string $buildFromYear;
 	
 	/**
 	 * @var string
 	 */
-	protected $buildFromYear;
+	protected string $buildToMonth;
 	
 	/**
 	 * @var string
 	 */
-	protected $buildToMonth;
-	
-	/**
-	 * @var string
-	 */
-	protected $buildToYear;
+	protected string $buildToYear;
 	
 	public function __construct() {
 		$this->codes = new ArrayCollection();
@@ -525,6 +542,57 @@ class Car extends ModelEntity {
 	 */
 	public function getActive(): bool {
 		return $this->active;
+	}
+	
+	/**
+	 * @param bool $isCar
+	 * @return $this
+	 */
+	public function setIsCar(bool $isCar): Car {
+		$this->isCar = $isCar;
+		
+		return $this;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getIsCar(): bool {
+		return $this->isCar;
+	}
+	
+	/**
+	 * @param bool $isTruck
+	 * @return $this
+	 */
+	public function setIsTruck(bool $isTruck): Car {
+		$this->isCar = $isTruck;
+		
+		return $this;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getIsTruck(): bool {
+		return $this->isTruck;
+	}
+	
+	/**
+	 * @param bool $isBike
+	 * @return $this
+	 */
+	public function setIsBike(bool $isBike): Car {
+		$this->isCar = $isBike;
+		
+		return $this;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getIsBike(): bool {
+		return $this->isBike;
 	}
 	
 	/**
