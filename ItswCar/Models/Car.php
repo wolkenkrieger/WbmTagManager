@@ -166,25 +166,25 @@ class Car extends ModelEntity {
 	
 	/**
 	 * @var bool
-	 * @ORM\Column(name="active", type="boolean", nullable=false)
+	 * @ORM\Column(name="active", type="boolean", nullable=false, options={"default":1})
 	 */
 	protected bool $active = TRUE;
 	
 	/**
 	 * @var bool
-	 * @ORM\Column(name="is_car", type="boolean", nullable=false)
+	 * @ORM\Column(name="is_car", type="boolean", nullable=false, options={"default":1})
 	 */
 	protected bool $isCar = TRUE;
 	
 	/**
 	 * @var bool
-	 * @ORM\Column(name="is_truck", type="boolean", nullable=false)
+	 * @ORM\Column(name="is_truck", type="boolean", nullable=false, options={"default":0})
 	 */
 	protected bool $isTruck = FALSE;
 	
 	/**
 	 * @var bool
-	 * @ORM\Column(name="is_bike", type="boolean", nullable=false)
+	 * @ORM\Column(name="is_bike", type="boolean", nullable=false, options={"default":0})
 	 */
 	protected bool $isBike = FALSE;
 	/**
