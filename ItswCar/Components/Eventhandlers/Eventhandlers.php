@@ -22,6 +22,7 @@ use ItswCar\Models\GoogleMerchantCenterQueue;
 use ItswCar\Traits\LoggingTrait;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Attribute\OrderBasket;
+use Shopware\Models\Customer\Group;
 use Shopware\Models\Order\Basket;
 use Shopware\Models\Order\Order;
 use Shopware\Components\DependencyInjection\Container;
@@ -594,6 +595,25 @@ class Eventhandlers {
 				} catch (ORMException $exception) {}
 			}
 		}
+	}
+	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 */
+	public function onBasketAddUpdateArticleStart(\Enlight_Event_EventArgs $eventArgs): void {
+		$userGroupData = $this->container->get('system')->sUSERGROUPDATA;
+		if (isset($userGroupData['discount'])) {
+			return;
+		}
+		
+		try {
+			$customerGroup = $this->shop->getCustomerGroup();
+		} catch (\RuntimeException $exception) {
+			$customerGroup = $this->modelManager->getRepository(Group::class)
+				->find($userGroupData['id']);
+		}
+		
+		$this->container->get('system')->sUSERGROUPDATA['discount'] = $customerGroup->getDiscount();
 	}
 	
 	/**

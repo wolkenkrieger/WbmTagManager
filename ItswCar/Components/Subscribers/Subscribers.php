@@ -15,6 +15,7 @@ use Enlight\Event\SubscriberInterface;
 use ItswCar\Components\Eventhandlers\Eventhandlers as Eventhandler;
 use ItswCar\Components\Eventhandlers\CategoryConditionHandler;
 use ItswCar\Traits\LoggingTrait;
+use Shopware\Models\Customer\Group;
 
 
 class Subscribers implements SubscriberInterface {
@@ -54,6 +55,8 @@ class Subscribers implements SubscriberInterface {
 			'sArticles::sGetArticleById::after'                             => 'onAfterGetArticleById',
 			
 			'Shopware_Modules_Basket_UpdateCartItems_Updated'               => 'onBasketUpdateCartItemsUpdated',
+			'Shopware_Modules_Basket_AddArticle_Start'                      => 'onBasketAddUpdateArticleStart',
+			'Shopware_Modules_Basket_UpdateArticle_Start'                   => 'onBasketAddUpdateArticleStart',
 			'Shopware_Modules_Order_SaveOrder_FilterAttributes'             => 'onOrderSaveOrderFilterAttributes',
 			
 			'Shopware_CronJob_ItswHandleGoogleMerchantCenterQueue'          => 'onCronHandleGoogleMerchantCenterQueue',
@@ -61,6 +64,7 @@ class Subscribers implements SubscriberInterface {
 			
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
+			//'Shopware_Modules_Basket_UpdateArticle_FilterSqlDefaultParameters'=> 'onBasketUpdateArticleFilterSqlDefaultParameters',
 		];
 	}
 	
@@ -174,6 +178,17 @@ class Subscribers implements SubscriberInterface {
 	public function onBasketUpdateCartItemsUpdated(\Enlight_Event_EventArgs $eventArgs): void {
 		$eventHandler = new Eventhandler($this->pluginDir);
 		$eventHandler->onBasketUpdateCartItemsUpdated($eventArgs);
+	}
+	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 */
+	public function onBasketAddUpdateArticleStart(\Enlight_Event_EventArgs $eventArgs): void {
+		(new Eventhandler($this->pluginDir))->onBasketAddUpdateArticleStart($eventArgs);
+	}
+	
+	public function onBasketUpdateArticleFilterSqlDefaultParameters(\Enlight_Event_EventArgs $eventArgs) {
+	
 	}
 	
 	/**

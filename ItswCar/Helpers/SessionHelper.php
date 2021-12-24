@@ -193,6 +193,7 @@ class SessionHelper {
 	 * @return bool
 	 */
 	public function isUserLoggedIn(): bool {
-		return Shopware()->Modules()->Admin()->sCheckUser();
+		return $this->getUserId() !== NULL;
+		//return Shopware()->Modules()->Admin()->sCheckUser();
 	}
 }
