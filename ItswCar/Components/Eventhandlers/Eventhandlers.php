@@ -782,7 +782,7 @@ class Eventhandlers {
 	 * @return string
 	 */
 	public function onCronCheckEbayTemplateFolder(\Shopware_Components_Cron_CronJob $cronJob): string {
-		$saveFolder = sprintf('%stemplates.ebay.save', Shopware()->DocPath());
+		$saveFolder = sprintf('%s../templates.ebay.save', Shopware()->DocPath());
 		$templateFolder = sprintf('%stemplates', Shopware()->DocPath());
 		
 		$fileSystem = new Filesystem();
