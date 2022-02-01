@@ -28,6 +28,7 @@ use Shopware\Models\Order\Order;
 use Shopware\Components\DependencyInjection\Container;
 use Shopware\Models\Article\Article as ProductModel;
 use Shopware\Models\Shop\Shop;
+use Symfony\Component\Finder\Finder;
 
 class Eventhandlers {
 	use LoggingTrait;
@@ -774,6 +775,27 @@ class Eventhandlers {
 		}
 		
 		return sprintf('%d of %d orders handled', $counter, count($orders));
+	}
+	
+	/**
+	 * @param \Shopware_Components_Cron_CronJob $cronJob
+	 * @return string
+	 */
+	public function onCronCheckEbayTemplateFolder(\Shopware_Components_Cron_CronJob $cronJob): string {
+		$saveFolder = sprintf('%stemplates.ebay.save', Shopware()->DocPath());
+		$templateFolder = sprintf('%stemplates', Shopware()->DocPath());
+		
+		$fileSystem = new \Symfony\Component\Filesystem\Filesystem();
+		
+		if ($fileSystem->exists($saveFolder)) {
+			try {
+				$fileSystem->mirror($saveFolder, $templateFolder);
+				return sprintf('Source: %s  ... Target: %s', $saveFolder, $templateFolder);
+			} catch (\Exception $exception) {
+				return $exception->getMessage();
+			}
+		}
+		return sprintf('Directory %s NOT EXISTS!', $saveFolder);
 	}
 	
 	/**

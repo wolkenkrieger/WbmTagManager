@@ -61,6 +61,7 @@ class Subscribers implements SubscriberInterface {
 			
 			'Shopware_CronJob_ItswHandleGoogleMerchantCenterQueue'          => 'onCronHandleGoogleMerchantCenterQueue',
 			'Shopware_CronJob_ItswCheckPrepaymentOrdersPaymentStatus'       => 'onCronHandleOrdersPaymentStatus',
+			'Shopware_CronJob_ItswCheckEbayTemplateFolder'                  => 'onCronCheckEbayTemplateFolder',
 			
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
@@ -207,6 +208,15 @@ class Subscribers implements SubscriberInterface {
 	public function onCronHandleOrdersPaymentStatus(\Shopware_Components_Cron_CronJob $cronJob): string {
 		$eventHandler = new Eventhandler($this->pluginDir);
 		return $eventHandler->onCronHandleOrdersPaymentStatus($cronJob);
+	}
+	
+	/**
+	 * @param \Shopware_Components_Cron_CronJob $cronCronJob
+	 * @return string
+	 */
+	public function onCronCheckEbayTemplateFolder(\Shopware_Components_Cron_CronJob $cronCronJob): string {
+		$eventHandler = new Eventhandler($this->pluginDir);
+		return $eventHandler->onCronCheckEbayTemplateFolder($cronCronJob);
 	}
 	
 	/**

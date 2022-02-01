@@ -16,4 +16,12 @@
 		<interval>86400</interval>
 		<disableOnError>true</disableOnError>
 	</cronjob>
+	
+	<cronjob>
+		<name>ITSW - Check eBay Template Folder</name>
+		<action>Shopware_CronJob_ItswCheckEbayTemplateFolder</action>
+		<active>true</active>
+		<interval>300</interval>
+		<disableOnError>false</disableOnError>
+	</cronjob>
 </cronjobs>
