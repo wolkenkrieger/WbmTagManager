@@ -28,7 +28,7 @@ use Shopware\Models\Order\Order;
 use Shopware\Components\DependencyInjection\Container;
 use Shopware\Models\Article\Article as ProductModel;
 use Shopware\Models\Shop\Shop;
-use Symfony\Component\Finder\Finder;
+use Symfony\Component\Filesystem\Filesystem;
 
 class Eventhandlers {
 	use LoggingTrait;
@@ -785,7 +785,7 @@ class Eventhandlers {
 		$saveFolder = sprintf('%stemplates.ebay.save', Shopware()->DocPath());
 		$templateFolder = sprintf('%stemplates', Shopware()->DocPath());
 		
-		$fileSystem = new \Symfony\Component\Filesystem\Filesystem();
+		$fileSystem = new Filesystem();
 		
 		if ($fileSystem->exists($saveFolder)) {
 			try {
