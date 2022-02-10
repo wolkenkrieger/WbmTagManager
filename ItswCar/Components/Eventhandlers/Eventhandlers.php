@@ -754,7 +754,7 @@ class Eventhandlers {
 			$payUntilDate = $attribute->getItswPayUntilDate();
 			
 			if ($payUntilDate === NULL) {
-				$counter += $this->cancelOrder($order);
+				$counter += $this->cancelOrder($order, FALSE);
 				continue;
 			}
 			
