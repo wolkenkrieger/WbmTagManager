@@ -754,9 +754,7 @@ class Eventhandlers {
 			$payUntilDate = $attribute->getItswPayUntilDate();
 			
 			if ($payUntilDate === NULL) {
-				/*
-				 * @ToDo: set date for orders prior plugin version 2.1.3
-				 */
+				$counter += $this->cancelOrder($order);
 				continue;
 			}
 			
@@ -920,14 +918,18 @@ class Eventhandlers {
 	
 	/**
 	 * @param \Shopware\Models\Order\Order $order
+	 * @param bool                         $sendMail
 	 * @return int
 	 */
-	private function cancelOrder(Order $order): int {
+	private function cancelOrder(Order $order, bool $sendMail = TRUE): int {
 		try {
 			Shopware()->Modules()->Order()->setOrderStatus($order->getId(), 4, FALSE, NULL);
 			Shopware()->Modules()->Order()->setPaymentStatus($order->getId(), 35, FALSE, NULL);
-			$statusMail = Shopware()->Modules()->Order()->createStatusMail($order->getId(), 4, 'ItswCar_Order_Canceled');
-			Shopware()->Modules()->Order()->sendStatusMail($statusMail);
+			
+			if ($sendMail) {
+				$statusMail = Shopware()->Modules()->Order()->createStatusMail($order->getId(), 4, 'ItswCar_Order_Canceled');
+				Shopware()->Modules()->Order()->sendStatusMail($statusMail);
+			}
 		} catch (\Exception $exception) {
 			$this->error($exception);
 			
