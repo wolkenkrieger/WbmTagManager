@@ -627,6 +627,8 @@ class Eventhandlers {
 		$context = $this->container->get('shopware_storefront.context_service')->createShopContext($this->shop->getId());
 		$countries = $this->container->get('shopware_storefront.location_service')->getCountries($context);
 		*/
+		$limit = $this->configHelper->getValue('cronjob_handle_gmc_queue_limit', 'ItswCar') ?:self::CRON_GMC_QUEUE_LIMIT;
+		
 		try {
 			$shippingInfos = $this->configHelper->getShippingInfos();
 			$builder = $this->modelManager->createQueryBuilder();
