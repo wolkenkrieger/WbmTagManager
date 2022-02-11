@@ -194,7 +194,6 @@ class ContentProduct {
 			foreach($shippingInfos as $shippingInfo) {
 				if (in_array($shippingInfo['countryISO'], self::TARGET_COUNTRIES, TRUE)) {
 					$shippingPrice = new Google_Service_ShoppingContent_Price();
-					//$shippingPrice->setValue(number_format((float)$shippingInfo['shippingCost'], 2, ',', '.'));
 					$shippingPrice->setValue((string)$shippingInfo['shippingCost']);
 					$shippingPrice->setCurrency('EUR');
 					
@@ -208,7 +207,6 @@ class ContentProduct {
 			}
 		} else {
 			$shippingPrice = new Google_Service_ShoppingContent_Price();
-			//$shippingPrice->setValue(number_format((float)$shippingInfo['shippingCost'], 2, ',', '.'));
 			$shippingPrice->setValue('0.00');
 			$shippingPrice->setCurrency('EUR');
 			
