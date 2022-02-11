@@ -11,6 +11,7 @@
 namespace ItswCar\Commands;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use ItswCar\Components\Services\Services;
 use ItswCar\Models\Car;
 use ItswCar\Models\EbayPlatform;
 use ItswCar\Models\KbaCodes;
@@ -35,7 +36,7 @@ class EbayCarsImporterCommand extends ShopwareCommand {
 	 * EbayCarsImporterCommand constructor.
 	 * @param \ItswCar\Components\Services\Services $itswCarServices
 	 */
-	public function __construct(\ItswCar\Components\Services\Services $itswCarServices) {
+	public function __construct(Services $itswCarServices) {
 		$this->setContainer(Shopware()->Container());
 		$this->itswCarServices = $itswCarServices;
 		$this->entityManager = Shopware()->Models();

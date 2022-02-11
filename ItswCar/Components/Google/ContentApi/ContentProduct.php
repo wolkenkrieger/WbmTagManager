@@ -150,12 +150,18 @@ class ContentProduct {
 		$shippingPrice->setValue('0');
 		$shippingPrice->setCurrency('EUR');
 		
-		$shipping = new Google_Service_ShoppingContent_ProductShipping();
-		$shipping->setPrice($shippingPrice);
-		$shipping->setCountry('DE');
 		$shipping->setService('DHL');
 		
 		$product->setShipping([$shipping]);
+		
+		$shippingPrice = new Google_Service_ShoppingContent_Price();
+		$shippingPrice->setValue('18,00');
+		$shippingPrice->setCurrency('EUR');
+		
+		$shipping = new Google_Service_ShoppingContent_ProductShipping();
+		$shipping->setPrice($shippingPrice);
+		$shipping->setCountry('AT');
+		$shipping->setService('DHL');
 		
 		/*
 		$shippingWeight =
@@ -265,6 +271,7 @@ class ContentProduct {
 	
 	/**
 	 * @return string
+	 * @throws \Doctrine\DBAL\Exception
 	 */
 	private function getSeoLink(): string {
 		$builder = Shopware()->Models()->getDBALQueryBuilder();

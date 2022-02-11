@@ -622,9 +622,13 @@ class Eventhandlers {
 	 * @return string
 	 */
 	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): string {
-		$limit = $this->configHelper->getValue('cronjob_handle_gmc_queue_limit', 'ItswCar') ?:self::CRON_GMC_QUEUE_LIMIT;
-		
+		/*
+		$this->container->get('shopware.components.shop_registration_service')->registerShop($this->shop);
+		$context = $this->container->get('shopware_storefront.context_service')->createShopContext($this->shop->getId());
+		$countries = $this->container->get('shopware_storefront.location_service')->getCountries($context);
+		*/
 		try {
+			$shippingInfos = $this->configHelper->getShippingInfos();
 			$builder = $this->modelManager->createQueryBuilder();
 			$query = $builder
 				->select([

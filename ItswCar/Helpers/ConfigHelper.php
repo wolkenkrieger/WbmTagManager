@@ -281,4 +281,37 @@ class ConfigHelper {
 			return date("d.m.Y", $then);
 		}
 	}
+	
+	/**
+	 * @throws \Doctrine\DBAL\Driver\Exception
+	 * @throws \Doctrine\DBAL\Exception
+	 */
+	public function getShippingInfos(int $countryId = NULL): array {
+		$builder = Shopware()->Container()->get('dbal_connection')->createQueryBuilder();
+		
+		$query = $builder->select([
+			'd.name AS dispatchName',
+			'd.description AS dispatchDescription',
+			'd.comment AS dispatchComment',
+			'c.id as countryID',
+			'c.countryiso as countryISO',
+			'c.countryname as countryName',
+			'ROUND(IF(c.taxfree = 1, sc.value / 1.19, sc.value), 2) AS ShippingCost'
+			])
+			->from('s_premium_dispatch', 'd')
+			->join('d', 's_premium_dispatch_countries', 'dc', 'd.id = dc.dispatchID')
+			->join('d', 's_premium_shippingcosts', 'sc', 'd.id = sc.dispatchID')
+			->join('dc','s_core_countries', 'c', 'dc.countryID = c.id')
+			->where('d.active = 1')
+			->andWhere('c.active = 1')
+			->andWhere('c.allow_shipping = 1');
+		
+		if ($countryId !== NULL) {
+			$query
+				->andWhere('c.id = :country_id')
+				->setParameter(':country_id', $countryId);
+		}
+		
+		return $query->execute()->fetchAllAssociative();
+	}
 }
