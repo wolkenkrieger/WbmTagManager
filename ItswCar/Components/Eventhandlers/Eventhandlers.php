@@ -622,6 +622,8 @@ class Eventhandlers {
 	/**
 	 * @param \Shopware_Components_Cron_CronJob $cronJob
 	 * @return string
+	 * @throws \Doctrine\DBAL\Driver\Exception
+	 * @throws \Doctrine\DBAL\Exception
 	 */
 	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): string {
 		/*
