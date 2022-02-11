@@ -296,7 +296,7 @@ class ConfigHelper {
 			'c.id as countryID',
 			'c.countryiso as countryISO',
 			'c.countryname as countryName',
-			'ROUND(IF(c.taxfree = 1, sc.value / 1.19, sc.value), 2) AS ShippingCost'
+			'ROUND(IF(c.taxfree = 1, sc.value / 1.19, sc.value), 2) AS shippingCost'
 			])
 			->from('s_premium_dispatch', 'd')
 			->join('d', 's_premium_dispatch_countries', 'dc', 'd.id = dc.dispatchID')

@@ -39,6 +39,8 @@ class Eventhandlers {
 	private ModelManager $modelManager;
 	protected Container $container;
 	protected Shop $shop;
+	
+	/** @var \ItswCar\Helpers\ConfigHelper|mixed|object|\Symfony\Component\DependencyInjection\Container|null  */
 	protected $configHelper;
 	protected $sessionHelper;
 	protected $seoHelper;
@@ -630,7 +632,6 @@ class Eventhandlers {
 		$limit = $this->configHelper->getValue('cronjob_handle_gmc_queue_limit', 'ItswCar') ?:self::CRON_GMC_QUEUE_LIMIT;
 		
 		try {
-			$shippingInfos = $this->configHelper->getShippingInfos();
 			$builder = $this->modelManager->createQueryBuilder();
 			$query = $builder
 				->select([

@@ -18,21 +18,55 @@ use Google_Service_ShoppingContent_Price;
 use Google_Service_ShoppingContent_ProductShipping;
 use Google_Service_ShoppingContent_CustomAttribute;
 use Shopware\Models\Article\Article as ProductModel;
+use ItswCar\Traits\LoggingTrait;
 
 class ContentProduct {
+	use LoggingTrait;
+	
+	/** @var string  */
 	protected const CHANNEL = 'online';
+	
+	/** @var string  */
 	protected const CONTENT_LANGUAGE = 'de';
+	
+	/** @var string  */
 	protected const TARGET_COUNTRY_DE = 'DE';
+	
+	/** @var string  */
 	protected const TARGET_COUNTRY_CH = 'CH';
+	
+	/** @var string  */
 	protected const TARGET_COUNTRY_AT = 'AT';
+	
+	/** @var string[]  */
+	protected const TARGET_COUNTRIES = ['DE', 'CH', 'AT'];
+	
+	/** @var string  */
+	protected const DEFAULT_DISPATCH = 'DHL';
+	
+	/** @var int  */
 	protected const MAX_RETRIES = 5;
 	
+	/** @var \Shopware\Models\Article\Article  */
 	private ProductModel $product;
+	
+	/** @var \ItswCar\Components\Google\ContentApi\ContentSession|null  */
 	private ?ContentSession $session = NULL;
+	
+	/** @var int  */
 	private int $shopID;
+	
+	/** @var mixed|object|\Symfony\Component\DependencyInjection\Container|null  */
 	private $mediaService;
+	
+	/** @var bool  */
 	private bool $force;
+	
+	/** @var \ItswCar\Helpers\TextHelper|mixed|object|\Symfony\Component\DependencyInjection\Container|null  */
 	private $textHelper;
+
+	/** @var \ItswCar\Helpers\ConfigHelper|mixed|object|\Symfony\Component\DependencyInjection\Container|null  */
+	private $configHelper;
 	
 	
 	/**
@@ -50,6 +84,7 @@ class ContentProduct {
 		$this->force = $force;
 		$this->mediaService = Shopware()->Container()->get('shopware_media.media_service');
 		$this->textHelper = Shopware()->Container()->get('itsw.helper.text');
+		$this->configHelper = Shopware()->Container()->get('itsw.helper.config');
 		
 		if (is_null($session)) {
 			$this->session = new ContentSession($config, $this->shopID);
@@ -61,8 +96,16 @@ class ContentProduct {
 	
 	/**
 	 * @return \Google\Service\ShoppingContent\Product
+	 * @throws \Doctrine\DBAL\Driver\Exception
+	 * @throws \Doctrine\DBAL\Exception
 	 */
 	private function buildProduct(): Product {
+		try {
+			$shippingInfos = $this->configHelper->getShippingInfos();
+		} catch (\Exception $exception) {
+			$this->error($exception);
+			$shippingInfos = [];
+		}
 		
 		$productImageUrls = [];
 		
@@ -83,7 +126,7 @@ class ContentProduct {
 			}
 		}
 		
-		$productPrice *= (($this->product->getTax()->getTax() + 100) / 100);
+		$productPrice *= (((float)$this->product->getTax()->getTax() + 100) / 100);
 		$discountProductPrice = $productPrice;
 		
 		if ($productPrice && $discount) {
@@ -134,7 +177,6 @@ class ContentProduct {
 		$product->setGoogleProductCategory('Fahrzeuge & Teile > Fahrzeugersatzteile & -zubehör');
 		$product->setGtin((string)$this->product->getMainDetail()->getEan());
 		$product->setMpn($productMpn);
-		//wiesel$product->setIdentifierExists(!$this->product->getMainDetail()->getEan()?'nein':'ja');
 		
 		$price = new Price();
 		$price->setValue(sprintf('%.2f', $fakePrice));
@@ -146,31 +188,37 @@ class ContentProduct {
 		$discountPrice->setCurrency('EUR');
 		$product->setSalePrice($discountPrice);
 		
-		$shippingPrice = new Google_Service_ShoppingContent_Price();
-		$shippingPrice->setValue('0');
-		$shippingPrice->setCurrency('EUR');
+		$productShipping = [];
 		
-		$shipping->setService('DHL');
+		if (!empty($shippingInfos)) {
+			foreach($shippingInfos as $shippingInfo) {
+				if (in_array($shippingInfo['countryISO'], self::TARGET_COUNTRIES, TRUE)) {
+					$shippingPrice = new Google_Service_ShoppingContent_Price();
+					$shippingPrice->setValue(number_format((float)$shippingInfo['shippingCost'], 2, ',', '.'));
+					$shippingPrice->setCurrency('EUR');
+					
+					$shipping = new Google_Service_ShoppingContent_ProductShipping();
+					$shipping->setPrice($shippingPrice);
+					$shipping->setCountry($shippingInfo['countryISO']);
+					$shipping->setService($shippingInfo['dispatchName']);
+					
+					$productShipping[] = $shipping;
+				}
+			}
+		} else {
+			$shippingPrice = new Google_Service_ShoppingContent_Price();
+			$shippingPrice->setValue('0,00');
+			$shippingPrice->setCurrency('EUR');
+			
+			$shipping = new Google_Service_ShoppingContent_ProductShipping();
+			$shipping->setPrice($shippingPrice);
+			$shipping->setCountry(self::TARGET_COUNTRY_DE);
+			$shipping->setService(self::DEFAULT_DISPATCH);
+			
+			$productShipping[] = $shipping;
+		}
 		
-		$product->setShipping([$shipping]);
-		
-		$shippingPrice = new Google_Service_ShoppingContent_Price();
-		$shippingPrice->setValue('18,00');
-		$shippingPrice->setCurrency('EUR');
-		
-		$shipping = new Google_Service_ShoppingContent_ProductShipping();
-		$shipping->setPrice($shippingPrice);
-		$shipping->setCountry('AT');
-		$shipping->setService('DHL');
-		
-		/*
-		$shippingWeight =
-			new Google_Service_ShoppingContent_ProductShippingWeight();
-		$shippingWeight->setValue(200);
-		$shippingWeight->setUnit('grams');
-		
-		$product->setShippingWeight($shippingWeight);
-		*/
+		$product->setShipping($productShipping);
 		
 		if (count($productImageUrls)) {
 			$product->setAdditionalImageLinks($productImageUrls);
@@ -188,10 +236,13 @@ class ContentProduct {
 	
 	/**
 	 * @return array
+	 * @throws \Doctrine\DBAL\Driver\Exception
+	 * @throws \Doctrine\DBAL\Exception
 	 */
 	public function create(): array {
 		$toDelete = FALSE;
 		$contentProduct = $this->buildProduct();
+		
 		foreach ($contentProduct->getCustomAttributes() as $customAttribute) {
 			if ($customAttribute->getName() === 'active' && $customAttribute->getValue() === FALSE) {
 				$toDelete = TRUE;
@@ -225,6 +276,8 @@ class ContentProduct {
 	
 	/**
 	 * @return array
+	 * @throws \Doctrine\DBAL\Driver\Exception
+	 * @throws \Doctrine\DBAL\Exception
 	 */
 	public function update(): array {
 		$toDelete = FALSE;
