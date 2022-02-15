@@ -179,77 +179,45 @@ class Repository extends ModelRepository {
 	
 	/**
 	 * @param int   $manufacturerId
-	 * @param array $filters
-	 * @param array $sortings
+	 * @param array $options
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */
-	public function getModelsByManufacturerIdQueryBuilder(int $manufacturerId, array $filters = [], array $sortings = []): QueryBuilder {
+	public function getModelsByManufacturerIdQueryBuilder(int $manufacturerId, array $options = []): QueryBuilder {
 		$builder = $this->getEntityManager()->createQueryBuilder();
-		$builder->select([
-			'models'
-		])
-			->from(Model::class, 'models')
-			->distinct(TRUE)
+		$builder->from(Model::class, 'models')
 			->join('models.cars', 'cars')
 			->where('cars.manufacturerId = :manufacturerId')
 			->setParameter('manufacturerId', $manufacturerId);
 		
-		foreach($filters as $filter) {
-			$builder->andWhere($filter);
-		}
-		
-		if (!empty($sortings)) {
-			foreach ($sortings as $sort => $order) {
-				$builder->addOrderBy($sort, $order);
-			}
-		} else {
-			$builder->addOrderBy('models.display', 'ASC');
-		}
+		$this->setOptions($builder, $options);
 		
 		return $builder;
 	}
 	
 	/**
 	 * @param int   $manufacturerId
-	 * @param array $filters
-	 * @param array $sortings
+	 * @param array $options
 	 * @return \Doctrine\ORM\Query
 	 */
-	public function getModelsByManufacturerIdQuery(int $manufacturerId, array $filters = [], array $sortings = []): Query {
-		return $this->getModelsByManufacturerIdQueryBuilder($manufacturerId, $filters, $sortings)->getQuery();
+	public function getModelsByManufacturerIdQuery(int $manufacturerId, array $options = []): Query {
+		return $this->getModelsByManufacturerIdQueryBuilder($manufacturerId, $options)->getQuery();
 	}
 	
 	/**
 	 * @param int   $manufacturerId
 	 * @param int   $modelId
-	 * @param int   $typeId
-	 * @param array $filters
-	 * @param array $sortings
+	 * @param array $options
 	 * @return \Doctrine\ORM\QueryBuilder
 	 */
-	public function getTypesByManufacturerIdAndModelIdQueryBuilder(int $manufacturerId, int $modelId, int $typeId, array $filters = [], array $sortings = []): QueryBuilder {
+	public function getTypesByManufacturerIdAndModelIdQueryBuilder(int $manufacturerId, int $modelId, array $options = []): QueryBuilder {
 		$builder = $this->getEntityManager()->createQueryBuilder();
-		$builder->select([
-			'types'
-		])
-			->from(Type::class, 'types')
-			->distinct(TRUE)
+		$builder->from(Type::class, 'types')
 			->join('types.cars', 'cars')
 			->where('cars.manufacturerId = :manufacturerId AND cars.modelId = :modelId')
 			->setParameter('manufacturerId', $manufacturerId)
 			->setParameter('modelId', $modelId);
 		
-		foreach($filters as $filter) {
-			$builder->andWhere($filter);
-		}
-		
-		if (!empty($sortings)) {
-			foreach ($sortings as $sort => $order) {
-				$builder->addOrderBy($sort, $order);
-			}
-		} else {
-			$builder->addOrderBy('types.display', 'ASC');
-		}
+		$this->setOptions($builder, $options);
 		
 		return $builder;
 	}
@@ -257,13 +225,11 @@ class Repository extends ModelRepository {
 	/**
 	 * @param int   $manufacturerId
 	 * @param int   $modelId
-	 * @param int   $typeId
-	 * @param array $filters
-	 * @param array $sortings
+	 * @param array $options
 	 * @return \Doctrine\ORM\Query
 	 */
-	public function getTypesByManufacturerIdAndModelIdQuery(int $manufacturerId, int $modelId, int $typeId, array $filters = [], array $sortings = []): Query {
-		return $this->getTypesByManufacturerIdAndModelIdQueryBuilder($manufacturerId, $modelId, $typeId, $filters, $sortings)->getQuery();
+	public function getTypesByManufacturerIdAndModelIdQuery(int $manufacturerId, int $modelId, array $options = []): Query {
+		return $this->getTypesByManufacturerIdAndModelIdQueryBuilder($manufacturerId, $modelId, $options)->getQuery();
 	}
 	
 	/**
@@ -453,7 +419,17 @@ class Repository extends ModelRepository {
 			return;
 		}
 		
-		$builder->select($options['select'] ?? []);
+		if (isset($options['select'])) {
+			$builder->select($options['select']);
+		}
+		
+		if (isset($options['from']) && is_array($options['from'])) {
+			if (isset($options['from']['class'], $options['from']['alias'])) {
+				$builder->from($options['from']['class'], $options['from']['alias']);
+			} else {
+				$builder->from(reset($options['from']), array_key_first($options['from']));
+			}
+		}
 		
 		$parameterCount = 1;
 		if (isset($options['conditions']) && is_array($options['conditions'])) {
@@ -474,6 +450,35 @@ class Repository extends ModelRepository {
 			foreach ($options['orders'] as $column => $order) {
 				$builder->addOrderBy($column, $order);
 			}
+		}
+		
+		if (isset($options['joins']) && is_array($options['joins'])) {
+			foreach($options['joins'] as $alias => $join) {
+				if (!is_array($join)) {
+					$builder->join($join, $alias);
+				} else {
+					$type = $join['type'] ?? 'inner';
+					$indexBy = $join['indexBy'] ?? NULL;
+					$condition = $join['condition'] ?? NULL;
+					$conditionType = $join['conditionType'] ?? NULL;
+					
+					switch(strtolower($type)) {
+						case 'left': $builder->leftJoin($join['join'], $alias, $conditionType, $condition, $indexBy); break;
+						case 'inner':
+						default: $builder->innerJoin($join['join'], $alias, $conditionType, $condition, $indexBy);
+					}
+				}
+			}
+		}
+		
+		if (isset($options['groups']) && is_array($options['groups'])) {
+			foreach($options['groups'] as $groupBy) {
+				$builder->addGroupBy($groupBy);
+			}
+		}
+		
+		if (isset($options['distinct'])) {
+			$builder->distinct($options['distinct']);
 		}
 	}
 	
@@ -695,5 +700,16 @@ class Repository extends ModelRepository {
 		}
 		
 		return [];
+	}
+	
+	/**
+	 * @param array $options
+	 * @return \Doctrine\ORM\Query
+	 */
+	public function getDefaultQuery(array $options = []): Query {
+		$builder = $this->getEntityManager()->createQueryBuilder();
+		$this->setOptions($builder, $options);
+		
+		return $builder->getQuery();
 	}
 }
