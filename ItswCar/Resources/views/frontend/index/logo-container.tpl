@@ -10,7 +10,7 @@
                     <source srcset="{link file='frontend/_public/src/img/atw-logo.jpg'}" media="(min-width: 78.75em)">
                     <source srcset="{link file='frontend/_public/src/img/atw-logo.jpg'}" media="(min-width: 64em)">
                     <source srcset="{link file='frontend/_public/src/img/atw-logo.jpg'}" media="(min-width: 48em)">
-                    <img srcset="{link file='frontend/_public/src/img/atw-logo.jpg'}" alt="{"{config name=shopName}"|escapeHtml} - {$snippetIndexLinkDefault|escape}" />
+                    <img width="116" height="50" srcset="{link file='frontend/_public/src/img/atw-logo.jpg'}" alt="{"{config name=shopName}"|escapeHtml} - {$snippetIndexLinkDefault|escape}" />
                 </picture>
             </a>
         </div>
