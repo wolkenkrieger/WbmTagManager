@@ -252,10 +252,14 @@ function Flatpickr(element, config) {
 				window.addEventListener("testPassive", null, opts);
 				window.removeEventListener("testPassive", null, opts);
 			} catch (e) {}
-			
+			/*
 			self.monthNav.addEventListener("wheel", function (e) {
 				return e.preventDefault();
 			}, supportsPassive ? { passive: true } : false);
+			*/
+			self.monthNav.addEventListener("wheel", function (e) {
+				return e.preventDefault();
+			}, true);
 			bind(self.monthNav, "wheel", debounce(onMonthNavScroll, 10));
 			bind(self.monthNav, "mousedown", onClick(onMonthNavClick));
 
