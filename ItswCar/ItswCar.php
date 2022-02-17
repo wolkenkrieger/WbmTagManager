@@ -125,12 +125,13 @@ class ItswCar extends Plugin {
 	 * @return \Doctrine\Common\Collections\ArrayCollection
 	 */
 	public function onCollectPluginJavascript(\Enlight_Event_EventArgs $args): ArrayCollection {
-		return new ArrayCollection(
-			[__DIR__ . '/Resources/frontend/vendors/select2-4.1.0-rc.0/dist/js/select2.full.min.js'],
-			[__DIR__ . '/Resources/frontend/js/jquery.carfinder.js'],
-			[__DIR__ . '/Resources/frontend/js/states.js'],
-			[__DIR__ . '/Resources/frontend/js/main.js']
-		);
+		return new ArrayCollection([
+			__DIR__ . '/Resources/frontend/vendors/select2-4.1.0-rc.0/dist/js/select2.full.min.js',
+			__DIR__ . '/Resources/frontend/vendors/flatpickr-2.6.3/dist/flatpickr.min.js',
+			__DIR__ . '/Resources/frontend/js/jquery.carfinder.js',
+			__DIR__ . '/Resources/frontend/js/states.js',
+			__DIR__ . '/Resources/frontend/js/main.js'
+		]);
 	}
 	
 	/**

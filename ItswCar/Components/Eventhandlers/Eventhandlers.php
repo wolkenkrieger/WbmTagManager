@@ -821,6 +821,22 @@ class Eventhandlers {
 		$eventArgs->setReturn($attributeData);
 	}
 	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 * @return void
+	 */
+	public function onCollectJavascriptFilesFilterResult(\Enlight_Event_EventArgs $eventArgs): void {
+		$javascriptFiles = $eventArgs->getReturn();
+		$pattern = '/^.*\/Frontend\/Responsive\/frontend\/_public\/vendors\/js\/flatpickr\/flatpickr.min.js$/im';
+		$hits = array_keys(preg_grep($pattern, $javascriptFiles));
+		
+		foreach ($hits as $hit) {
+			unset($javascriptFiles[$hit]);
+		}
+		
+		$eventArgs->setReturn($javascriptFiles);
+	}
+	
 	
 	// Helpers and private functions
 	

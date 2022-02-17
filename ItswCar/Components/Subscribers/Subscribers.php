@@ -62,6 +62,7 @@ class Subscribers implements SubscriberInterface {
 			'Shopware_CronJob_ItswCheckPrepaymentOrdersPaymentStatus'       => 'onCronHandleOrdersPaymentStatus',
 			'Shopware_CronJob_ItswCheckEbayTemplateFolder'                  => 'onCronCheckEbayTemplateFolder',
 			
+			'Theme_Compiler_Collect_Javascript_Files_FilterResult'          => 'onCollectJavascriptFilesFilterResult',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
 			//'Shopware_Modules_Basket_UpdateArticle_FilterSqlDefaultParameters'=> 'onBasketUpdateArticleFilterSqlDefaultParameters',
@@ -233,5 +234,14 @@ class Subscribers implements SubscriberInterface {
 	public function onOrderSaveOrderFilterAttributes(\Enlight_Event_EventArgs $eventArgs): void {
 		$eventHandler = new Eventhandler($this->pluginDir);
 		$eventHandler->onOrderSaveOrderFilterAttributes($eventArgs);
+	}
+	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 * @return void
+	 */
+	public function onCollectJavascriptFilesFilterResult(\Enlight_Event_EventArgs $eventArgs): void {
+		$eventHandler = new Eventhandler($this->pluginDir);
+		$eventHandler->onCollectJavascriptFilesFilterResult($eventArgs);
 	}
 }
