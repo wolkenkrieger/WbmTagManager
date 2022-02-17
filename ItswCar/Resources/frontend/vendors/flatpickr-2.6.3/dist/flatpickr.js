@@ -259,7 +259,7 @@ function Flatpickr(element, config) {
 			*/
 			self.monthNav.addEventListener("wheel", function (e) {
 				return e.preventDefault();
-			}, true);
+			}, {passive: true});
 			bind(self.monthNav, "wheel", debounce(onMonthNavScroll, 10));
 			bind(self.monthNav, "mousedown", onClick(onMonthNavClick));
 
