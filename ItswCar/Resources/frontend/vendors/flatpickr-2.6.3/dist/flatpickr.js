@@ -241,7 +241,7 @@ function Flatpickr(element, config) {
 		if (self.config.clickOpens === true) bind(self._input, "focus", self.open);
 
 		if (!self.config.noCalendar) {
-			// Test via a getter in the options object to see if the passive property is accessed
+			/*
 			var supportsPassive = false;
 			try {
 				var opts = Object.defineProperty({}, 'passive', {
@@ -252,7 +252,7 @@ function Flatpickr(element, config) {
 				window.addEventListener("testPassive", null, opts);
 				window.removeEventListener("testPassive", null, opts);
 			} catch (e) {}
-			/*
+			
 			self.monthNav.addEventListener("wheel", function (e) {
 				return e.preventDefault();
 			}, supportsPassive ? { passive: true } : false);
