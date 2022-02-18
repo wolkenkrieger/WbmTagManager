@@ -62,7 +62,7 @@ class Subscribers implements SubscriberInterface {
 			'Shopware_CronJob_ItswCheckPrepaymentOrdersPaymentStatus'       => 'onCronHandleOrdersPaymentStatus',
 			'Shopware_CronJob_ItswCheckEbayTemplateFolder'                  => 'onCronCheckEbayTemplateFolder',
 			
-			'Theme_Compiler_Collect_Javascript_Files_FilterResult'          => 'onCollectJavascriptFilesFilterResult',
+			//'Theme_Compiler_Collect_Javascript_Files_FilterResult'          => 'onCollectJavascriptFilesFilterResult',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
 			//'Shopware_Modules_Basket_UpdateArticle_FilterSqlDefaultParameters'=> 'onBasketUpdateArticleFilterSqlDefaultParameters',
