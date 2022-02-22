@@ -7,10 +7,12 @@
             {s name="IndexLinkDefault" namespace="frontend/index/index" assign="snippetIndexLinkDefault"}{/s}
             <a class="logo--link" href="{$ItswCar.rootUrl}" title="{"{config name=shopName}"|escapeHtml} - {$snippetIndexLinkDefault|escape}">
                 <picture>
-                    <source srcset="{link file='frontend/_public/src/img/atw-logo.jpg'}" media="(min-width: 78.75em)">
-                    <source srcset="{link file='frontend/_public/src/img/atw-logo.jpg'}" media="(min-width: 64em)">
-                    <source srcset="{link file='frontend/_public/src/img/atw-logo.jpg'}" media="(min-width: 48em)">
-                    <img width="116" height="50" srcset="{link file='frontend/_public/src/img/atw-logo.jpg'}" alt="{"{config name=shopName}"|escapeHtml} - {$snippetIndexLinkDefault|escape}" />
+                    <source srcset="{link file='frontend/_public/src/img/atw-logo.webp'}" type="image/webp">
+                    <img width="116"
+                         height="50"
+                         loading="lazy"
+                         srcset="{link file='frontend/_public/src/img/atw-logo.jpg'}"
+                         alt="{"{config name=shopName}"|escapeHtml} - {$snippetIndexLinkDefault|escape}" />
                 </picture>
             </a>
         </div>
