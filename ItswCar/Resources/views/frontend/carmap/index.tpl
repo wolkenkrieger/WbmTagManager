@@ -42,10 +42,13 @@
 			<nav class="itsw">
 				<div class="table flex carmap">
                     {foreach $topBrandsViewData as $manufacturerDisplay => $modelDisplays}
-						<div class="table--cell panel--td is--rounded is--border" role="navigation">
+						<div class="table--cell panel--td is--rounded is--border" role="menu">
 							<span class="headline">{$manufacturerDisplay}</span>
                             {foreach $modelDisplays as $modelDisplay => $data}
-								<a style="display: block;" href="{url controller=carmap action=types manufacturer=$data.manufacturerId model=$data.modelId}">{$modelDisplay}</a>
+								<a class="is--block" href="{url controller=carmap action=types manufacturer=$data.manufacturerId model=$data.modelId}" title="{$manufacturerDisplay} {$modelDisplay}" itemprop="item">
+									<link itemprop="url" href="{url controller=carmap action=types manufacturer=$data.manufacturerId model=$data.modelId}">
+									<span itemprop="name">{$modelDisplay}</span>
+								</a>
                             {/foreach}
 						</div>
                     {/foreach}
@@ -58,10 +61,13 @@
 			<nav class="itsw">
 				<div class="table flex carmap">
                     {foreach $viewData as $manufacturerDisplay => $modelDisplays}
-						<div class="table--cell panel--td is--rounded is--border" role="navigation">
+						<div class="table--cell panel--td is--rounded is--border" role="menu">
 							<span class="headline">{$manufacturerDisplay}</span>
                             {foreach $modelDisplays as $modelDisplay => $data}
-								<a style="display: block;" href="{url controller=carmap action=types manufacturer=$data.manufacturerId model=$data.modelId}">{$modelDisplay}</a>
+								<a class="is--block" href="{url controller=carmap action=types manufacturer=$data.manufacturerId model=$data.modelId}" title="{$manufacturerDisplay} {$modelDisplay}" itemprop="item">
+									<link itemprop="url" href="{url controller=carmap action=types manufacturer=$data.manufacturerId model=$data.modelId}">
+									<span itemprop="name">{$modelDisplay}</span>
+								</a>
                             {/foreach}
 						</div>
                     {/foreach}
