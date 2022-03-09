@@ -57,7 +57,7 @@
 									<a class="btn is--small is--primary" href="{$car.seoUrl}" title="{$car.manufacturer.display} {$car.model.display} {$car.type.display}" itemprop="item">
 										<i class="icon--arrow-right"></i>
 										<link href="{$car.seoUrl}" itemprop="url">
-										<span class="is--hidden" itemprop="name">{$car.manufacturer.display}&nbsp;{$car.model.display}&nbsp;{$car.type.display}</span>
+										<span class="is--hidden" itemprop="name">{$car.manufacturer.display} {$car.model.display} {$car.type.display}</span>
 									</a>
 								</div>
 							</div>
