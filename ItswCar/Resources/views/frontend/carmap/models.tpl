@@ -47,7 +47,7 @@
                         {foreach $models as $data}
                             <a href="{url controller=carmap action=types manufacturer=$data.manufacturerId model=$data.modelId}" title="{$data.manufacturerDisplay} {$data.modelDisplay}" itemprop="item" role="menuitem">
                                 <link itemprop="url" href="{url controller=carmap action=types manufacturer=$data.manufacturerId  model=$data.modelId}">
-                                <span itemprop="name"><span class="link--name">{$data.manufacturerDisplay} {$data.modelDisplay}</span> {$data.MIN_PS} - {$data.MAX_PS} PS / {$data.MIN_KW} - {$data.MAX_KW} kW / {$data.MIN_CCM} - {$data.MAX_CCM} cm&sup3; / {$data.MIN_BUILD|date_format:"%m/%Y"} - {$data.MAX_BUILD|date_format:"%m/%Y"}</span>
+                                <span itemprop="name"><span class="link--name">{$data.manufacturerDisplay} {$data.modelDisplay}</span> {if $data.MIN_PS neq $data.MAX_PS}{$data.MIN_PS} - {$data.MAX_PS}{else}{$data.MIN_PS}{/if} PS / {if $data.MIN_KW neq $data.MAX_KW}{$data.MIN_KW} - {$data.MAX_KW}{else}{$data.MIN_KW}{/if} kW / {if $data.MIN_CCM neq $data.MAX_CCM}{$data.MIN_CCM} - {$data.MAX_CCM}{else}{$data.MIN_CCM}{/if} cm&sup3; / {$data.MIN_BUILD|date_format:"%m/%Y"} - {$data.MAX_BUILD|date_format:"%m/%Y"}</span>
                             </a>
                         {/foreach}
                     </div>
