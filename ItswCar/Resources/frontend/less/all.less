@@ -24,6 +24,11 @@
     color: @text-color;
   }
 
+  .is--small-text {
+    @x: @font-size-base - 1;
+    .unitize(font-size, @x)
+  }
+
 
 }
 

@@ -39,11 +39,11 @@
         {/block}
 
         {block name="itsw_carmap_types"}
-			<div class="itsw" role="menu">
-				<div class="table flex carmap">
+			<nav class="itsw">
+				<div class="carmap type" role="menu">
                     {foreach $cars as $car}
-						<div class="table--cell panel--td is--rounded is--border padding-none" role="menuitem">
-							<div class="table">
+						<div class="panel is--rounded is--border" role="menuitem">
+							<div class="table panel--body is--wide">
 								<div class="table--cell">
 									<a class="is--text-color" href="{$car.seoUrl}">
 										<div>{s name="CARFINDER_WIDGET_CAR" namespace="itsw/carfinder"}{/s} <span class="bold">{$car.manufacturer.display}&nbsp;{$car.model.display}&nbsp;{$car.type.display}</span></div>
@@ -64,8 +64,7 @@
 						</div>
                     {/foreach}
 				</div>
-			</div>
-
+			</nav>
         {/block}
 	</div>
 {/block}

@@ -10,6 +10,7 @@
 use ItswCar\Models\Car;
 use ItswCar\Traits\LoggingTrait;
 use ItswCar\Helpers\SeoHelper;
+use Shopware\Components\Api\Resource\Manufacturer;
 
 class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 	use LoggingTrait;
@@ -26,6 +27,46 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 		$this->setContainer(Shopware()->Container());
 		$this->entityManager = $this->get('models');
 		$this->seoHelper = $this->get('itsw.helper.seo');
+	}
+	
+	public function _indexAction(): void {
+		$topBrandsViewData = $viewData = [];
+		
+		$data = $this->entityManager->getRepository(Car::class)->getDefaultQuery([
+			'select' => [
+				'manufacturers.display AS manufacturerDisplay',
+				'manufacturers.topBrand',
+				'cars.manufacturerId',
+			],
+			'from' => [
+				'cars' => Car::class
+			],
+			'joins' => [
+				'manufacturers' => 'cars.manufacturer'
+			],
+			'conditions' => [
+				'cars.active' => 1,
+				'manufacturers.active' => 1
+			],
+			'groups' => [
+				'cars.manufacturerId'
+			],
+			'orders' => [
+				'manufacturerDisplay' => 'ASC'
+			]
+		])
+			->getResult();
+		
+		foreach($data as $datum) {
+			if ($datum['topBrand'] === TRUE) {
+				$topBrandsViewData[$datum['manufacturerDisplay']] = $datum['manufacturerId'];
+			} else {
+				$viewData[$datum['manufacturerDisplay']] = $datum['manufacturerId'];
+			}
+		}
+		
+		$this->View()->assign('viewData', $viewData);
+		$this->View()->assign('topBrandsViewData', $topBrandsViewData);
 	}
 	
 	/**
@@ -65,26 +106,94 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 		])
 			->getResult();
 		
-		/*echo "<pre>";
-		var_dump($data);die;
-		*/
-		
 		foreach($data as $datum) {
+			if (!isset($models[$datum['manufacturerId']]) || count($models[$datum['manufacturerId']]) < 6) {
+				$models[$datum['manufacturerId']][] = $datum['modelDisplay'];
+			}
+			
+			$firstChar = mb_strtoupper(mb_substr($datum['manufacturerDisplay'], 0, 1, 'UTF-8'));
+			
 			if ($datum['topBrand'] === TRUE) {
-				$topBrandsViewData[$datum['manufacturerDisplay']][$datum['modelDisplay']] = [
+				$topBrandsViewData[$datum['manufacturerDisplay']] = [
 					'manufacturerId' => $datum['manufacturerId'],
-					'modelId' => $datum['modelId']
-				];
-			} else {
-				$viewData[$datum['manufacturerDisplay']][$datum['modelDisplay']] = [
-					'manufacturerId' => $datum['manufacturerId'],
-					'modelId' => $datum['modelId']
+					'models' => $models[$datum['manufacturerId']]
 				];
 			}
+			
+			$viewData[$firstChar][$datum['manufacturerDisplay']] = [
+				'manufacturerId' => $datum['manufacturerId'],
+				'models' => $models[$datum['manufacturerId']]
+			];
+			
 		}
+		//echo "<pre>";var_dump($viewData);die;
 		
 		$this->View()->assign('viewData', $viewData);
 		$this->View()->assign('topBrandsViewData', $topBrandsViewData);
+	}
+	
+	/**
+	 * @return void
+	 */
+	public function modelsAction(): void {
+		$manufacturerId = (int)$this->Request()->getParam('manufacturer', 0);
+		
+		if (!$manufacturerId) {
+			$this->Request()->setParam('redirect', 0);
+			$this->forward('index');
+			return;
+		}
+		
+		$viewData = [];
+		
+		$controller = Shopware()->Front()->Router()->assemble([
+			'controller' => 'cat',
+			'module' => 'frontend',
+			'action' => 'index',
+			'sCategory' => 6,
+			'rewriteUrl' => 1
+		]);
+		
+		$models = $this->entityManager->getRepository(Car::class)->getDefaultQuery([
+			'select' => [
+				'cars.tecdocId',
+				'cars.manufacturerId',
+				'manufacturers.display AS manufacturerDisplay',
+				'cars.modelId',
+				'models.display AS modelDisplay',
+				'MIN(cars.ps) as MIN_PS',
+				'MAX(cars.ps) AS MAX_PS',
+				'MIN(cars.kw) as MIN_KW',
+				'MAX(cars.kw) AS MAX_KW',
+				'MIN(cars.ccm) AS MIN_CCM',
+				'MAX(cars.ccm) AS MAX_CCM',
+				'MIN(cars.buildFrom) AS MIN_BUILD',
+				'MAX(cars.buildTo) AS MAX_BUILD',
+			],
+			'from' => [
+				'cars' => Car::class
+			],
+			'joins' => [
+				'manufacturers' => 'cars.manufacturer',
+				'models' => 'cars.model'
+			],
+			'conditions' => [
+				'cars.active' => 1,
+				'manufacturers.active' => 1,
+				'models.active' => 1,
+				'cars.manufacturerId' => $manufacturerId
+			],
+			'orders' => [
+				'modelDisplay' => 'ASC'
+			],
+			'groups' => [
+				'cars.manufacturerId',
+				'cars.modelId'
+			]
+		])
+			->getResult();
+		
+		$this->View()->assign('models', $models);
 	}
 	
 	/**
