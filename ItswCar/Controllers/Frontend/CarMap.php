@@ -29,46 +29,6 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 		$this->seoHelper = $this->get('itsw.helper.seo');
 	}
 	
-	public function _indexAction(): void {
-		$topBrandsViewData = $viewData = [];
-		
-		$data = $this->entityManager->getRepository(Car::class)->getDefaultQuery([
-			'select' => [
-				'manufacturers.display AS manufacturerDisplay',
-				'manufacturers.topBrand',
-				'cars.manufacturerId',
-			],
-			'from' => [
-				'cars' => Car::class
-			],
-			'joins' => [
-				'manufacturers' => 'cars.manufacturer'
-			],
-			'conditions' => [
-				'cars.active' => 1,
-				'manufacturers.active' => 1
-			],
-			'groups' => [
-				'cars.manufacturerId'
-			],
-			'orders' => [
-				'manufacturerDisplay' => 'ASC'
-			]
-		])
-			->getResult();
-		
-		foreach($data as $datum) {
-			if ($datum['topBrand'] === TRUE) {
-				$topBrandsViewData[$datum['manufacturerDisplay']] = $datum['manufacturerId'];
-			} else {
-				$viewData[$datum['manufacturerDisplay']] = $datum['manufacturerId'];
-			}
-		}
-		
-		$this->View()->assign('viewData', $viewData);
-		$this->View()->assign('topBrandsViewData', $topBrandsViewData);
-	}
-	
 	/**
 	 * @return void
 	 */
@@ -126,8 +86,8 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 			];
 			
 		}
-		//echo "<pre>";var_dump($viewData);die;
 		
+		$this->Response()->setHeader('X-Robots-Tag', 'noindex');
 		$this->View()->assign('viewData', $viewData);
 		$this->View()->assign('topBrandsViewData', $topBrandsViewData);
 	}
@@ -193,6 +153,7 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 		])
 			->getResult();
 		
+		$this->Response()->setHeader('X-Robots-Tag', 'noindex');
 		$this->View()->assign('models', $models);
 	}
 	
