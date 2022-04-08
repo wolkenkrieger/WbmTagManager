@@ -10,7 +10,6 @@
 use ItswCar\Models\Car;
 use ItswCar\Traits\LoggingTrait;
 use ItswCar\Helpers\SeoHelper;
-use Shopware\Components\Api\Resource\Manufacturer;
 
 class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 	use LoggingTrait;
@@ -87,7 +86,7 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 			
 		}
 		
-		$this->Response()->setHeader('X-Robots-Tag', 'noindex');
+		//$this->Response()->setHeader('X-Robots-Tag', 'noindex');
 		$this->View()->assign('viewData', $viewData);
 		$this->View()->assign('topBrandsViewData', $topBrandsViewData);
 	}
@@ -103,16 +102,6 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 			$this->forward('index');
 			return;
 		}
-		
-		$viewData = [];
-		
-		$controller = Shopware()->Front()->Router()->assemble([
-			'controller' => 'cat',
-			'module' => 'frontend',
-			'action' => 'index',
-			'sCategory' => 6,
-			'rewriteUrl' => 1
-		]);
 		
 		$models = $this->entityManager->getRepository(Car::class)->getDefaultQuery([
 			'select' => [
@@ -153,7 +142,7 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 		])
 			->getResult();
 		
-		$this->Response()->setHeader('X-Robots-Tag', 'noindex');
+		//$this->Response()->setHeader('X-Robots-Tag', 'noindex');
 		$this->View()->assign('models', $models);
 	}
 	
@@ -198,7 +187,6 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 				'cars.manufacturerId' => $manufacturerId,
 				'cars.modelId' => $modelId,
 				'cars.typeId IN (' . implode(',', $typeIds) . ')',
-				//'cars.tecdocId' => $tecdocId,
 				'cars.active' => 1
 			],
 			'orders' => [
