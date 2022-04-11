@@ -283,7 +283,7 @@ class Eventhandlers {
 		$return = $hookArgs->getReturn();
 		$articles = $return['sArticles']??[];
 		foreach($articles as &$article) {
-			$this->setPseudoprice($article);
+			//$this->setPseudoprice($article);
 			$url = $this->seoHelper->getArticleSeoUrl($article['articleID']);
 			$link = ($url) ?: $article['linkDetails'];
 			$article['linkDetails'] = $link;
@@ -298,7 +298,7 @@ class Eventhandlers {
 	 */
 	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs): void {
 		$article = $eventArgs->getReturn();
-		$this->setPseudoprice($article);
+		//$this->setPseudoprice($article);
 		$url = $this->seoHelper->getArticleSeoUrl($article['articleID']);
 		$link = ($url) ?: $article['linkDetails'];
 		$article['linkDetails'] = $link;
@@ -332,7 +332,7 @@ class Eventhandlers {
 			]) : $article['articleName'])
 		]);
 		
-		$this->setPseudoprice($article);
+		//$this->setPseudoprice($article);
 		
 		$article['seoTitle'] = implode(' ', [
 			$titlePart,
@@ -695,7 +695,7 @@ class Eventhandlers {
 				}
 				
 				$productHelper = Shopware()->Container()->get('itsw.helper.product');
-				$productHelper->setProductFakePrice($product);
+				//$productHelper->setProductFakePrice($product);
 			} catch(\Exception $exception) {
 				$this->error($exception);
 				continue;

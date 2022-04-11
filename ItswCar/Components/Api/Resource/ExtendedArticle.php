@@ -353,7 +353,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			$this->writeCarLinks($carLinks, $product);
 		}
 		
-		$this->productHelper->setProductFakePrice($product);
+		//$this->productHelper->setProductFakePrice($product);
 		
 		if ($googleContentApi) {
 			$queueId = $this->addToGoogleMerchantCenterQueue($product);
@@ -473,7 +473,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			}
 		}
 		
-		$this->productHelper->setProductFakePrice($product);
+		//$this->productHelper->setProductFakePrice($product);
 		
 		if ($googleContentApi || $this->isInQueue($product)) {
 			$queueId = $this->addToGoogleMerchantCenterQueue($product, 'update');

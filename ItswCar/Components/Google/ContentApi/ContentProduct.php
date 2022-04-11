@@ -134,7 +134,7 @@ class ContentProduct {
 		}
 		
 		//$fakePrice = $productPrice * $this->getPriceFactor();
-		$fakePrice = $this->product->getMainDetail()->getAttribute()->getFakePrice()?:$productPrice;
+		//$fakePrice = $this->product->getMainDetail()->getAttribute()->getFakePrice()?:$productPrice;
 		
 		$description = str_ireplace([
 			'</ul><br><br><div id="description_oe">',
@@ -178,6 +178,7 @@ class ContentProduct {
 		$product->setGtin((string)$this->product->getMainDetail()->getEan());
 		$product->setMpn($productMpn);
 		
+		/*
 		$price = new Price();
 		$price->setValue(sprintf('%.2f', $fakePrice));
 		$price->setCurrency('EUR');
@@ -187,6 +188,12 @@ class ContentProduct {
 		$discountPrice->setValue(sprintf('%.2f', $discountProductPrice));
 		$discountPrice->setCurrency('EUR');
 		$product->setSalePrice($discountPrice);
+		*/
+		
+		$discountPrice = new Price();
+		$discountPrice->setValue(sprintf('%.2f', $discountProductPrice));
+		$discountPrice->setCurrency('EUR');
+		$product->setPrice($discountPrice);
 		
 		$productShipping = [];
 		
