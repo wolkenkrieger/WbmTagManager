@@ -341,7 +341,7 @@ class Eventhandlers {
 		
 		$article['seoDescription'] = implode(' &star; ', [
 			sprintf('%s günstig kaufen', $titlePart),
-			sprintf('Sparen Sie jetzt bis zu %d%%', $article['pseudopricePercent']),
+			//sprintf('Sparen Sie jetzt bis zu %d%%', $article['pseudopricePercent']),
 			'Versandkostenfreie Lieferung in Deutschland'
 		]);
 		
