@@ -21,6 +21,8 @@ use ItswCar\Models\Car;
 use ItswCar\Models\ArticleCarLinks;
 use ItswCar\Models\GoogleMerchantCenterQueue;
 use ItswCar\Models\Garage;
+use ItswCar\Models\ArticlePrices;
+
 
 use Shopware\Components\Logger;
 use Shopware\Components\Plugin;
@@ -41,19 +43,13 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 
 
 class ItswCar extends Plugin {
-	/**
-	 * @var \Shopware\Components\Logger|null
-	 */
+	/** @var \Shopware\Components\Logger|null  */
 	public static ?Logger $logger;
 	
-	/**
-	 * @var \Shopware\Components\Logger|null
-	 */
+	/** @var \Shopware\Components\Logger|null  */
 	public static ?Logger $warningLogger;
 	
-	/**
-	 * @var int
-	 */
+	/** @var int  */
 	public static int $logLevel;
 	
 	
@@ -75,7 +71,8 @@ class ItswCar extends Plugin {
 	public function update(UpdateContext $context): void {
 		try {
 			$this->createAttributes();
-			$this->updateSchemas();
+			$this->createSchemas();
+			//$this->updateSchemas();
 		} catch (Exception $err) {}
 		
 		$context->scheduleClearCache(UpdateContext::CACHE_LIST_ALL);
@@ -87,7 +84,7 @@ class ItswCar extends Plugin {
 	public function activate(ActivateContext $context): void {
 		try {
 		$this->createAttributes();
-		//$this->updateSchemas();
+		$this->createSchemas();
 		} catch (Exception $err) {}
 		
 		$context->scheduleClearCache(ActivateContext::CACHE_LIST_ALL);
@@ -318,9 +315,6 @@ class ItswCar extends Plugin {
 			$service->delete('s_articles_attributes', 'position_aggregated');
 		}
 		
-		//$metaDataCache  = Shopware()->Models()->getConfiguration()->getMetadataCacheImpl();
-		//$metaDataCache->deleteAll();
-		
 		if (!is_null($metaDataCache = Shopware()->Models()->getConfiguration()->getMetadataCache())) {
 			$metaDataCache->clear();
 		}
@@ -352,9 +346,9 @@ class ItswCar extends Plugin {
 			$entityManager->getClassMetadata(ArticleCarLinks::class),
 			$entityManager->getClassMetadata(GoogleMerchantCenterQueue::class),
 			$entityManager->getClassMetadata(Garage::class),
+			$entityManager->getClassMetadata(ArticlePrices::class),
 		];
 		
-		//$entityManager->getConfiguration()->getMetadataCacheImpl()->deleteAll();
 		if (!is_null($metaDataCache = $entityManager->getConfiguration()->getMetadataCache())) {
 			$metaDataCache->clear();
 		}
@@ -379,9 +373,9 @@ class ItswCar extends Plugin {
 			$entityManager->getClassMetadata(ArticleCarLinks::class),
 			$entityManager->getClassMetadata(GoogleMerchantCenterQueue::class),
 			$entityManager->getClassMetadata(Garage::class),
+			$entityManager->getClassMetadata(ArticlePrices::class),
 		];
 		
-		//$entityManager->getConfiguration()->getMetadataCacheImpl()->deleteAll();
 		if (!is_null($metaDataCache = $entityManager->getConfiguration()->getMetadataCache())) {
 			$metaDataCache->clear();
 		}

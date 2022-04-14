@@ -355,6 +355,13 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		
 		//$this->productHelper->setProductFakePrice($product);
 		
+		try {
+			$this->productHelper->setProductPriceHistory($product);
+		} catch(\Exception $exception) {
+			$this->error($exception);
+		}
+		
+		
 		if ($googleContentApi) {
 			$queueId = $this->addToGoogleMerchantCenterQueue($product);
 		}
@@ -474,6 +481,12 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		}
 		
 		//$this->productHelper->setProductFakePrice($product);
+		
+		try {
+			$this->productHelper->setProductPriceHistory($product);
+		} catch(\Exception $exception) {
+			$this->error($exception);
+		}
 		
 		if ($googleContentApi || $this->isInQueue($product)) {
 			$queueId = $this->addToGoogleMerchantCenterQueue($product, 'update');

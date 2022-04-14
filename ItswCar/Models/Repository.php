@@ -436,7 +436,7 @@ class Repository extends ModelRepository {
 			foreach($options['conditions'] as $condition => $value) {
 				if (is_numeric($condition)) {
 					$builder->andWhere($value);
-				} else if (strpos($condition, ' =') !== FALSE) {
+				} else if (strpbrk($condition, '=!<>') !== FALSE) {
 					$builder->andWhere($condition . ' ?' . $parameterCount)
 						->setParameter($parameterCount++, $value);
 				} else {

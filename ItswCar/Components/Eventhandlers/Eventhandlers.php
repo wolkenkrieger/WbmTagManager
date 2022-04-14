@@ -44,6 +44,7 @@ class Eventhandlers {
 	protected $configHelper;
 	protected $sessionHelper;
 	protected $seoHelper;
+	protected $productHelper;
 	public bool $isFrontEnd = FALSE;
 	
 	/* Hydration mode constants */
@@ -86,6 +87,10 @@ class Eventhandlers {
 		
 		if ($this->container->has('itsw.helper.seo')) {
 			$this->seoHelper = $this->container->get('itsw.helper.seo');
+		}
+		
+		if ($this->container->has('itsw.helper.product')) {
+			$this->productHelper = $this->container->get('itsw.helper.product');
 		}
 	}
 	
@@ -284,6 +289,7 @@ class Eventhandlers {
 		$articles = $return['sArticles']??[];
 		foreach($articles as &$article) {
 			//$this->setPseudoprice($article);
+			//$this->setHistoricalMinPrice($article);
 			$url = $this->seoHelper->getArticleSeoUrl($article['articleID']);
 			$link = ($url) ?: $article['linkDetails'];
 			$article['linkDetails'] = $link;
@@ -299,6 +305,7 @@ class Eventhandlers {
 	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs): void {
 		$article = $eventArgs->getReturn();
 		//$this->setPseudoprice($article);
+		//$this->setHistoricalMinPrice($article);
 		$url = $this->seoHelper->getArticleSeoUrl($article['articleID']);
 		$link = ($url) ?: $article['linkDetails'];
 		$article['linkDetails'] = $link;
@@ -333,6 +340,7 @@ class Eventhandlers {
 		]);
 		
 		//$this->setPseudoprice($article);
+		//$this->setHistoricalMinPrice($article);
 		
 		$article['seoTitle'] = implode(' ', [
 			$titlePart,
@@ -371,6 +379,20 @@ class Eventhandlers {
 	}
 	
 	/**
+	 * @param $article
+	 * @return void
+	 */
+	private function setHistoricalMinPrice(&$article): void {
+		$minPrice = $article['price_numeric'];
+		
+		if (NULL !== ($prices = $this->productHelper->getMinimumPrice($article['articleDetailsID'], $article['pricegroup']))) {
+			$minPrice = $prices['price_net'];
+		}
+		
+		$article['historicalMinPrice'] = $minPrice;
+	}
+	
+	/**
 	 * @param $category
 	 * @return mixed
 	 */
@@ -392,7 +414,7 @@ class Eventhandlers {
 	 */
 	private function getPrice($price, $tax, $discount): string {
 		$price /= (1 - ($discount / 100));
-		return Shopware()->Modules()->Articles()->sFormatPrice($price);
+		return $this->productHelper->formatPrice($price);
 	}
 	
 	/**
@@ -403,7 +425,7 @@ class Eventhandlers {
 	 */
 	private function getPriceNum($price, $tax, $discount) {
 		$price /= (1 - ($discount / 100));
-		return Shopware()->Modules()->Articles()->sRound($price);
+		return $this->productHelper->roundFloat($price);
 	}
 	
 	/**
