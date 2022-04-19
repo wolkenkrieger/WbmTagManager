@@ -149,10 +149,10 @@ class ProductHelper {
 	 * @param int    $articleDetailsId
 	 * @param string $customerGroupKey
 	 * @param int    $interval
-	 * @return array|null
+	 * @return float|null
 	 * @throws \Exception
 	 */
-	public function getMinimumPrice(int $articleDetailsId, string $customerGroupKey = 'EK', int $interval = 30): ?array {
+	public function getMinimumPrice(int $articleDetailsId, string $customerGroupKey = 'EK', int $interval = 30) {
 		$now = new \DateTimeImmutable();
 		$past = $now->sub(new \DateInterval(sprintf('P%dD', $interval + 1)));
 		
@@ -171,26 +171,13 @@ class ProductHelper {
 				]
 			])
 				->getSingleScalarResult();
-		} catch(\Exception $exception) {
-			if (! ($exception instanceof NoResultException)) {
-				$this->error($exception);
-			}
+		} catch (\Exception $exception) {
+			$this->error($exception);
 			
 			return NULL;
 		}
 		
-		if (NULL === $historyPrice) {
-			return NULL;
-		}
-		
-		$minPrice = (float)($historyPrice['price_net'] * (($historyPrice['tax'] + 100) / 100));
-		$netPrice = $this->roundFloat($historyPrice['price_net']);
-		
-		return [
-			'price' => $this->formatPrice($minPrice),
-			'price_net' => $netPrice,
-			'tax' => $historyPrice['tax']
-		];
+		return !is_null($historyPrice) ? (float)$historyPrice : NULL;
 	}
 	
 	/**

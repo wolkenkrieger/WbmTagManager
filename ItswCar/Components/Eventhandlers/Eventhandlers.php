@@ -12,6 +12,7 @@ namespace ItswCar\Components\Eventhandlers;
 
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Query\Expr\Join;
 use Google\Exception;
 use InvalidArgumentException;
 use ItswCar\Components\Google\ContentApi\ContentProduct;
@@ -19,8 +20,10 @@ use ItswCar\Components\Google\ContentApi\ContentSession;
 use ItswCar\Components\Services\Services;
 use ItswCar\Models\Car;
 use ItswCar\Models\GoogleMerchantCenterQueue;
+use ItswCar\Models\ArticlePrices as PriceHistory;
 use ItswCar\Traits\LoggingTrait;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Article\Price;
 use Shopware\Models\Attribute\OrderBasket;
 use Shopware\Models\Customer\Group;
 use Shopware\Models\Order\Basket;
@@ -376,20 +379,6 @@ class Eventhandlers {
 		if ($request->getActionName() === 'load') {
 			$view->extendsTemplate('backend/extend_form/view/main/fieldgrid.js');
 		}
-	}
-	
-	/**
-	 * @param $article
-	 * @return void
-	 */
-	private function setHistoricalMinPrice(&$article): void {
-		$minPrice = $article['price_numeric'];
-		
-		if (NULL !== ($prices = $this->productHelper->getMinimumPrice($article['articleDetailsID'], $article['pricegroup']))) {
-			$minPrice = $prices['price_net'];
-		}
-		
-		$article['historicalMinPrice'] = $minPrice;
 	}
 	
 	/**
@@ -825,6 +814,35 @@ class Eventhandlers {
 			}
 		}
 		return sprintf('Directory %s NOT EXISTS!', $saveFolder);
+	}
+	
+	/**
+	 * @param \Shopware_Components_Cron_CronJob $cronJob
+	 * @return string
+	 */
+	public function onCronSetMinPrice(\Shopware_Components_Cron_CronJob $cronJob): string {
+		$query = $this->modelManager->createQueryBuilder()
+			->select('prices')
+			->from(Price::class, 'prices')
+			->join(PriceHistory::class, 'history', Join::WITH, 'prices.articleDetailsId = history.articleDetailsId AND prices.customerGroupKey = history.customerGroupKey')
+			->getQuery();
+		
+		$result = $query->getResult();
+		$counter = 0;
+		
+		foreach($result as $price) {
+			try {
+				$minPrice = $this->productHelper->getMinimumPrice($price->getDetail()->getId(), $price->getCustomerGroup()->getKey());
+				$price->setRegulationPrice($minPrice);
+				$this->modelManager->persist($price);
+				$this->modelManager->flush($price);
+				$counter++;
+			} catch (\Exception $exception) {
+				$this->error($exception);
+			}
+		}
+		
+		return sprintf('%d of %d prices handled', $counter, count($result));
 	}
 	
 	/**

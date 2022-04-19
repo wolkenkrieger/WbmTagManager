@@ -24,4 +24,12 @@
 		<interval>300</interval>
 		<disableOnError>false</disableOnError>
 	</cronjob>
+	
+	<cronjob>
+		<name>ITSW - Set 30-Days-Minimum Price (PAngV)</name>
+		<action>Shopware_CronJob_ItswSetMinPrice</action>
+		<active>true</active>
+		<interval>86400</interval>
+		<disableOnError>false</disableOnError>
+	</cronjob>
 </cronjobs>

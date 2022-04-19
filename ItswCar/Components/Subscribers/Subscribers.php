@@ -61,6 +61,7 @@ class Subscribers implements SubscriberInterface {
 			'Shopware_CronJob_ItswHandleGoogleMerchantCenterQueue'          => 'onCronHandleGoogleMerchantCenterQueue',
 			'Shopware_CronJob_ItswCheckPrepaymentOrdersPaymentStatus'       => 'onCronHandleOrdersPaymentStatus',
 			'Shopware_CronJob_ItswCheckEbayTemplateFolder'                  => 'onCronCheckEbayTemplateFolder',
+			'Shopware_CronJob_ItswSetMinPrice'                              => 'onCronSetMinPrice',
 			
 			//'Theme_Compiler_Collect_Javascript_Files_FilterResult'          => 'onCollectJavascriptFilesFilterResult',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
@@ -159,6 +160,8 @@ class Subscribers implements SubscriberInterface {
 	
 	/**
 	 * @param \Enlight_Hook_HookArgs $hookArgs
+	 * @return void
+	 * @throws \Exception
 	 */
 	public function onAfterGetArticleById(\Enlight_Hook_HookArgs $hookArgs): void {
 		$eventHandler = new Eventhandler($this->pluginDir);
@@ -195,6 +198,8 @@ class Subscribers implements SubscriberInterface {
 	/**
 	 * @param \Shopware_Components_Cron_CronJob $cronJob
 	 * @return string
+	 * @throws \Doctrine\DBAL\Driver\Exception
+	 * @throws \Doctrine\DBAL\Exception
 	 */
 	public function onCronHandleGoogleMerchantCenterQueue(\Shopware_Components_Cron_CronJob $cronJob): string {
 		$eventHandler = new Eventhandler($this->pluginDir);
@@ -217,6 +222,15 @@ class Subscribers implements SubscriberInterface {
 	public function onCronCheckEbayTemplateFolder(\Shopware_Components_Cron_CronJob $cronCronJob): string {
 		$eventHandler = new Eventhandler($this->pluginDir);
 		return $eventHandler->onCronCheckEbayTemplateFolder($cronCronJob);
+	}
+	
+	/**
+	 * @param \Shopware_Components_Cron_CronJob $cronJob
+	 * @return void
+	 */
+	public function onCronSetMinPrice(\Shopware_Components_Cron_CronJob $cronJob) {
+		$eventHandler = new Eventhandler($this->pluginDir);
+		return $eventHandler->onCronSetMinPrice($cronJob);
 	}
 	
 	/**
