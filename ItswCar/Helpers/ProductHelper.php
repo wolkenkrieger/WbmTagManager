@@ -103,9 +103,12 @@ class ProductHelper {
 		
 		foreach($product->getMainDetail()->getPrices() as $price) {
 			$productPrice = $price->getPrice();
+			
+			/*
 			if ($discount = $price->getCustomerGroup()->getDiscount()) {
 				$productPrice -= ($productPrice / 100 * $discount);
 			}
+			*/
 			
 			$customerGroupKey = $price->getCustomerGroup()->getKey();
 			$articleDetailsId = $price->getDetail()->getId();
