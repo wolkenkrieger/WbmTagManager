@@ -291,8 +291,7 @@ class Eventhandlers {
 		$return = $hookArgs->getReturn();
 		$articles = $return['sArticles']??[];
 		foreach($articles as &$article) {
-			//$this->setPseudoprice($article);
-			//$this->setHistoricalMinPrice($article);
+			$this->setPseudoprice($article);
 			$url = $this->seoHelper->getArticleSeoUrl($article['articleID']);
 			$link = ($url) ?: $article['linkDetails'];
 			$article['linkDetails'] = $link;
@@ -307,8 +306,7 @@ class Eventhandlers {
 	 */
 	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs): void {
 		$article = $eventArgs->getReturn();
-		//$this->setPseudoprice($article);
-		//$this->setHistoricalMinPrice($article);
+		$this->setPseudoprice($article);
 		$url = $this->seoHelper->getArticleSeoUrl($article['articleID']);
 		$link = ($url) ?: $article['linkDetails'];
 		$article['linkDetails'] = $link;
@@ -342,8 +340,7 @@ class Eventhandlers {
 			]) : $article['articleName'])
 		]);
 		
-		//$this->setPseudoprice($article);
-		//$this->setHistoricalMinPrice($article);
+		$this->setPseudoprice($article);
 		
 		$article['seoTitle'] = implode(' ', [
 			$titlePart,
@@ -361,8 +358,6 @@ class Eventhandlers {
 		if (empty($article['keywords'])) {
 			$article['keywords'] = $this->getKeywords($article['description_long']);
 		}
-		
-		//echo "<pre>"; var_dump($article); echo "</pre>"; die;
 		
 		$hookArgs->setReturn($article);
 	}
@@ -535,6 +530,7 @@ class Eventhandlers {
 	 * @param $article
 	 */
 	public function setPseudoprice(&$article): void {
+		return;
 		if ($fakePrice = $article['attributes']['core']['fake_price'] ?? NULL) {
 			$article['has_pseudoprice'] = TRUE;
 			$article['pseudoprice'] = $fakePrice;
