@@ -100,7 +100,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		$this->fileName = $input->getOption('file')?? $this->fileName;
 		$this->offset = (int)$input->getOption('offset');
 		
-		$mediaCount = $this->countMedias($this->offset, $this->collectionsToUse, $this->collectionsToIgnore);
+		$mediaCount = $this->countMedias($this->collectionsToUse, $this->collectionsToIgnore);
 		$this->stack = $input->getOption('stack') ?? $mediaCount;
 		
 		$output->writeln('STACK: ' . $this->stack);
@@ -113,21 +113,20 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 	
 	
 	/**
-	 * @param int   $offset
 	 * @param array $useCollections
 	 * @param array $ignoreCollections
 	 * @return int
 	 * @throws \Doctrine\ORM\NoResultException
 	 * @throws \Doctrine\ORM\NonUniqueResultException
 	 */
-	private function countMedias(int $offset, array $useCollections = [], array $ignoreCollections = []): int {
+	private function countMedias(array $useCollections = [], array $ignoreCollections = []): int {
 		$this->mediaQuery = $this->createMediaQuery();
 		$this->extendMediaQuery($useCollections, $ignoreCollections);
 		
 		return (int)$this->mediaQuery
 			->select('COUNT(media.id)')
 			->getQuery()
-			->getSingleScalarResult() - $offset;
+			->getSingleScalarResult();
 	}
 	
 	/**
@@ -170,6 +169,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 	private function buildImageStack(OutputInterface $output, $mediaCount): void {
 		$progress = new ProgressBar($output, $mediaCount);
 		$progress->start();
+		$progress->advance($this->offset);
 		
 		for ($i = $this->offset; $i <= $mediaCount + $this->stack; $i += $this->stack) {
 			$stackMedia = $this->findByOffset($this->stack, $i,	$this->collectionsToUse, $this->collectionsToIgnore);
