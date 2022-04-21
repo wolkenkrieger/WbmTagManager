@@ -99,7 +99,6 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		$this->collectionsToIgnore = $input->getOption('ignoreCollection') ?? [];
 		$this->fileName = $input->getOption('file')?? $this->fileName;
 		$this->offset = $input->getOption('offset');
-		$this->mediaQuery = $this->createMediaQuery();
 		
 		$mediaCount = $this->countMedias($output, $this->collectionsToUse, $this->collectionsToIgnore);
 		$this->stack = $input->getOption('stack') ?? $mediaCount;
@@ -122,6 +121,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 	 * @throws \Doctrine\ORM\NonUniqueResultException
 	 */
 	private function countMedias(OutputInterface $output, array $useCollections = [], array $ignoreCollections = []): int {
+		$this->mediaQuery = $this->createMediaQuery();
 		$this->extendMediaQuery($useCollections, $ignoreCollections);
 		
 		return (int)$this->mediaQuery->select('COUNT(media.id)')->getQuery()->getSingleScalarResult();
@@ -149,6 +149,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 	 * @return float|int|mixed[]|string
 	 */
 	private function findByOffset($stack, $offset, array $useCollections = [], array $ignoreCollections = []) {
+		$this->mediaQuery = $this->createMediaQuery();
 		$this->extendMediaQuery($useCollections, $ignoreCollections);
 		
 		return $this->mediaQuery
