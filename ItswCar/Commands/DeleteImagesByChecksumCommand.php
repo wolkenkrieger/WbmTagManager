@@ -188,7 +188,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		
 		foreach ($stackMedia as $media) {
 			try {
-				$mediaHash = md5_file($this->mediaService->encode($media->getPath()));
+				$mediaHash = md5_file(Shopware()->DocPath() . $this->mediaService->encode($media->getPath()));
 				$fallBackHash = md5_file($this->docPath.$this->fileName);
 				
 				if ($mediaHash === $fallBackHash) {
