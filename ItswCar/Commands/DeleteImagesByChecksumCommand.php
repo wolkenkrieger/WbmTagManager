@@ -98,7 +98,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		$this->collectionsToUse = $input->getOption('setCollection') ?? [];
 		$this->collectionsToIgnore = $input->getOption('ignoreCollection') ?? [];
 		$this->fileName = $input->getOption('file')?? $this->fileName;
-		$this->offset = $input->getOption('offset');
+		$this->offset = (int)$input->getOption('offset');
 		
 		$mediaCount = $this->countMedias($output, $this->collectionsToUse, $this->collectionsToIgnore);
 		$this->stack = $input->getOption('stack') ?? $mediaCount;
@@ -188,20 +188,25 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		
 		foreach ($stackMedia as $media) {
 			try {
-				$mediaHash = md5_file(Shopware()->DocPath() . $this->mediaService->encode($media->getPath()));
-				$fallBackHash = md5_file($this->docPath.$this->fileName);
+				$mediaSize = $media->getFileSize();
+				$fallBackSize = filesize($this->docPath.$this->fileName);
 				
-				if ($mediaHash === $fallBackHash) {
-					if ($album) {
-						$media->setAlbum($album);
-						$media->setAlbumId(Album::ALBUM_GARBAGE);
+				if ($mediaSize === $fallBackSize) {
+					$mediaHash = md5_file(Shopware()->DocPath() . $this->mediaService->encode($media->getPath()));
+					$fallBackHash = md5_file($this->docPath.$this->fileName);
+					
+					if ($mediaHash === $fallBackHash) {
+						if ($album) {
+							$media->setAlbum($album);
+							$media->setAlbumId(Album::ALBUM_GARBAGE);
+						}
+						
+						$this->createThumbnailsForMovedMedia($media);
+						
+						$this->modelManager->persist($media);
+						$this->modelManager->flush();
+						$this->modelManager->flush();
 					}
-					
-					$this->createThumbnailsForMovedMedia($media);
-					
-					$this->modelManager->persist($media);
-					$this->modelManager->flush();
-					$this->modelManager->flush();
 				}
 				
 				$progress->advance();
