@@ -100,7 +100,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		$this->fileName = $input->getOption('file')?? $this->fileName;
 		$this->offset = (int)$input->getOption('offset');
 		
-		$mediaCount = $this->countMedias($output, $this->collectionsToUse, $this->collectionsToIgnore);
+		$mediaCount = $this->countMedias($this->offset, $this->collectionsToUse, $this->collectionsToIgnore);
 		$this->stack = $input->getOption('stack') ?? $mediaCount;
 		
 		$output->writeln('STACK: ' . $this->stack);
@@ -113,18 +113,21 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 	
 	
 	/**
-	 * @param \Symfony\Component\Console\Output\OutputInterface $output
-	 * @param array                                             $useCollections
-	 * @param array                                             $ignoreCollections
+	 * @param int   $offset
+	 * @param array $useCollections
+	 * @param array $ignoreCollections
 	 * @return int
 	 * @throws \Doctrine\ORM\NoResultException
 	 * @throws \Doctrine\ORM\NonUniqueResultException
 	 */
-	private function countMedias(OutputInterface $output, array $useCollections = [], array $ignoreCollections = []): int {
+	private function countMedias(int $offset, array $useCollections = [], array $ignoreCollections = []): int {
 		$this->mediaQuery = $this->createMediaQuery();
 		$this->extendMediaQuery($useCollections, $ignoreCollections);
 		
-		return (int)$this->mediaQuery->select('COUNT(media.id)')->getQuery()->getSingleScalarResult();
+		return (int)$this->mediaQuery
+			->select('COUNT(media.id)')
+			->getQuery()
+			->getSingleScalarResult() - $offset;
 	}
 	
 	/**
