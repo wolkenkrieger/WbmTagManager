@@ -701,8 +701,9 @@ class Eventhandlers {
 					throw new \Exception(sprintf('Product by id "%d" not found', $item->getArticleId()));
 				}
 				
-				$productHelper = Shopware()->Container()->get('itsw.helper.product');
-				//$productHelper->setProductFakePrice($product);
+				if (!$product->getImages()->count()) {
+					$this->error(sprintf('Product with SKU "%s" has no picture', $product->getMainDetail()->getNumber()));
+				}
 			} catch(\Exception $exception) {
 				$this->error($exception);
 				continue;

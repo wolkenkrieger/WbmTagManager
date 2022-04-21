@@ -231,7 +231,7 @@ class ContentProduct {
 			$product->setAdditionalImageLinks($productImageUrls);
 		}
 		
-		if (!$this->product->getActive()) {
+		if (!$this->product->getActive() || !count($productImageUrls)) {
 			$customAttribute = new Google_Service_ShoppingContent_CustomAttribute();
 			$customAttribute->setName('active');
 			$customAttribute->setValue(FALSE);
