@@ -110,7 +110,11 @@ class ContentProduct {
 		$productImageUrls = [];
 		
 		foreach($this->product->getImages() as $image) {
-			$productImageUrls[] = $this->mediaService->getUrl($image->getMedia()->getPath());
+			try {
+				$productImageUrls[] = $this->mediaService->getUrl($image->getMedia()->getPath());
+			} catch (\Exception $exception) {
+				$this->error($exception);
+			}
 		}
 		
 		$productAvailability = $this->product->getMainDetail()->getInStock()? 'auf Lager' : 'nicht auf Lager';

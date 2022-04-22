@@ -169,7 +169,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 	private function buildImageStack(OutputInterface $output, $mediaCount): void {
 		$progress = new ProgressBar($output, $mediaCount);
 		$progress->start();
-		$progress->advance($this->offset);
+		$progress->setProgress($this->offset);
 		
 		for ($i = $this->offset; $i <= $mediaCount + $this->stack; $i += $this->stack) {
 			$stackMedia = $this->findByOffset($this->stack, $i,	$this->collectionsToUse, $this->collectionsToIgnore);
