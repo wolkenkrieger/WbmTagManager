@@ -206,7 +206,8 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 	private function handleImagesByStack(?Album $album, string $fallbackHash, int $fallbackSize, OutputInterface $output, $stackMedia, ProgressBar $progress): void {
 		foreach ($stackMedia as $media) {
 			try {
-				$mediaSize = $media->getFileSize();
+				//$mediaSize = $media->getFileSize();
+				$mediaSize = filesize(Shopware()->DocPath() . $this->mediaService->encode($media->getPath()));
 				
 				if ($mediaSize === $fallbackSize) {
 					$mediaHash = md5_file(Shopware()->DocPath() . $this->mediaService->encode($media->getPath()));
