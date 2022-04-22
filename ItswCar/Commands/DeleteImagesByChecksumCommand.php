@@ -131,6 +131,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		return (int)$this->mediaQuery
 			->select('COUNT(media.id)')
 			->getQuery()
+			->disableResultCache()
 			->getSingleScalarResult();
 	}
 	
@@ -163,6 +164,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 			->setFirstResult($offset)
 			->setMaxResults($stack)
 			->getQuery()
+			->disableResultCache()
 			->getResult();
 	}
 	
@@ -182,8 +184,11 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		$album = Shopware()->Container()->get(ModelManager::class)->getRepository(Album::class)->find(Album::ALBUM_GARBAGE);
 		
 		for ($i = $this->offset; $i <= $mediaCount + $this->stack; $i += $this->stack) {
+			@gc_disable();
 			$stackMedia = $this->findByOffset($this->stack, $i,	$this->collectionsToUse, $this->collectionsToIgnore);
 			$this->handleImagesByStack($album, $fallbackHash, $fallbackSize, $output, $stackMedia, $progress);
+			@gc_enable();
+			@gc_collect_cycles();
 		}
 		
 		$progress->finish();
