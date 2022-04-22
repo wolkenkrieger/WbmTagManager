@@ -47,6 +47,9 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 	/** @var int  */
 	private int $offset;
 	
+	/** @var bool  */
+	private bool $createThumbnails;
+	
 	/** @var \Doctrine\ORM\QueryBuilder  */
 	private QueryBuilder $mediaQuery;
 	
@@ -75,7 +78,9 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 			->addOption('offset', 'o', InputOption::VALUE_OPTIONAL, 'process amount per iteration', 0)
 			->addOption('setCollection', 'c', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
 				'only search medias for specified collection. Example: `itsw:media:deletefallback -c 12`')
-			->addOption('ignoreCollection', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'ignores specified collection');
+			->addOption('ignoreCollection', 'i', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'ignores specified collection')
+			->addOption('createThumbnails', 't', InputOption::VALUE_OPTIONAL, 'create album thumbnails', 0)
+		;
 	}
 	
 	/**
@@ -102,6 +107,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		$this->collectionsToIgnore = $input->getOption('ignoreCollection') ?? [];
 		$this->fileName = $input->getOption('file')?? $this->fileName;
 		$this->offset = (int)$input->getOption('offset');
+		$this->createThumbnails = (bool)$input->getOption('createThumbnails');
 		
 		$mediaCount = $this->countMedias($this->collectionsToUse, $this->collectionsToIgnore);
 		$this->stack = $input->getOption('stack') ? (int)$input->getOption('stack') :  $mediaCount;
@@ -216,9 +222,14 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 						if ($album) {
 							$media->setAlbum($album);
 							$media->setAlbumId(Album::ALBUM_GARBAGE);
+							
+							if ($this->createThumbnails) {
+								$this->createThumbnailsForMovedMedia($media, $album);
+							}
 						}
 						
-						$this->createThumbnailsForMovedMedia($media);
+						
+						
 						$this->modelManager->persist($media);
 						$this->modelManager->flush();
 					}
@@ -231,17 +242,13 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 	}
 	
 	/**
-	 * @throws Exception
+	 * @param \Shopware\Models\Media\Media      $media
+	 * @param \Shopware\Models\Media\Album|null $album
+	 * @return void
 	 */
-	private function createThumbnailsForMovedMedia(Media $media) {
-		$albumRepository = Shopware()->Container()->get(ModelManager::class)->getRepository(Album::class);
-		
-		/** @var Album|null $album */
-		$album = $albumRepository->find($media->getAlbumId());
-		if ($album) {
-			$media->removeAlbumThumbnails($album->getSettings()->getThumbnailSize(), $media->getFileName());
-			$media->createAlbumThumbnails($album);
-		}
+	private function createThumbnailsForMovedMedia(Media $media, ?Album $album): void {
+		$media->removeAlbumThumbnails($album->getSettings()->getThumbnailSize(), $media->getFileName());
+		$media->createAlbumThumbnails($album);
 	}
 	
 	/**
