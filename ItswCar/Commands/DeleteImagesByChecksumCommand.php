@@ -114,8 +114,12 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		
 		$output->writeln('STACK: ' . $this->stack);
 		$output->writeln('OFFSET: ' . $this->offset);
+		$output->writeln('CREATE THUMBNAILS: ' . ($this->createThumbnails? 'TRUE' : 'FALSE'));
+		$output->writeln('');
 		
 		$this->buildImageStack($output, $mediaCount);
+		
+		$output->writeln('');
 		
 		@ini_set('memory_limit', $memoryLimit);
 		
@@ -212,7 +216,6 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 	private function handleImagesByStack(?Album $album, string $fallbackHash, int $fallbackSize, OutputInterface $output, $stackMedia, ProgressBar $progress): void {
 		foreach ($stackMedia as $media) {
 			try {
-				//$mediaSize = $media->getFileSize();
 				$mediaSize = filesize(Shopware()->DocPath() . $this->mediaService->encode($media->getPath()));
 				
 				if ($mediaSize === $fallbackSize) {
@@ -227,8 +230,6 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 								$this->createThumbnailsForMovedMedia($media, $album);
 							}
 						}
-						
-						
 						
 						$this->modelManager->persist($media);
 						$this->modelManager->flush();
