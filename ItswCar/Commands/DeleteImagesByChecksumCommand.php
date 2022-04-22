@@ -101,7 +101,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		$this->offset = (int)$input->getOption('offset');
 		
 		$mediaCount = $this->countMedias($this->collectionsToUse, $this->collectionsToIgnore);
-		$this->stack = $input->getOption('stack') ?? $mediaCount;
+		$this->stack = $input->getOption('stack') ? (int)$input->getOption('stack') :  $mediaCount;
 		
 		$output->writeln('STACK: ' . $this->stack);
 		$output->writeln('OFFSET: ' . $this->offset);
