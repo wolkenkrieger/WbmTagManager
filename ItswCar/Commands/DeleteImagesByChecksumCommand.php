@@ -95,6 +95,9 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 	 * @throws \Doctrine\ORM\NonUniqueResultException
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output): int {
+		$memoryLimit = @ini_get('memory_limit');
+		@ini_set('memory_limit', '-1');
+		
 		$this->collectionsToUse = $input->getOption('setCollection') ?? [];
 		$this->collectionsToIgnore = $input->getOption('ignoreCollection') ?? [];
 		$this->fileName = $input->getOption('file')?? $this->fileName;
@@ -107,6 +110,8 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		$output->writeln('OFFSET: ' . $this->offset);
 		
 		$this->buildImageStack($output, $mediaCount);
+		
+		ini_set('memory_limit', $memoryLimit);
 		
 		return 0;
 	}
