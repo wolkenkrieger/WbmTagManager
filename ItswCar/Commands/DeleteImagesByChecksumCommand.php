@@ -111,7 +111,7 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		
 		$this->buildImageStack($output, $mediaCount);
 		
-		ini_set('memory_limit', $memoryLimit);
+		@ini_set('memory_limit', $memoryLimit);
 		
 		return 0;
 	}
@@ -175,50 +175,49 @@ class DeleteImagesByChecksumCommand extends ShopwareCommand {
 		$progress = new ProgressBar($output, $mediaCount);
 		$progress->start();
 		$progress->setProgress($this->offset);
+		$fallbackSize = filesize($this->docPath.$this->fileName);
+		$fallbackHash = md5_file($this->docPath.$this->fileName);
+		
+		/** @var Album|null $album */
+		$album = Shopware()->Container()->get(ModelManager::class)->getRepository(Album::class)->find(Album::ALBUM_GARBAGE);
 		
 		for ($i = $this->offset; $i <= $mediaCount + $this->stack; $i += $this->stack) {
 			$stackMedia = $this->findByOffset($this->stack, $i,	$this->collectionsToUse, $this->collectionsToIgnore);
-			$this->handleImagesByStack($output, $stackMedia, $progress);
+			$this->handleImagesByStack($album, $fallbackHash, $fallbackSize, $output, $stackMedia, $progress);
 		}
 		
 		$progress->finish();
 	}
 	
 	/**
+	 * @param \Shopware\Models\Media\Album|null                 $album
+	 * @param string                                            $fallbackHash
+	 * @param int                                               $fallbackSize
 	 * @param \Symfony\Component\Console\Output\OutputInterface $output
 	 * @param                                                   $stackMedia
 	 * @param \Symfony\Component\Console\Helper\ProgressBar     $progress
 	 * @return void
 	 */
-	private function handleImagesByStack(OutputInterface $output, $stackMedia, ProgressBar $progress): void {
-		/** @var Album|null $album */
-		$album = Shopware()->Container()->get(ModelManager::class)->getRepository(Album::class)->find(Album::ALBUM_GARBAGE);
-		
+	private function handleImagesByStack(?Album $album, string $fallbackHash, int $fallbackSize, OutputInterface $output, $stackMedia, ProgressBar $progress): void {
 		foreach ($stackMedia as $media) {
 			try {
 				$mediaSize = $media->getFileSize();
-				$fallBackSize = filesize($this->docPath.$this->fileName);
 				
-				if ($mediaSize === $fallBackSize) {
+				if ($mediaSize === $fallbackSize) {
 					$mediaHash = md5_file(Shopware()->DocPath() . $this->mediaService->encode($media->getPath()));
-					$fallBackHash = md5_file($this->docPath.$this->fileName);
 					
-					if ($mediaHash === $fallBackHash) {
+					if ($mediaHash === $fallbackHash) {
 						if ($album) {
 							$media->setAlbum($album);
 							$media->setAlbumId(Album::ALBUM_GARBAGE);
 						}
 						
 						$this->createThumbnailsForMovedMedia($media);
-						
 						$this->modelManager->persist($media);
-						$this->modelManager->flush();
 						$this->modelManager->flush();
 					}
 				}
-				
 				$progress->advance();
-				
 			} catch (Throwable $e) {
 				$output->writeln($media->getPath() . ' => ' . $e->getMessage());
 			}
