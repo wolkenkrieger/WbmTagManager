@@ -11,6 +11,7 @@
 		<parameter key="itswcar.commands.links_importer_class">ItswCar\Commands\ArticleCarLinksImporterCommand</parameter>
 		<parameter key="itswcar.commands.rebuild_seo_index_class">ItswCar\Commands\RebuildSeoIndexCommand</parameter>
 		<parameter key="itswcar.commands.delete_images_by_checksum_class">ItswCar\Commands\DeleteImagesByChecksumCommand</parameter>
+		<parameter key="itswcar.commands.media_unlink_class">ItswCar\Commands\MediaUnlinkCommand</parameter>
     </parameters>
 	
 	<services>
@@ -48,6 +49,13 @@
 			<argument type="service" id="models" />
 			<argument type="service" id="shopware_media.media_service" />
 			<tag name="console.command" command="itsw:media:delete:bychecksum" />
+		</service>
+		
+		<service id="itswcar.commands.media_unlink_command"
+				 class="%itswcar.commands.media_unlink_class%">
+			<argument type="service" id="models" />
+			<argument type="service" id="shopware_media.media_service" />
+			<tag name="console.command" command="itsw:media:unlink" />
 		</service>
 	</services>
 </container>
