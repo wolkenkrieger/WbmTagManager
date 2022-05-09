@@ -18,7 +18,7 @@ class Shopware_Controllers_Api_ExtendedArticles extends Shopware_Controllers_Api
 	 */
 	public function __construct($extendedArticle = NULL) {
 		parent::__construct();
-		$this->resource = $extendedArticle ?: Shopware()->Container()->get('itswcar.resource.extendedarticle');
+		$this->resource = $extendedArticle ?: Shopware()->Container()->get('itswcar.api.resource.extendedarticle');
 	}
 	
 	/**
