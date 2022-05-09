@@ -32,14 +32,9 @@ class ContentProduct {
 	/** @var string  */
 	protected const TARGET_COUNTRY_DE = 'DE';
 	
-	/** @var string  */
-	protected const TARGET_COUNTRY_CH = 'CH';
-	
-	/** @var string  */
-	protected const TARGET_COUNTRY_AT = 'AT';
-	
 	/** @var string[]  */
-	protected const TARGET_COUNTRIES = ['DE', 'CH', 'AT'];
+	//protected const TARGET_COUNTRIES = ['DE', 'CH', 'AT'];
+	protected const TARGET_COUNTRIES = ['DE'];
 	
 	/** @var string  */
 	protected const DEFAULT_DISPATCH = 'DHL';

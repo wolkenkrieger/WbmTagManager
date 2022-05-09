@@ -111,9 +111,10 @@ class MediaUnlinkCommand extends ShopwareCommand {
 		$output->writeln('');
 		$output->writeln('Step 1: Unlink non existent images from articles with at least 2 linked images');
 		if ($articleImagesCount = $this->countArticleImages(1)) {
-			$this->progress->start($articleImagesCount);
 			$stackSize = max($this->stack, $articleImagesCount);
 			$output->writeln('STACK: ' . $stackSize);
+			$this->progress->start($articleImagesCount);
+			
 			$count = 0;
 			foreach($this->buildQuery(1)->getQuery()->toIterable() as $articleImage) {
 				$found = FALSE;
@@ -163,9 +164,10 @@ class MediaUnlinkCommand extends ShopwareCommand {
 		$output->writeln('');
 		$output->writeln('Step 2: Unlink non existent images from articles with only 1 linked image');
 		if ($articleImagesCount = $this->countArticleImages(2)) {
-			$this->progress->start($articleImagesCount);
 			$stackSize = max($this->stack, $articleImagesCount);
 			$output->writeln('STACK: ' . $stackSize);
+			$this->progress->start($articleImagesCount);
+			
 			$count = 0;
 			
 			foreach($this->buildQuery(2)->getQuery()->toIterable() as $articleImage) {
@@ -198,13 +200,14 @@ class MediaUnlinkCommand extends ShopwareCommand {
 		$output->writeln('Optional Step 3: Check all linked images for physical existence');
 		
 		if ($articleImagesCount = $this->countArticleImages(3)) {
-			$count = 0;
-			$hits = 0;
 			$stackSize = max($this->stack, $articleImagesCount);
 			$output->writeln('STACK: ' . $stackSize);
 			
 			$this->progress->start($articleImagesCount);
+			
 			$toDelete = [];
+			$count = 0;
+			$hits = 0;
 			
 			foreach($this->buildQuery(3)->getQuery()->toIterable() as $articleImage) {
 				$found = FALSE;
