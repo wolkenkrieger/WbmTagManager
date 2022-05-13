@@ -108,7 +108,7 @@ class Eventhandlers {
 		$basketData = [];
 		if ($request->getActionName() === 'finish') {
 			$basketData = [];
-			$basket = $subject->View()->getAssign('sBasket');
+			$basket = $subject->View()->getAssign('sBasket') ?? [];
 			$basketData['shippingdate'] = $this->getShippingDate($basket);
 			$basketData['gtins'] = $this->getGTINs($basket);
 		}
@@ -462,7 +462,7 @@ class Eventhandlers {
 	 * @return int
 	 */
 	private function getMaxShippingTime(array $basket): int {
-		if ($this->isUnavailableProductInBasket($basket)) {
+		if (!$basket || $this->isUnavailableProductInBasket($basket)) {
 			$maxShippingTime = $this->configHelper->getValue('google_default_shipping_time_not_in_stock', 'ItswCar')?:14;
 			
 			return (int)$maxShippingTime;
@@ -959,7 +959,8 @@ class Eventhandlers {
 			'/address',
 			'/checkout',
 			'/api',
-			'/carmap'
+			'/carmap',
+			'/oncoamazonpay'
 		];
 		
 		foreach($stopWords as $stopWord) {
