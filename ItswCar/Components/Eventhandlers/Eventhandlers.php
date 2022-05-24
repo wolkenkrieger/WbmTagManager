@@ -106,8 +106,8 @@ class Eventhandlers {
 		$request = $actionEventArgs->getRequest();
 		
 		$basketData = [];
+		
 		if ($request->getActionName() === 'finish') {
-			$basketData = [];
 			$basket = $subject->View()->getAssign('sBasket') ?? [];
 			$basketData['shippingdate'] = $this->getShippingDate($basket);
 			$basketData['gtins'] = $this->getGTINs($basket);
