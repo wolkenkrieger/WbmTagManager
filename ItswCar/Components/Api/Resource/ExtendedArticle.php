@@ -313,23 +313,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		
 		$product = new ProductModel();
 		
-		$translations = [];
-		if (!empty($params['translations'])) {
-			$translations = $params['translations'];
-			unset($params['translations']);
-		}
+		$translations = $params['translations'] ?? [];
+		$carLinks = $params['carLinks'] ?? [];
+		$googleContentApi = $params['google_content_api'] ?? TRUE;
 		
-		$carLinks = [];
-		if (!empty($params['carLinks'])) {
-			$carLinks = $params['carLinks'];
-			unset($params['carLinks']);
-		}
-		
-		$googleContentApi = FALSE;
-		if (isset($params['google_content_api']) && $params['google_content_api'] === TRUE) {
-			$googleContentApi = TRUE;
-			unset($params['google_content_api']);
-		}
+		unset($params['translations'], $params['carLinks'], $params['google_content_api']);
 		
 		$params = $this->prepareAssociatedData($params, $product);
 		
@@ -439,23 +427,11 @@ class ExtendedArticle extends Resource implements BatchInterface {
 			throw new ApiException\NotFoundException(sprintf('Product by id "%d" not found', $id));
 		}
 		
-		$translations = [];
-		if (!empty($params['translations'])) {
-			$translations = $params['translations'];
-			unset($params['translations']);
-		}
+		$translations = $params['translations'] ?? [];
+		$carLinks = $params['carLinks'] ?? [];
+		$googleContentApi = $params['google_content_api'] ?? TRUE;
 		
-		$carLinks = [];
-		if (!empty($params['carLinks'])) {
-			$carLinks = $params['carLinks'];
-			unset($params['carLinks']);
-		}
-		
-		$googleContentApi = FALSE;
-		if (isset($params['google_content_api']) && $params['google_content_api'] === TRUE) {
-			$googleContentApi = TRUE;
-			unset($params['google_content_api']);
-		}
+		unset($params['translations'], $params['carLinks'], $params['google_content_api']);
 		
 		$params = $this->prepareAssociatedData($params, $product);
 		
