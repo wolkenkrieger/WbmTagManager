@@ -814,7 +814,7 @@ class Eventhandlers {
 	 */
 	public function onCronSetMinPrice(\Shopware_Components_Cron_CronJob $cronJob): string {
 		$offset = 0;
-		$limit = 100;
+		$limit = 5000;
 		$counter = 0;
 		$resultCount = 0;
 		
@@ -842,12 +842,10 @@ class Eventhandlers {
 		$counter = 0;
 		$query = $this->modelManager->createQueryBuilder()
 			->select('prices')
-			->distinct()
 			->from(Price::class, 'prices')
-			->join(PriceHistory::class, 'history', Join::WITH, 'prices.articleDetailsId = history.articleDetailsId AND prices.customerGroupKey = history.customerGroupKey')
+			#->join(PriceHistory::class, 'history', Join::WITH, 'prices.articleDetailsId = history.articleDetailsId AND prices.customerGroupKey = history.customerGroupKey')
 			->setMaxResults($limit)
 			->setFirstResult($offset)
-			->setCacheable(FALSE)
 			->getQuery();
 		
 		$result = $query->getResult();
@@ -858,14 +856,17 @@ class Eventhandlers {
 				$price->setRegulationPrice($minPrice);
 				$this->modelManager->persist($price);
 				$this->modelManager->flush($price);
-				$this->modelManager->clear(Price::class);
-				$price = NULL;
 				$counter++;
 			} catch (\Exception $exception) {
 				$this->error($exception);
 			}
 		}
 		
+		try {
+			$this->modelManager->clear(Price::class);
+		} catch(\Exception $exception) {
+			$this->error(($exception));
+		}
 		
 		return [
 			'counter' => $counter,
