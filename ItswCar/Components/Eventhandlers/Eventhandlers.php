@@ -819,39 +819,58 @@ class Eventhandlers {
 		$resultCount = 0;
 		
 		while (TRUE) {
-			$query = $this->modelManager->createQueryBuilder()
-				->select('prices')
-				->from(Price::class, 'prices')
-				->join(PriceHistory::class, 'history', Join::WITH, 'prices.articleDetailsId = history.articleDetailsId AND prices.customerGroupKey = history.customerGroupKey')
-				->setMaxResults($limit)
-				->setFirstResult($offset)
-				->setCacheable(FALSE)
-				->getQuery();
+			$return = $this->handleMinPrice($limit, $offset);
 			
-			$result = $query->getResult();
-			
-			if (!count($result)) {
+			if (!$return['resultCount']) {
 				break;
 			}
 			
 			$offset += $limit;
-			$resultCount += count($result);
-			
-			foreach($result as $price) {
-				try {
-					$minPrice = $this->productHelper->getMinimumPrice($price->getDetail()->getId(), $price->getCustomerGroup()->getKey());
-					$price->setRegulationPrice($minPrice);
-					$this->modelManager->persist($price);
-					$this->modelManager->flush($price);
-					$price = NULL;
-					$counter++;
-				} catch (\Exception $exception) {
-					$this->error($exception);
-				}
-			}
+			$resultCount += $return['resultCount'];
+			$counter += $return['counter'];
 		}
 		
 		return sprintf('%d of %d prices handled', $counter, $resultCount);
+	}
+	
+	/**
+	 * @param $limit
+	 * @param $offset
+	 * @return array
+	 */
+	private function handleMinPrice($limit, $offset): array {
+		$counter = 0;
+		$query = $this->modelManager->createQueryBuilder()
+			->select('prices')
+			->distinct()
+			->from(Price::class, 'prices')
+			->join(PriceHistory::class, 'history', Join::WITH, 'prices.articleDetailsId = history.articleDetailsId AND prices.customerGroupKey = history.customerGroupKey')
+			->setMaxResults($limit)
+			->setFirstResult($offset)
+			->setCacheable(FALSE)
+			->getQuery();
+		
+		$result = $query->getResult();
+		
+		foreach($result as $price) {
+			try {
+				$minPrice = $this->productHelper->getMinimumPrice($price->getDetail()->getId(), $price->getCustomerGroup()->getKey());
+				$price->setRegulationPrice($minPrice);
+				$this->modelManager->persist($price);
+				$this->modelManager->flush($price);
+				$this->modelManager->clear(Price::class);
+				$price = NULL;
+				$counter++;
+			} catch (\Exception $exception) {
+				$this->error($exception);
+			}
+		}
+		
+		
+		return [
+			'counter' => $counter,
+			'resultCount' => count($result)
+		];
 	}
 	
 	/**
