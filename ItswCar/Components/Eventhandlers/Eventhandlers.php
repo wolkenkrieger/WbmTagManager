@@ -843,7 +843,6 @@ class Eventhandlers {
 					$price->setRegulationPrice($minPrice);
 					$this->modelManager->persist($price);
 					$this->modelManager->flush($price);
-					$this->modelManager->clear($price);
 					$price = NULL;
 					$counter++;
 				} catch (\Exception $exception) {
