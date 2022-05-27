@@ -155,7 +155,7 @@ class ProductHelper {
 	 * @return float|null
 	 * @throws \Exception
 	 */
-	public function getMinimumPrice(int $articleDetailsId, string $customerGroupKey = 'EK', int $interval = 30) {
+	public function getMinimumPrice(int $articleDetailsId, string $customerGroupKey = 'EK', int $interval = 30): ?float {
 		$now = new \DateTimeImmutable();
 		$past = $now->sub(new \DateInterval(sprintf('P%dD', $interval + 1)));
 		
@@ -173,6 +173,7 @@ class ProductHelper {
 					'prices.date >' => $past
 				]
 			])
+				->setCacheable(FALSE)
 				->getSingleScalarResult();
 		} catch (\Exception $exception) {
 			$this->error($exception);

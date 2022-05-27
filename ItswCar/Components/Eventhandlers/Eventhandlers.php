@@ -813,28 +813,46 @@ class Eventhandlers {
 	 * @return string
 	 */
 	public function onCronSetMinPrice(\Shopware_Components_Cron_CronJob $cronJob): string {
-		$query = $this->modelManager->createQueryBuilder()
-			->select('prices')
-			->from(Price::class, 'prices')
-			->join(PriceHistory::class, 'history', Join::WITH, 'prices.articleDetailsId = history.articleDetailsId AND prices.customerGroupKey = history.customerGroupKey')
-			->getQuery();
-		
-		$result = $query->getResult();
+		$offset = 0;
+		$limit = 100;
 		$counter = 0;
+		$resultCount = 0;
 		
-		foreach($result as $price) {
-			try {
-				$minPrice = $this->productHelper->getMinimumPrice($price->getDetail()->getId(), $price->getCustomerGroup()->getKey());
-				$price->setRegulationPrice($minPrice);
-				$this->modelManager->persist($price);
-				$this->modelManager->flush($price);
-				$counter++;
-			} catch (\Exception $exception) {
-				$this->error($exception);
+		while (TRUE) {
+			$query = $this->modelManager->createQueryBuilder()
+				->select('prices')
+				->from(Price::class, 'prices')
+				->join(PriceHistory::class, 'history', Join::WITH, 'prices.articleDetailsId = history.articleDetailsId AND prices.customerGroupKey = history.customerGroupKey')
+				->setMaxResults($limit)
+				->setFirstResult($offset)
+				->setCacheable(FALSE)
+				->getQuery();
+			
+			$result = $query->getResult();
+			
+			if (!count($result)) {
+				break;
+			}
+			
+			$offset += $limit;
+			$resultCount += count($result);
+			
+			foreach($result as $price) {
+				try {
+					$minPrice = $this->productHelper->getMinimumPrice($price->getDetail()->getId(), $price->getCustomerGroup()->getKey());
+					$price->setRegulationPrice($minPrice);
+					$this->modelManager->persist($price);
+					$this->modelManager->flush($price);
+					$this->modelManager->clear($price);
+					$price = NULL;
+					$counter++;
+				} catch (\Exception $exception) {
+					$this->error($exception);
+				}
 			}
 		}
 		
-		return sprintf('%d of %d prices handled', $counter, count($result));
+		return sprintf('%d of %d prices handled', $counter, $resultCount);
 	}
 	
 	/**
