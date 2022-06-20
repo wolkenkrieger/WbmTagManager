@@ -693,7 +693,7 @@ class Eventhandlers {
 				$product = $builder->getQuery()->getOneOrNullResult(self::HYDRATE_OBJECT);
 				
 				if (!$product) {
-					throw new \Exception(sprintf('Product by id "%d" not found', $item->getArticleId()));
+					throw new \RuntimeException(sprintf('Product by id "%d" not found', $item->getArticleId()));
 				}
 				
 				if (!$product->getImages()->count()) {
