@@ -697,7 +697,7 @@ class Eventhandlers {
 				}
 				
 				if (!$product->getImages()->count()) {
-					$this->error(sprintf('Product with SKU "%s" has no picture', $product->getMainDetail()->getNumber()));
+					$this->debug(sprintf('Product with SKU "%s" has no picture', $product->getMainDetail()->getNumber()));
 				}
 			} catch(\Exception $exception) {
 				$this->error($exception);
