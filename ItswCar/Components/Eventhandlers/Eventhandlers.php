@@ -589,7 +589,7 @@ class Eventhandlers {
 		$html = $this->_fixDescription($article['description_long'], $article['articleName']);
 		$article['description_long'] = $html?:$article['description_long'];
 		$html = $this->_fixDescription($article['description'], $article['articleName']);
-		$article['description_long'] = $html?:$article['description'];
+		$article['description'] = $html?:$article['description'];
 	}
 	
 	/**
