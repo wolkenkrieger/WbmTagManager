@@ -504,7 +504,8 @@ class Repository extends ModelRepository {
 			if (is_object($car)) {
 				return [
 					'description' => sprintf('%s %s %s %d PS', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay(), $car->getPs()),
-					'title' => sprintf('%s %s %s - %d PS - %s ', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay(), $car->getPs(), $car->getBuildFrom()->format('Y'))
+					'title' => sprintf('%s %s %s - %d PS - %s ', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay(), $car->getPs(), $car->getBuildFrom()->format('Y')),
+					'shortTitle' => sprintf('%s %s %s', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay())
 				];
 			}
 		} catch (NonUniqueResultException $nonUniqueResultException) {}

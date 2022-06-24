@@ -291,7 +291,7 @@ class Eventhandlers {
 		$return = $hookArgs->getReturn();
 		$articles = $return['sArticles']??[];
 		foreach($articles as &$article) {
-			$this->setPseudoprice($article);
+			//$this->setPseudoprice($article);
 			$url = $this->seoHelper->getArticleSeoUrl($article['articleID']);
 			$link = ($url) ?: $article['linkDetails'];
 			$article['linkDetails'] = $link;
@@ -306,7 +306,7 @@ class Eventhandlers {
 	 */
 	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs): void {
 		$article = $eventArgs->getReturn();
-		$this->setPseudoprice($article);
+		//$this->setPseudoprice($article);
 		$url = $this->seoHelper->getArticleSeoUrl($article['articleID']);
 		$link = ($url) ?: $article['linkDetails'];
 		$article['linkDetails'] = $link;
@@ -327,6 +327,7 @@ class Eventhandlers {
 	 */
 	public function onAfterGetArticleById(\Enlight_Hook_HookArgs $hookArgs): void {
 		$article = $hookArgs->getReturn();
+		$sessionData = $this->sessionHelper->getSessionData();
 		
 		$titlePart = implode(' ', [
 			$article['ordernumber'],
@@ -337,10 +338,11 @@ class Eventhandlers {
 			]) ? implode(' ', [
 				$article['supplierName'],
 				$article['articleName']
-			]) : $article['articleName'])
+			]) : $article['articleName']),
+			($sessionData['shortTitle']? sprintf('für %s', $sessionData['shortTitle']) : '')
 		]);
 		
-		$this->setPseudoprice($article);
+		//$this->setPseudoprice($article);
 		
 		$article['seoTitle'] = implode(' ', [
 			$titlePart,

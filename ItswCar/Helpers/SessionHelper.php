@@ -20,6 +20,7 @@ class SessionHelper {
 	/**
 	 * @param array $data
 	 * @return array
+	 * @throws \Exception
 	 */
 	public function setSessionData(array $data = []): array {
 		$container = Shopware()->Container();
@@ -31,6 +32,7 @@ class SessionHelper {
 			'car'           => NULL,
 			'description'   => NULL,
 			'title'         => NULL,
+			'shortTitle'    => NULL,
 			'url'           => NULL,
 			'uuid'          => NULL,
 		];
@@ -40,8 +42,8 @@ class SessionHelper {
 		$seoHelper = $container->get('itsw.helper.seo');
 		
 		$sessionData = [];
-		if ($session->offsetExists('itsw-car-session-data')) {
-			$sessionData = $session->offsetGet('itsw-car-session-data');
+		if ($session->has('itsw-car-session-data')) {
+			$sessionData = $session->get('itsw-car-session-data');
 		}
 		
 		$data = array_merge($defaultData, $data);
@@ -52,6 +54,7 @@ class SessionHelper {
 		
 		$data['description'] = $viewData['description']??NULL;
 		$data['title'] = $viewData['title']??NULL;
+		$data['shortTitle'] = $viewData['shortTitle']??NULL;
 		$data['url'] = $seoHelper->getCarSeoUrl($data['manufacturer'], $data['model'], $data['car'])?:NULL;
 		
 		$session->offsetSet('itsw-car-session-data', $data);
@@ -100,6 +103,7 @@ class SessionHelper {
 	
 	/**
 	 * @return null[]
+	 * @throws \Exception
 	 */
 	public function getSessionData(): array {
 		$container = Shopware()->Container();
@@ -111,14 +115,15 @@ class SessionHelper {
 			'car'           => NULL,
 			'description'   => NULL,
 			'title'         => NULL,
+			'shortTitle'    => NULL,
 			'url'           => NULL,
 			'uuid'          => NULL,
 		];
 		
 		$session = $container->get('session');
 		
-		if ($session->offsetExists('itsw-car-session-data')) {
-			$sessionData = array_merge($sessionData, $session->offsetGet('itsw-car-session-data'));
+		if ($session->has('itsw-car-session-data')) {
+			$sessionData = array_merge($sessionData, $session->get('itsw-car-session-data'));
 		} else if ($cookieData = Shopware()->Front()->Request()->getCookie('itsw-car-session-data')) {
 			try {
 				$cookieSessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_IGNORE);
@@ -169,6 +174,7 @@ class SessionHelper {
 	
 	/**
 	 * @return array
+	 * @throws \Exception
 	 */
 	public function resetSession(): array {
 		try {
@@ -185,7 +191,7 @@ class SessionHelper {
 	 * @return mixed|null
 	 */
 	public function getUserId() {
-		$userId = Shopware()->Session()->offsetGet('sUserId');
+		$userId = Shopware()->Session()->get('sUserId');
 		return empty($userId) ? NULL : $userId;
 	}
 	
