@@ -293,7 +293,7 @@ class Eventhandlers {
 		$articles = $return['sArticles']??[];
 		foreach($articles as &$article) {
 			try {
-				$this->fixDescriptions($article);
+				$this->productHelper->fixDescriptions($article);
 			} catch(\Exception $exception) {
 				$this->error($exception);
 			}
@@ -314,7 +314,7 @@ class Eventhandlers {
 	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs): void {
 		$article = $eventArgs->getReturn();
 		try {
-			$this->fixDescriptions($article);
+			$this->productHelper->fixDescriptions($article);
 		} catch(\Exception $exception) {
 			$this->error($exception);
 		}
@@ -341,7 +341,7 @@ class Eventhandlers {
 		$sessionData = $this->sessionHelper->getSessionData();
 		
 		try {
-			$this->fixDescriptions($article);
+			$this->productHelper->fixDescriptions($article);
 		} catch(\Exception $exception) {
 			$this->error($exception);
 		}
@@ -541,55 +541,6 @@ class Eventhandlers {
 			'badgeposition' => $this->configHelper->getValue('google_badge_position', 'ItswCar'),
 			'surveyoptinstyle' => $this->configHelper->getValue('google_survey_opt_in_style', 'ItswCar')
 		]);
-	}
-	
-	/**
-	 * @param $description
-	 * @param $articleName
-	 * @return false|string
-	 * @throws \DOMException
-	 */
-	private function _fixDescription($description, $articleName) {
-		$dom = new \DOMDocument();
-		$dom->loadHTML(mb_convert_encoding($description, 'HTML-ENTITIES', 'UTF-8'));
-		$xPath = new \DOMXPath($dom);
-		
-		$nodes = $xPath->query('//li');
-		$oe = FALSE;
-		
-		foreach($nodes as $node) {
-			if (FALSE !== stripos($node->nodeValue, 'qualität')) {
-				$node->parentNode->removeChild($node);
-				if (FALSE !== stripos($node->nodeValue, 'erstausrüster')) {
-					$oe = TRUE;
-				}
-			}
-			
-			if (empty($node->nodeValue)) {
-				if ($nodes->length === 1) {
-					$node->nodeValue = $articleName;
-				} else {
-					$node->parentNode->removeChild($node);
-				}
-			}
-		}
-		
-		if ($nodes->count()) {
-			$nodes->item($nodes->length - 1)->appendChild($dom->createElement('li', sprintf('Zustand: Neuteil%s', $oe? ' in Erstausrüsterqualität': '')));
-		}
-		
-		return $dom->saveHTML();
-	}
-	
-	/**
-	 * @throws \DOMException
-	 */
-	private function fixDescriptions(&$article): void {
-		
-		$html = $this->_fixDescription($article['description_long'], $article['articleName']);
-		$article['description_long'] = $html?:$article['description_long'];
-		$html = $this->_fixDescription($article['description'], $article['articleName']);
-		$article['description'] = $html?:$article['description'];
 	}
 	
 	/**

@@ -243,4 +243,67 @@ class ProductHelper {
 		
 		return $price;
 	}
+	
+	/**
+	 * @throws \DOMException
+	 */
+	public function fixDescriptions(&$article): void {
+		
+		$name = $article['name']??$article['articleName']??'';
+		
+		if (isset($article['description'])) {
+			$html = $this->fixDescription($article['description'], $name);
+			$article['description'] = $html?:$article['description'];
+		}
+		
+		if (isset($article['descriptionLong'])) {
+			$html = $this->fixDescription($article['descriptionLong'], $name);
+			$article['descriptionLong'] = $html?:$article['descriptionLong'];
+		}
+		
+		if (isset($article['description_long'])) {
+			$html = $this->fixDescription($article['description_long'], $name);
+			$article['description_long'] = $html?:$article['description_long'];
+		}
+		
+	}
+	
+	/**
+	 * @param $description
+	 * @param $articleName
+	 * @return false|string
+	 * @throws \DOMException
+	 */
+	public function fixDescription($description, $articleName) {
+		$dom = new \DOMDocument();
+		$dom->loadHTML(mb_convert_encoding($description, 'HTML-ENTITIES', 'UTF-8'));
+		
+		$xPath = new \DOMXPath($dom);
+		
+		$nodes = $xPath->query('//li');
+		$oe = FALSE;
+		
+		foreach($nodes as $node) {
+			if (FALSE !== stripos($node->nodeValue, 'qualität')) {
+				$node->parentNode->removeChild($node);
+				if (FALSE !== stripos($node->nodeValue, 'erstausrüster')) {
+					$oe = TRUE;
+				}
+			}
+			
+			if (empty($node->nodeValue)) {
+				if ($nodes->length === 1) {
+					$node->nodeValue = $articleName;
+				} else {
+					$node->parentNode->removeChild($node);
+				}
+			}
+		}
+		
+		if ($nodes->count()) {
+			$nodes->item($nodes->length - 1)->parentNode->appendChild($dom->createElement('li', sprintf('Zustand: Neuteil%s', $oe? ' in Erstausrüsterqualität': '')));
+		}
+		
+		return stristr(stristr($dom->saveHTML(), '<ul>'), '</body>', TRUE);
+	}
 }

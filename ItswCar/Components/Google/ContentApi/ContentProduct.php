@@ -63,6 +63,9 @@ class ContentProduct {
 	/** @var \ItswCar\Helpers\ConfigHelper|mixed|object|\Symfony\Component\DependencyInjection\Container|null  */
 	private $configHelper;
 	
+	/** @var \ItswCar\Helpers\ProductHelper|mixed|object|\Symfony\Component\DependencyInjection\Container|null  */
+	private $productHelper;
+	
 	
 	/**
 	 * @param \Shopware\Models\Article\Article                          $product
@@ -80,6 +83,7 @@ class ContentProduct {
 		$this->mediaService = Shopware()->Container()->get('shopware_media.media_service');
 		$this->textHelper = Shopware()->Container()->get('itsw.helper.text');
 		$this->configHelper = Shopware()->Container()->get('itsw.helper.config');
+		$this->productHelper = Shopware()->Container()->get('itsw.helper.product');
 		
 		if (is_null($session)) {
 			$this->session = new ContentSession($config, $this->shopID);
@@ -143,6 +147,12 @@ class ContentProduct {
 			'</li></ul>'
 		],
 			$this->textHelper->filterBadWords($this->product->getDescriptionLong()));
+		
+		try {
+			$description = $this->productHelper->fixDescription($description, $this->product->getName());
+		} catch (\Exception $exception) {
+			$this->error($exception);
+		}
 		
 		$productMpn = $this->product->getMainDetail()->getSupplierNumber()? : 'ATW-'.$this->product->getMainDetail()->getId();
 		

@@ -322,6 +322,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		$params = $this->prepareAssociatedData($params, $product);
 		
 		$this->filterBadWords($params);
+		$this->productHelper->fixDescriptions($params);
 		
 		$product->fromArray($params);
 		
@@ -436,6 +437,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		$params = $this->prepareAssociatedData($params, $product);
 		
 		$this->filterBadWords($params);
+		$this->productHelper->fixDescriptions($params);
 		
 		$product->fromArray($params);
 		$violations = $this->getManager()->validate($product);
