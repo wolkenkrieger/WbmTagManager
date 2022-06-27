@@ -304,6 +304,8 @@ class ProductHelper {
 			$nodes->item($nodes->length - 1)->parentNode->appendChild($dom->createElement('li', sprintf('Zustand: Neuteil%s', $oe? ' in Erstausrüsterqualität': '')));
 		}
 		
-		return stristr(stristr($dom->saveHTML(), '<ul>'), '</body>', TRUE);
+		
+		return $dom->saveHTML();
+		//return stristr(stristr($dom->saveHTML(), '<ul>'), '</body>', TRUE);
 	}
 }
