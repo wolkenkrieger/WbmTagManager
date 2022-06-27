@@ -305,7 +305,10 @@ class ProductHelper {
 		}
 		
 		
-		return $dom->saveHTML();
-		//return stristr(stristr($dom->saveHTML(), '<ul>'), '</body>', TRUE);
+		if ((FALSE !== ($html = $dom->saveHTML())) && (FALSE !== ($html = stristr($html, '<ul>'))) && FALSE !== ($html = stristr($html, '</body>', TRUE))) {
+			return $html;
+		}
+		
+		return $description;
 	}
 }
