@@ -282,13 +282,17 @@ class ProductHelper {
 		
 		$nodes = $xPath->query('//li');
 		$oe = FALSE;
+		$add = TRUE;
 		
 		foreach($nodes as $node) {
-			if (FALSE !== stripos($node->nodeValue, 'qualität')) {
-				$node->parentNode->removeChild($node);
+			if (FALSE !== stripos($node->nodeValue, 'qualität:')) {
 				if (FALSE !== stripos($node->nodeValue, 'erstausrüster')) {
 					$oe = TRUE;
 				}
+				$node->parentNode->removeChild($node);
+			}
+			if (FALSE !== stripos($node->nodeValue, 'zustand:')) {
+				$add = FALSE;
 			}
 			
 			if (empty($node->nodeValue)) {
@@ -300,12 +304,12 @@ class ProductHelper {
 			}
 		}
 		
-		if ($nodes->count()) {
+		if ($add && $nodes->count()) {
 			$nodes->item($nodes->length - 1)->parentNode->appendChild($dom->createElement('li', sprintf('Zustand: Neuteil%s', $oe? ' in Erstausrüsterqualität': '')));
 		}
 		
 		
-		if ((FALSE !== ($html = $dom->saveHTML())) && (FALSE !== ($html = stristr($html, '<ul>'))) && FALSE !== ($html = stristr($html, '</body>', TRUE))) {
+		if ((FALSE !== ($html = $dom->saveHTML())) && (FALSE !== ($html = stristr($html, '<ul>'))) && (FALSE !== ($html = stristr($html, '</body>', TRUE)))) {
 			return $html;
 		}
 		
