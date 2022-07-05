@@ -141,11 +141,7 @@ class ContentProduct {
 		
 		$description = $this->product->getDescriptionLong();
 		
-		try {
-			$description = $this->productHelper->fixDescription($description, $this->product->getName());
-		} catch (\Exception $exception) {
-			$this->error($exception);
-		}
+		
 		
 		$description = str_ireplace([
 			'</ul><br><br><div id="description_oe">',
@@ -156,7 +152,11 @@ class ContentProduct {
 		],
 			$this->textHelper->filterBadWords($description));
 		
-		
+		try {
+			$description = $this->productHelper->fixDescription($description, $this->product->getName());
+		} catch (\Exception $exception) {
+			$this->error($exception);
+		}
 		
 		$productMpn = $this->product->getMainDetail()->getSupplierNumber()? : 'ATW-'.$this->product->getMainDetail()->getId();
 		
