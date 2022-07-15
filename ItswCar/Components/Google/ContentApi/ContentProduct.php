@@ -138,6 +138,8 @@ class ContentProduct {
 		
 		if (empty($parentCategories)) {
 			$parentCategories = min($categories);
+		} else {
+			$parentCategories = min($parentCategories);
 		}
 		
 		$categories = max($categories);
