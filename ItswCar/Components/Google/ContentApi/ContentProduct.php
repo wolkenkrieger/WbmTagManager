@@ -281,13 +281,8 @@ class ContentProduct {
 		$product->setCustomLabel1($parentCategories[0]??NULL);
 		$product->setCustomLabel2($categories[0]??NULL);
 		
-		foreach($parentCategories as $parentCategory) {
-			$product->setAdsLabels($parentCategory);
-		}
 		
-		foreach($categories as $category) {
-			$product->setAdsLabels($category);
-		}
+		$product->setAdsLabels(array_merge($parentCategories, $categories));
 		
 		return $product;
 	}
