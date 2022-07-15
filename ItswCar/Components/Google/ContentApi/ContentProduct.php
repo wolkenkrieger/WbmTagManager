@@ -18,10 +18,14 @@ use Google_Service_ShoppingContent_Price;
 use Google_Service_ShoppingContent_ProductShipping;
 use Google_Service_ShoppingContent_CustomAttribute;
 use Shopware\Models\Article\Article as ProductModel;
+use Shopware\Models\Category;
 use ItswCar\Traits\LoggingTrait;
 
 class ContentProduct {
 	use LoggingTrait;
+	
+	/** @var int  */
+	protected const ROOT_CATEGORY_ID = 5;
 	
 	/** @var string  */
 	protected const CHANNEL = 'online';
@@ -34,7 +38,7 @@ class ContentProduct {
 	
 	/** @var string[]  */
 	//protected const TARGET_COUNTRIES = ['DE', 'CH', 'AT'];
-	protected const TARGET_COUNTRIES = ['DE'];
+	protected const TARGET_COUNTRIES = ['DE', 'AT'];
 	
 	/** @var string  */
 	protected const DEFAULT_DISPATCH = 'DHL';
@@ -46,7 +50,7 @@ class ContentProduct {
 	private ProductModel $product;
 	
 	/** @var \ItswCar\Components\Google\ContentApi\ContentSession|null  */
-	private ?ContentSession $session = NULL;
+	private ?ContentSession $session;
 	
 	/** @var int  */
 	private int $shopID;
@@ -116,6 +120,28 @@ class ContentProduct {
 			}
 		}
 		
+		$categories = [];
+		$parentCategories = [];
+		$rootCategoryId = ($rootCategory = $this->configHelper->getRootCategory()) ? $rootCategory->getId() : self::ROOT_CATEGORY_ID;
+		
+		foreach($this->product->getCategories() as $category) {
+			$categories[$category->getLevel()][] = $category->getName();
+			
+			do {
+				if ($category = $category->getParent()) {
+					$parentCategories[$category->getLevel()][] = $category->getName();
+				} else {
+					break;
+				}
+			} while ($category->getId() === $rootCategoryId);
+		}
+		
+		if (empty($parentCategories)) {
+			$parentCategories = min($categories);
+		}
+		
+		$categories = max($categories);
+		
 		$productAvailability = $this->product->getMainDetail()->getInStock()? 'auf Lager' : 'nicht auf Lager';
 		
 		$productPrice = 0;
@@ -140,9 +166,7 @@ class ContentProduct {
 		//$fakePrice = $this->product->getMainDetail()->getAttribute()->getFakePrice()?:$productPrice;
 		
 		$description = $this->product->getDescriptionLong();
-		
-		
-		
+
 		$description = str_ireplace([
 			'</ul><br><br><div id="description_oe">',
 			'</div>'
@@ -249,6 +273,18 @@ class ContentProduct {
 			$customAttribute->setName('active');
 			$customAttribute->setValue(FALSE);
 			$product->setCustomAttributes([$customAttribute]);
+		}
+		
+		$product->setCustomLabel0($this->getLabel0($discountProductPrice));
+		$product->setCustomLabel1($parentCategories[0]??NULL);
+		$product->setCustomLabel2($categories[0]??NULL);
+		
+		foreach($parentCategories as $parentCategory) {
+			$product->setAdsLabels($parentCategory);
+		}
+		
+		foreach($categories as $category) {
+			$product->setAdsLabels($category);
 		}
 		
 		return $product;
@@ -381,5 +417,31 @@ class ContentProduct {
 	 */
 	private function getPriceFactor(): float {
 		return ((float)rand() / (float)getrandmax()) + 1.1111;
+	}
+	
+	/**
+	 *
+	 * @param float $articlePrice
+	 * @return string
+	 */
+	private function getLabel0( float $articlePrice = 0 ):string {
+		$prices = [
+			10 => '1 - 10 EUR',
+			20 => '10 - 20 EUR',
+			50 => '20 - 50 EUR',
+			100 => '50 - 100 EUR',
+			200 => '100 - 200 EUR',
+			400 => '200 - 400 EUR',
+			600 => '400 - 600 EUR',
+			10000 => '> 600 EUR',
+		];
+		$priceText = '';
+		foreach( $prices as $price => $text ) {
+			if( $price > $articlePrice ) {
+				$priceText = $text;
+				break;
+			}
+		}
+		return $priceText;
 	}
 }

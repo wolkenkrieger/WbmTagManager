@@ -9,9 +9,12 @@
 namespace ItswCar\Helpers;
 
 use Google\Exception;
+use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
+use Shopware\Bundle\StoreFrontBundle\Struct\ShopContextInterface;
 use Shopware\Components\ConfigWriter;
 use Shopware\Models\Shop\DetachedShop;
 use Shopware\Models\Shop\Shop;
+use Shopware\Models\Category;
 use Shopware_Components_Config;
 use Monolog\Logger;
 
@@ -313,5 +316,19 @@ class ConfigHelper {
 		}
 		
 		return $query->execute()->fetchAllAssociative();
+	}
+	
+	/**
+	 * @return int
+	 */
+	public function getRootCategoryId(): int {
+		return $this->getShop()->getCategory()->getId();
+	}
+	
+	/**
+	 * @return \Shopware\Models\Category\Category|null
+	 */
+	public function getRootCategory(): ?Category\Category {
+		return $this->getShop()->getCategory();
 	}
 }
