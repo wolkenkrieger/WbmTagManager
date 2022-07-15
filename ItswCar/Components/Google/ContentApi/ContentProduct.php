@@ -280,6 +280,7 @@ class ContentProduct {
 		$product->setCustomLabel0($this->getLabel0($discountProductPrice));
 		$product->setCustomLabel1($parentCategories[0]??NULL);
 		$product->setCustomLabel2($categories[0]??NULL);
+		$product->setCustomLabel3($productAvailability);
 		
 		
 		$product->setAdsLabels(array_merge($parentCategories, $categories));
