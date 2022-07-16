@@ -9,16 +9,11 @@
 
 namespace ItswCar\Components\Google\ContentApi;
 
-use Google\Exception;
-use Google\Service\ShoppingContent\Product;
-use Google\Service\ShoppingContent\Price;
-use Google\Service\ShoppingContent\ProductShipping;
-use Google\Service\ShoppingContent\ProductShippingWeight;
 use Google_Service_ShoppingContent_Price;
 use Google_Service_ShoppingContent_ProductShipping;
 use Google_Service_ShoppingContent_CustomAttribute;
+use Google_Service_ShoppingContent_Product;
 use Shopware\Models\Article\Article as ProductModel;
-use Shopware\Models\Category;
 use ItswCar\Traits\LoggingTrait;
 
 class ContentProduct {
@@ -98,11 +93,11 @@ class ContentProduct {
 	}
 	
 	/**
-	 * @return \Google\Service\ShoppingContent\Product
+	 * @return \Google_Service_ShoppingContent_Product
 	 * @throws \Doctrine\DBAL\Driver\Exception
 	 * @throws \Doctrine\DBAL\Exception
 	 */
-	private function buildProduct(): Product {
+	private function buildProduct(): Google_Service_ShoppingContent_Product {
 		try {
 			$shippingInfos = $this->configHelper->getShippingInfos();
 		} catch (\Exception $exception) {
@@ -186,7 +181,7 @@ class ContentProduct {
 		
 		$productMpn = $this->product->getMainDetail()->getSupplierNumber()? : 'ATW-'.$this->product->getMainDetail()->getId();
 		
-		$product = new Product();
+		$product = new Google_Service_ShoppingContent_Product();
 		
 		if (!in_array(mb_strtolower($this->product->getSupplier()->getName()), [
 			'autoteile wiesel',
@@ -229,7 +224,7 @@ class ContentProduct {
 		$product->setSalePrice($discountPrice);
 		*/
 		
-		$discountPrice = new Price();
+		$discountPrice = new Google_Service_ShoppingContent_Price();
 		$discountPrice->setValue(sprintf('%.2f', $discountProductPrice));
 		$discountPrice->setCurrency('EUR');
 		$product->setPrice($discountPrice);
@@ -414,7 +409,7 @@ class ContentProduct {
 	 * @return float
 	 */
 	private function getPriceFactor(): float {
-		return ((float)rand() / (float)getrandmax()) + 1.1111;
+		return ((float)mt_rand() / (float)mt_getrandmax()) + 1.1111;
 	}
 	
 	/**

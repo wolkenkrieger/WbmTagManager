@@ -26,13 +26,25 @@ use ItswCar\Traits\LoggingTrait;
 class ContentSession {
 	use LoggingTrait;
 	
+	/** @var string  */
 	protected const CONFIGFILE_NAME = 'merchant-info.json';
+	
+	/** @var string  */
 	protected const SERVICE_ACCOUNT_FILE_NAME = 'service-account.json';
 	
-	private	$config;
+	/** @var array  */
+	private array $config;
+	
+	/** @var string  */
 	public string $merchantId;
+	
+	/** @var bool  */
 	public bool $mcaStatus;
+	
+	/** @var \Google_Service_ShoppingContent  */
 	public Google_Service_ShoppingContent $service;
+	
+	/** @var string  */
 	public string $websiteUrl;
 	
 	/**
@@ -138,6 +150,7 @@ class ContentSession {
 		
 		$account = $this->service->accounts->get($this->merchantId, $this->merchantId);
 		$this->websiteUrl = $account->getWebsiteUrl();
+		
 		if (is_null($this->websiteUrl)) {
 			throw new Exception('No website URL assigned to merchant center account');
 		}
@@ -165,7 +178,7 @@ class ContentSession {
 		}
 		
 		if ($home === null) {
-			throw new UnexpectedValueException('Could not locate home directory.');
+			throw new \UnexpectedValueException('Could not locate home directory.');
 		}
 		
 		return rtrim($home, '\\/');
@@ -178,13 +191,13 @@ class ContentSession {
 	 * @param int $maxAttempts
 	 * @return false|mixed|void
 	 */
-	public function retry($object, $function, $parameter, $maxAttempts = 5) {
+	public function retry($object, $function, $parameter, int $maxAttempts = 5) {
 		$attempts = 1;
 		
 		while ($attempts <= $maxAttempts) {
 			try {
-				return call_user_func([$object, $function], $parameter);
-			} catch (Google_Service_Exception $exception) {
+				return $object->$function($parameter);
+			} catch (Exception $exception) {
 				$sleepTime = $attempts * $attempts;
 				printf("Attempt to call %s failed, retrying in %d second(s).\n",
 					$function, $sleepTime);

@@ -681,6 +681,7 @@ class Eventhandlers {
 		
 		try {
 			$googleContentApiSession = new ContentSession($this->getGoogleConfigOptions(), $this->shop->getId());
+			var_dump($googleContentApiSession);die;
 		} catch (\Exception $exception) {
 			$this->error($exception);
 			$googleContentApiSession = NULL;
