@@ -68,7 +68,13 @@ class BuyersCreatives extends \Google\Service\Resource
     return $this->call('get', [$params], Creative::class);
   }
   /**
-   * Lists creatives. (creatives.listBuyersCreatives)
+   * Lists creatives as they are at the time of the initial request. This call may
+   * take multiple hours to complete. For large, paginated requests, this method
+   * returns a snapshot of creatives at the time of request for the first page.
+   * `lastStatusUpdate` and `creativeServingDecision` may be outdated for
+   * creatives on sequential pages. We recommend [Google Cloud
+   * Pub/Sub](//cloud.google.com/pubsub/docs/overview) to view the latest status.
+   * (creatives.listBuyersCreatives)
    *
    * @param string $parent Required. Name of the parent buyer that owns the
    * creatives. The pattern for this resource is either `buyers/{buyerAccountId}`
@@ -95,7 +101,8 @@ class BuyersCreatives extends \Google\Service\Resource
    * @opt_param string pageToken A token identifying a page of results the server
    * should return. Typically, this is the value of
    * ListCreativesResponse.nextPageToken returned from the previous call to the
-   * 'ListCreatives' method.
+   * 'ListCreatives' method. Page tokens for continued pages are valid for up to
+   * five hours, counting from the call to 'ListCreatives' for the first page.
    * @opt_param string view Controls the amount of information included in the
    * response. By default only creativeServingDecision is included. To retrieve
    * the entire creative resource (including the declared fields and the creative

@@ -45,32 +45,32 @@ class GoogleMerchantCenterQueue extends ModelEntity {
 	protected \DateTime $created;
 	
 	/**
-	 * @var ?\DateTime
+	 * @var \DateTime|null
 	 *
 	 * @ORM\Column(name="handled", type="datetime", nullable=true)
 	 */
 	protected ?\DateTime $handled;
 	
 	/**
-	 * @var ?\DateTime
+	 * @var \DateTime|null
 	 *
 	 * @ORM\Column(name="modified", type="datetime", nullable=true)
 	 */
 	protected ?\DateTime $modified;
 	
 	/**
-	 * @var string
+	 * @var string|null
 	 *
 	 * @ORM\Column(name="google_product_id", type="string", nullable=true, length=64)
 	 */
-	protected string $googleProductId;
+	protected ?string $googleProductId;
 	
 	/**
-	 * @var string
+	 * @var string|null
 	 *
 	 * @ORM\Column(name="response", type="text", nullable=true)
 	 */
-	protected string $response;
+	protected ?string $response;
 	
 	/**
 	 * @var string
@@ -78,6 +78,13 @@ class GoogleMerchantCenterQueue extends ModelEntity {
 	 * @ORM\Column(name="job_type", type="string", nullable=false, length=20)
 	 */
 	protected string $jobType;
+	
+	/**
+	 * @var bool
+	 *
+	 * @ORM\Column(name="active", type="boolean", nullable=false, options={"default" : 1})
+	 */
+	protected bool $active;
 	
 	
 	/**
@@ -89,6 +96,7 @@ class GoogleMerchantCenterQueue extends ModelEntity {
 		}
 		
 		$this->created = new \DateTime();
+		$this->active = TRUE;
 	}
 	
 	/**
@@ -170,10 +178,10 @@ class GoogleMerchantCenterQueue extends ModelEntity {
 	}
 	
 	/**
-	 * @param string $googleProductId
+	 * @param string|null $googleProductId
 	 * @return $this
 	 */
-	public function setGoogleProductId(string $googleProductId): GoogleMerchantCenterQueue {
+	public function setGoogleProductId(?string $googleProductId): GoogleMerchantCenterQueue {
 		$this->googleProductId = $googleProductId;
 		return $this;
 	}
@@ -186,10 +194,10 @@ class GoogleMerchantCenterQueue extends ModelEntity {
 	}
 	
 	/**
-	 * @param string $response
+	 * @param string|null $response
 	 * @return $this
 	 */
-	public function setResponse(string $response): GoogleMerchantCenterQueue {
+	public function setResponse(?string $response): GoogleMerchantCenterQueue {
 		$this->response = $response;
 		return $this;
 	}
@@ -215,6 +223,22 @@ class GoogleMerchantCenterQueue extends ModelEntity {
 	 */
 	public function getJobType(): string {
 		return $this->jobType;
+	}
+	
+	/**
+	 * @param bool $active
+	 * @return $this
+	 */
+	public function setActive(bool $active): GoogleMerchantCenterQueue {
+		$this->active = $active;
+		return $this;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function getActive(): bool {
+		return $this->active;
 	}
 	
 	/**
@@ -246,18 +270,6 @@ class GoogleMerchantCenterQueue extends ModelEntity {
 	 */
 	public function __isset($property) {
 		return isset($this->$property);
-	}
-	
-	/**
-	 * @param array $array
-	 * @return void
-	 */
-	public function fromArray(array $array): void {
-		foreach ($array as $k => $v) {
-			if (property_exists($this, $k)) {
-				$this->{$k} = $v;
-			}
-		}
 	}
 	
 	public function toArray(): array {

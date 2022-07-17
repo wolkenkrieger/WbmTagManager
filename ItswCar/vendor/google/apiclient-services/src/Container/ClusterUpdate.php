@@ -24,45 +24,82 @@ class ClusterUpdate extends \Google\Collection
   protected $desiredAddonsConfigDataType = '';
   protected $desiredAuthenticatorGroupsConfigType = AuthenticatorGroupsConfig::class;
   protected $desiredAuthenticatorGroupsConfigDataType = '';
-  protected $desiredAutopilotType = Autopilot::class;
-  protected $desiredAutopilotDataType = '';
   protected $desiredBinaryAuthorizationType = BinaryAuthorization::class;
   protected $desiredBinaryAuthorizationDataType = '';
   protected $desiredClusterAutoscalingType = ClusterAutoscaling::class;
   protected $desiredClusterAutoscalingDataType = '';
   protected $desiredDatabaseEncryptionType = DatabaseEncryption::class;
   protected $desiredDatabaseEncryptionDataType = '';
+  /**
+   * @var string
+   */
   public $desiredDatapathProvider;
   protected $desiredDefaultSnatStatusType = DefaultSnatStatus::class;
   protected $desiredDefaultSnatStatusDataType = '';
+  protected $desiredDnsConfigType = DNSConfig::class;
+  protected $desiredDnsConfigDataType = '';
+  protected $desiredGcfsConfigType = GcfsConfig::class;
+  protected $desiredGcfsConfigDataType = '';
+  protected $desiredIdentityServiceConfigType = IdentityServiceConfig::class;
+  protected $desiredIdentityServiceConfigDataType = '';
+  /**
+   * @var string
+   */
   public $desiredImageType;
   protected $desiredIntraNodeVisibilityConfigType = IntraNodeVisibilityConfig::class;
   protected $desiredIntraNodeVisibilityConfigDataType = '';
   protected $desiredL4ilbSubsettingConfigType = ILBSubsettingConfig::class;
   protected $desiredL4ilbSubsettingConfigDataType = '';
+  /**
+   * @var string[]
+   */
   public $desiredLocations;
   protected $desiredLoggingConfigType = LoggingConfig::class;
   protected $desiredLoggingConfigDataType = '';
+  /**
+   * @var string
+   */
   public $desiredLoggingService;
   protected $desiredMasterAuthorizedNetworksConfigType = MasterAuthorizedNetworksConfig::class;
   protected $desiredMasterAuthorizedNetworksConfigDataType = '';
+  /**
+   * @var string
+   */
   public $desiredMasterVersion;
+  protected $desiredMeshCertificatesType = MeshCertificates::class;
+  protected $desiredMeshCertificatesDataType = '';
   protected $desiredMonitoringConfigType = MonitoringConfig::class;
   protected $desiredMonitoringConfigDataType = '';
+  /**
+   * @var string
+   */
   public $desiredMonitoringService;
+  protected $desiredNodePoolAutoConfigNetworkTagsType = NetworkTags::class;
+  protected $desiredNodePoolAutoConfigNetworkTagsDataType = '';
   protected $desiredNodePoolAutoscalingType = NodePoolAutoscaling::class;
   protected $desiredNodePoolAutoscalingDataType = '';
+  /**
+   * @var string
+   */
   public $desiredNodePoolId;
+  /**
+   * @var string
+   */
   public $desiredNodeVersion;
   protected $desiredNotificationConfigType = NotificationConfig::class;
   protected $desiredNotificationConfigDataType = '';
   protected $desiredPrivateClusterConfigType = PrivateClusterConfig::class;
   protected $desiredPrivateClusterConfigDataType = '';
+  /**
+   * @var string
+   */
   public $desiredPrivateIpv6GoogleAccess;
   protected $desiredReleaseChannelType = ReleaseChannel::class;
   protected $desiredReleaseChannelDataType = '';
   protected $desiredResourceUsageExportConfigType = ResourceUsageExportConfig::class;
   protected $desiredResourceUsageExportConfigDataType = '';
+  protected $desiredServiceExternalIpsConfigType = ServiceExternalIPsConfig::class;
+  protected $desiredServiceExternalIpsConfigDataType = '';
   protected $desiredShieldedNodesType = ShieldedNodes::class;
   protected $desiredShieldedNodesDataType = '';
   protected $desiredVerticalPodAutoscalingType = VerticalPodAutoscaling::class;
@@ -97,20 +134,6 @@ class ClusterUpdate extends \Google\Collection
   public function getDesiredAuthenticatorGroupsConfig()
   {
     return $this->desiredAuthenticatorGroupsConfig;
-  }
-  /**
-   * @param Autopilot
-   */
-  public function setDesiredAutopilot(Autopilot $desiredAutopilot)
-  {
-    $this->desiredAutopilot = $desiredAutopilot;
-  }
-  /**
-   * @return Autopilot
-   */
-  public function getDesiredAutopilot()
-  {
-    return $this->desiredAutopilot;
   }
   /**
    * @param BinaryAuthorization
@@ -154,10 +177,16 @@ class ClusterUpdate extends \Google\Collection
   {
     return $this->desiredDatabaseEncryption;
   }
+  /**
+   * @param string
+   */
   public function setDesiredDatapathProvider($desiredDatapathProvider)
   {
     $this->desiredDatapathProvider = $desiredDatapathProvider;
   }
+  /**
+   * @return string
+   */
   public function getDesiredDatapathProvider()
   {
     return $this->desiredDatapathProvider;
@@ -176,10 +205,58 @@ class ClusterUpdate extends \Google\Collection
   {
     return $this->desiredDefaultSnatStatus;
   }
+  /**
+   * @param DNSConfig
+   */
+  public function setDesiredDnsConfig(DNSConfig $desiredDnsConfig)
+  {
+    $this->desiredDnsConfig = $desiredDnsConfig;
+  }
+  /**
+   * @return DNSConfig
+   */
+  public function getDesiredDnsConfig()
+  {
+    return $this->desiredDnsConfig;
+  }
+  /**
+   * @param GcfsConfig
+   */
+  public function setDesiredGcfsConfig(GcfsConfig $desiredGcfsConfig)
+  {
+    $this->desiredGcfsConfig = $desiredGcfsConfig;
+  }
+  /**
+   * @return GcfsConfig
+   */
+  public function getDesiredGcfsConfig()
+  {
+    return $this->desiredGcfsConfig;
+  }
+  /**
+   * @param IdentityServiceConfig
+   */
+  public function setDesiredIdentityServiceConfig(IdentityServiceConfig $desiredIdentityServiceConfig)
+  {
+    $this->desiredIdentityServiceConfig = $desiredIdentityServiceConfig;
+  }
+  /**
+   * @return IdentityServiceConfig
+   */
+  public function getDesiredIdentityServiceConfig()
+  {
+    return $this->desiredIdentityServiceConfig;
+  }
+  /**
+   * @param string
+   */
   public function setDesiredImageType($desiredImageType)
   {
     $this->desiredImageType = $desiredImageType;
   }
+  /**
+   * @return string
+   */
   public function getDesiredImageType()
   {
     return $this->desiredImageType;
@@ -212,10 +289,16 @@ class ClusterUpdate extends \Google\Collection
   {
     return $this->desiredL4ilbSubsettingConfig;
   }
+  /**
+   * @param string[]
+   */
   public function setDesiredLocations($desiredLocations)
   {
     $this->desiredLocations = $desiredLocations;
   }
+  /**
+   * @return string[]
+   */
   public function getDesiredLocations()
   {
     return $this->desiredLocations;
@@ -234,10 +317,16 @@ class ClusterUpdate extends \Google\Collection
   {
     return $this->desiredLoggingConfig;
   }
+  /**
+   * @param string
+   */
   public function setDesiredLoggingService($desiredLoggingService)
   {
     $this->desiredLoggingService = $desiredLoggingService;
   }
+  /**
+   * @return string
+   */
   public function getDesiredLoggingService()
   {
     return $this->desiredLoggingService;
@@ -256,13 +345,33 @@ class ClusterUpdate extends \Google\Collection
   {
     return $this->desiredMasterAuthorizedNetworksConfig;
   }
+  /**
+   * @param string
+   */
   public function setDesiredMasterVersion($desiredMasterVersion)
   {
     $this->desiredMasterVersion = $desiredMasterVersion;
   }
+  /**
+   * @return string
+   */
   public function getDesiredMasterVersion()
   {
     return $this->desiredMasterVersion;
+  }
+  /**
+   * @param MeshCertificates
+   */
+  public function setDesiredMeshCertificates(MeshCertificates $desiredMeshCertificates)
+  {
+    $this->desiredMeshCertificates = $desiredMeshCertificates;
+  }
+  /**
+   * @return MeshCertificates
+   */
+  public function getDesiredMeshCertificates()
+  {
+    return $this->desiredMeshCertificates;
   }
   /**
    * @param MonitoringConfig
@@ -278,13 +387,33 @@ class ClusterUpdate extends \Google\Collection
   {
     return $this->desiredMonitoringConfig;
   }
+  /**
+   * @param string
+   */
   public function setDesiredMonitoringService($desiredMonitoringService)
   {
     $this->desiredMonitoringService = $desiredMonitoringService;
   }
+  /**
+   * @return string
+   */
   public function getDesiredMonitoringService()
   {
     return $this->desiredMonitoringService;
+  }
+  /**
+   * @param NetworkTags
+   */
+  public function setDesiredNodePoolAutoConfigNetworkTags(NetworkTags $desiredNodePoolAutoConfigNetworkTags)
+  {
+    $this->desiredNodePoolAutoConfigNetworkTags = $desiredNodePoolAutoConfigNetworkTags;
+  }
+  /**
+   * @return NetworkTags
+   */
+  public function getDesiredNodePoolAutoConfigNetworkTags()
+  {
+    return $this->desiredNodePoolAutoConfigNetworkTags;
   }
   /**
    * @param NodePoolAutoscaling
@@ -300,18 +429,30 @@ class ClusterUpdate extends \Google\Collection
   {
     return $this->desiredNodePoolAutoscaling;
   }
+  /**
+   * @param string
+   */
   public function setDesiredNodePoolId($desiredNodePoolId)
   {
     $this->desiredNodePoolId = $desiredNodePoolId;
   }
+  /**
+   * @return string
+   */
   public function getDesiredNodePoolId()
   {
     return $this->desiredNodePoolId;
   }
+  /**
+   * @param string
+   */
   public function setDesiredNodeVersion($desiredNodeVersion)
   {
     $this->desiredNodeVersion = $desiredNodeVersion;
   }
+  /**
+   * @return string
+   */
   public function getDesiredNodeVersion()
   {
     return $this->desiredNodeVersion;
@@ -344,10 +485,16 @@ class ClusterUpdate extends \Google\Collection
   {
     return $this->desiredPrivateClusterConfig;
   }
+  /**
+   * @param string
+   */
   public function setDesiredPrivateIpv6GoogleAccess($desiredPrivateIpv6GoogleAccess)
   {
     $this->desiredPrivateIpv6GoogleAccess = $desiredPrivateIpv6GoogleAccess;
   }
+  /**
+   * @return string
+   */
   public function getDesiredPrivateIpv6GoogleAccess()
   {
     return $this->desiredPrivateIpv6GoogleAccess;
@@ -379,6 +526,20 @@ class ClusterUpdate extends \Google\Collection
   public function getDesiredResourceUsageExportConfig()
   {
     return $this->desiredResourceUsageExportConfig;
+  }
+  /**
+   * @param ServiceExternalIPsConfig
+   */
+  public function setDesiredServiceExternalIpsConfig(ServiceExternalIPsConfig $desiredServiceExternalIpsConfig)
+  {
+    $this->desiredServiceExternalIpsConfig = $desiredServiceExternalIpsConfig;
+  }
+  /**
+   * @return ServiceExternalIPsConfig
+   */
+  public function getDesiredServiceExternalIpsConfig()
+  {
+    return $this->desiredServiceExternalIpsConfig;
   }
   /**
    * @param ShieldedNodes

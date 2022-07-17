@@ -33,7 +33,7 @@ class BillingAccountsLocationsBucketsViews extends \Google\Service\Resource
 {
   /**
    * Creates a view over log entries in a log bucket. A bucket may contain a
-   * maximum of 50 views. (views.create)
+   * maximum of 30 views. (views.create)
    *
    * @param string $parent Required. The bucket in which to create the view
    * `"projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]"` For
@@ -51,7 +51,9 @@ class BillingAccountsLocationsBucketsViews extends \Google\Service\Resource
     return $this->call('create', [$params], LogView::class);
   }
   /**
-   * Deletes a view on a log bucket. (views.delete)
+   * Deletes a view on a log bucket. If an UNAVAILABLE error is returned, this
+   * indicates that system is not in a state where it can delete the view. If this
+   * occurs, please try again in a few minutes. (views.delete)
    *
    * @param string $name Required. The full resource name of the view to delete: "
    * projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW
@@ -65,6 +67,22 @@ class BillingAccountsLocationsBucketsViews extends \Google\Service\Resource
     $params = ['name' => $name];
     $params = array_merge($params, $optParams);
     return $this->call('delete', [$params], LoggingEmpty::class);
+  }
+  /**
+   * Gets a view on a log bucket.. (views.get)
+   *
+   * @param string $name Required. The resource name of the policy: "projects/[PRO
+   * JECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]" For
+   * example:"projects/my-project/locations/global/buckets/my-bucket/views/my-
+   * view"
+   * @param array $optParams Optional parameters.
+   * @return LogView
+   */
+  public function get($name, $optParams = [])
+  {
+    $params = ['name' => $name];
+    $params = array_merge($params, $optParams);
+    return $this->call('get', [$params], LogView::class);
   }
   /**
    * Lists views on a log bucket. (views.listBillingAccountsLocationsBucketsViews)
@@ -90,7 +108,10 @@ class BillingAccountsLocationsBucketsViews extends \Google\Service\Resource
   }
   /**
    * Updates a view on a log bucket. This method replaces the following fields in
-   * the existing view with values from the new view: filter. (views.patch)
+   * the existing view with values from the new view: filter. If an UNAVAILABLE
+   * error is returned, this indicates that system is not in a state where it can
+   * update the view. If this occurs, please try again in a few minutes.
+   * (views.patch)
    *
    * @param string $name Required. The full resource name of the view to update "p
    * rojects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_

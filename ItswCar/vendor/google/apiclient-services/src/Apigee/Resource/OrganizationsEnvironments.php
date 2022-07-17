@@ -59,7 +59,9 @@ class OrganizationsEnvironments extends \Google\Service\Resource
     return $this->call('create', [$params], GoogleLongrunningOperation::class);
   }
   /**
-   * Deletes an environment from an organization. (environments.delete)
+   * Deletes an environment from an organization. **Note**: You must delete all
+   * key value maps and key value entries before you can delete an environment.
+   * (environments.delete)
    *
    * @param string $name Required. Name of the environment. Use the following
    * structure in your request: `organizations/{org}/environments/{env}`
@@ -126,16 +128,21 @@ class OrganizationsEnvironments extends \Google\Service\Resource
    * permission to call this API. (environments.getIamPolicy)
    *
    * @param string $resource REQUIRED: The resource for which the policy is being
-   * requested. See the operation documentation for the appropriate value for this
-   * field.
+   * requested. See [Resource
+   * names](https://cloud.google.com/apis/design/resource_names) for the
+   * appropriate value for this field.
    * @param array $optParams Optional parameters.
    *
-   * @opt_param int options.requestedPolicyVersion Optional. The policy format
-   * version to be returned. Valid values are 0, 1, and 3. Requests specifying an
-   * invalid value will be rejected. Requests for policies with any conditional
-   * bindings must specify version 3. Policies without any conditional bindings
-   * may specify any valid value or leave the field unset. To learn which
-   * resources support conditions in their IAM policies, see the [IAM
+   * @opt_param int options.requestedPolicyVersion Optional. The maximum policy
+   * version that will be used to format the policy. Valid values are 0, 1, and 3.
+   * Requests specifying an invalid value will be rejected. Requests for policies
+   * with any conditional role bindings must specify version 3. Policies with no
+   * conditional role bindings may specify any valid value or leave the field
+   * unset. The policy in the response might use the policy version that you
+   * specified, or it might use a lower policy version. For example, if you
+   * specify version 3, but the policy has no conditional role bindings, the
+   * response uses version 1. To learn which resources support conditions in their
+   * IAM policies, see the [IAM
    * documentation](https://cloud.google.com/iam/help/conditions/resource-
    * policies).
    * @return GoogleIamV1Policy
@@ -171,8 +178,9 @@ class OrganizationsEnvironments extends \Google\Service\Resource
    * (environments.setIamPolicy)
    *
    * @param string $resource REQUIRED: The resource for which the policy is being
-   * specified. See the operation documentation for the appropriate value for this
-   * field.
+   * specified. See [Resource
+   * names](https://cloud.google.com/apis/design/resource_names) for the
+   * appropriate value for this field.
    * @param GoogleIamV1SetIamPolicyRequest $postBody
    * @param array $optParams Optional parameters.
    * @return GoogleIamV1Policy
@@ -206,8 +214,9 @@ class OrganizationsEnvironments extends \Google\Service\Resource
    * returned). (environments.testIamPermissions)
    *
    * @param string $resource REQUIRED: The resource for which the policy detail is
-   * being requested. See the operation documentation for the appropriate value
-   * for this field.
+   * being requested. See [Resource
+   * names](https://cloud.google.com/apis/design/resource_names) for the
+   * appropriate value for this field.
    * @param GoogleIamV1TestIamPermissionsRequest $postBody
    * @param array $optParams Optional parameters.
    * @return GoogleIamV1TestIamPermissionsResponse
@@ -239,7 +248,8 @@ class OrganizationsEnvironments extends \Google\Service\Resource
    * existing properties to the API, even if they are not being changed. If you
    * omit properties from the payload, the properties are removed. To get the
    * current list of properties for the environment, use the [Get Environment
-   * API](get). (environments.update)
+   * API](get). **Note**: Both `PUT` and `POST` methods are supported for updating
+   * an existing environment. (environments.update)
    *
    * @param string $name Required. Name of the environment. Use the following
    * structure in your request: `organizations/{org}/environments/{env}`
@@ -279,7 +289,8 @@ class OrganizationsEnvironments extends \Google\Service\Resource
    * existing properties to the API, even if they are not being changed. If you
    * omit properties from the payload, the properties are removed. To get the
    * current list of properties for the environment, use the [Get Environment
-   * API](get). (environments.updateEnvironment)
+   * API](get). **Note**: Both `PUT` and `POST` methods are supported for updating
+   * an existing environment. (environments.updateEnvironment)
    *
    * @param string $name Required. Name of the environment. Use the following
    * structure in your request: `organizations/{org}/environments/{env}`

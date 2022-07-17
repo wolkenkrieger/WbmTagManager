@@ -138,8 +138,8 @@ class Files extends \Google\Service\Resource
     return $this->call('emptyTrash', [$params]);
   }
   /**
-   * Exports a Google Doc to the requested MIME type and returns the exported
-   * content. Please note that the exported content is limited to 10MB.
+   * Exports a Google Workspace document to the requested MIME type and returns
+   * exported byte content. Note that the exported content is limited to 10MB.
    * (files.export)
    *
    * @param string $fileId The ID of the file.
@@ -247,8 +247,10 @@ class Files extends \Google\Service\Resource
     return $this->call('list', [$params], FileList::class);
   }
   /**
-   * Updates a file's metadata and/or content. This method supports patch
-   * semantics. (files.update)
+   * Updates a file's metadata and/or content. When calling this method, only
+   * populate fields in the request that you want to modify. When updating fields,
+   * some fields might change automatically, such as modifiedDate. This method
+   * supports patch semantics. (files.update)
    *
    * @param string $fileId The ID of the file.
    * @param DriveFile $postBody
@@ -281,7 +283,9 @@ class Files extends \Google\Service\Resource
     return $this->call('update', [$params], DriveFile::class);
   }
   /**
-   * Subscribes to changes to a file (files.watch)
+   * Subscribes to changes to a file. While you can establish a channel for
+   * changes to a file on a shared drive, a change to a shared drive file won't
+   * create a notification. (files.watch)
    *
    * @param string $fileId The ID of the file.
    * @param Channel $postBody

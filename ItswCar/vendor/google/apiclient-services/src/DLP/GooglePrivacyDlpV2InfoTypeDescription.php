@@ -20,39 +20,91 @@ namespace Google\Service\DLP;
 class GooglePrivacyDlpV2InfoTypeDescription extends \Google\Collection
 {
   protected $collection_key = 'supportedBy';
+  protected $categoriesType = GooglePrivacyDlpV2InfoTypeCategory::class;
+  protected $categoriesDataType = 'array';
+  /**
+   * @var string
+   */
   public $description;
+  /**
+   * @var string
+   */
   public $displayName;
+  /**
+   * @var string
+   */
   public $name;
+  /**
+   * @var string[]
+   */
   public $supportedBy;
 
+  /**
+   * @param GooglePrivacyDlpV2InfoTypeCategory[]
+   */
+  public function setCategories($categories)
+  {
+    $this->categories = $categories;
+  }
+  /**
+   * @return GooglePrivacyDlpV2InfoTypeCategory[]
+   */
+  public function getCategories()
+  {
+    return $this->categories;
+  }
+  /**
+   * @param string
+   */
   public function setDescription($description)
   {
     $this->description = $description;
   }
+  /**
+   * @return string
+   */
   public function getDescription()
   {
     return $this->description;
   }
+  /**
+   * @param string
+   */
   public function setDisplayName($displayName)
   {
     $this->displayName = $displayName;
   }
+  /**
+   * @return string
+   */
   public function getDisplayName()
   {
     return $this->displayName;
   }
+  /**
+   * @param string
+   */
   public function setName($name)
   {
     $this->name = $name;
   }
+  /**
+   * @return string
+   */
   public function getName()
   {
     return $this->name;
   }
+  /**
+   * @param string[]
+   */
   public function setSupportedBy($supportedBy)
   {
     $this->supportedBy = $supportedBy;
   }
+  /**
+   * @return string[]
+   */
   public function getSupportedBy()
   {
     return $this->supportedBy;

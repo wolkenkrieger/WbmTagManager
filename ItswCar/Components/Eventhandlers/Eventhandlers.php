@@ -681,7 +681,6 @@ class Eventhandlers {
 		
 		try {
 			$googleContentApiSession = new ContentSession($this->getGoogleConfigOptions(), $this->shop->getId());
-			var_dump($googleContentApiSession);die;
 		} catch (\Exception $exception) {
 			$this->error($exception);
 			$googleContentApiSession = NULL;
@@ -714,7 +713,7 @@ class Eventhandlers {
 					throw new \RuntimeException(sprintf('Product by id "%d" not found', $item->getArticleId()));
 				}
 				
-				if (!$product->getImages()->count()) {
+				if ($product->getImages()->isEmpty()) {
 					$this->debug(sprintf('Product with SKU "%s" has no picture', $product->getMainDetail()->getNumber()));
 				}
 			} catch(\Exception $exception) {
@@ -722,35 +721,64 @@ class Eventhandlers {
 				continue;
 			}
 			
-			
-			try {
-				$contentProduct = new ContentProduct($product, $this->getGoogleConfigOptions(), $this->shop->getId(), $googleContentApiSession);
-			} catch (Exception | \JsonException $exception) {
-				$this->error($exception);
-				continue;
+			if (!$product->getActive() || $product->getImages()->isEmpty()) {
+				$item->setJobType('delete');
+			} else if ($item->getGoogleProductId()) {
+				$item->setJobType('update');
+			} else {
+				$item->setJobType('create');
 			}
 			
-			$response = NULL;
-			
-			switch($item->getJobType) {
-				case 'delete' : break;
-				case 'update':	$response = $contentProduct->update();	break;
-				default: $response = $contentProduct->create();	break;
-			}
-			
-			if (!is_null($response)) {
-				$response = $response['response'];
+			if ($item->getJobType() === 'delete' && !$item->getActive()) {
+				$contentProduct = NULL;
+			} else {
 				try {
-					$item->setHandled(new \DateTime());
-					$item->setGoogleProductId($contentProduct->buildProductId($product->getMainDetail()->getNumber()));
-					$item->setResponse(json_encode($response, JSON_THROW_ON_ERROR));
-					$this->modelManager->persist($item);
-					$this->modelManager->flush($item);
-					$counter++;
+					$contentProduct = new ContentProduct($product, $this->getGoogleConfigOptions(), $this->shop->getId(), $googleContentApiSession);
 				} catch (\Exception $exception) {
 					$this->error($exception);
 					continue;
 				}
+			}
+			
+			$response = NULL;
+			
+			switch($item->getJobType()) {
+				case 'delete' : if ($item->getActive()) {
+									$response = $contentProduct->delete();
+									$item->setActive(FALSE);
+								} else {
+									try {
+										$item->setHandled(new \DateTime());
+										$item->setResponse(NULL);
+										$this->modelManager->persist($item);
+										$this->modelManager->flush($item);
+										$counter++;
+									} catch (\Exception $exception) {
+										$this->error($exception);
+									}
+									continue 2;
+								}
+								
+								break;
+				
+				case 'update':	$response = $contentProduct->update();
+								$item->setActive(TRUE);
+								break;
+								
+				default:        $response = $contentProduct->create();
+								$item->setActive(TRUE);
+			}
+			
+			try {
+				$item->setHandled(new \DateTime());
+				$item->setGoogleProductId($contentProduct->buildProductId($product->getMainDetail()->getNumber()));
+				$item->setResponse(json_encode($response, JSON_THROW_ON_ERROR));
+				$this->modelManager->persist($item);
+				$this->modelManager->flush($item);
+				$counter++;
+			} catch (\Exception $exception) {
+				$this->error($exception);
+				continue;
 			}
 		}
 		

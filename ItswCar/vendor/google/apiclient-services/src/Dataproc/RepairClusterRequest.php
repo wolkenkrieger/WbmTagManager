@@ -17,23 +17,58 @@
 
 namespace Google\Service\Dataproc;
 
-class RepairClusterRequest extends \Google\Model
+class RepairClusterRequest extends \Google\Collection
 {
+  protected $collection_key = 'nodePools';
+  /**
+   * @var string
+   */
   public $clusterUuid;
+  protected $nodePoolsType = NodePool::class;
+  protected $nodePoolsDataType = 'array';
+  /**
+   * @var string
+   */
   public $requestId;
 
+  /**
+   * @param string
+   */
   public function setClusterUuid($clusterUuid)
   {
     $this->clusterUuid = $clusterUuid;
   }
+  /**
+   * @return string
+   */
   public function getClusterUuid()
   {
     return $this->clusterUuid;
   }
+  /**
+   * @param NodePool[]
+   */
+  public function setNodePools($nodePools)
+  {
+    $this->nodePools = $nodePools;
+  }
+  /**
+   * @return NodePool[]
+   */
+  public function getNodePools()
+  {
+    return $this->nodePools;
+  }
+  /**
+   * @param string
+   */
   public function setRequestId($requestId)
   {
     $this->requestId = $requestId;
   }
+  /**
+   * @return string
+   */
   public function getRequestId()
   {
     return $this->requestId;

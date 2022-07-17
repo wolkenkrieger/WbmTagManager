@@ -28,7 +28,7 @@ use Google\Client;
  *
  * <p>
  * For more information about this service, see the API
- * <a href="http://code.google.com/apis/adsense/management/" target="_blank">Documentation</a>
+ * <a href="https://developers.google.com/adsense/management/" target="_blank">Documentation</a>
  * </p>
  *
  * @author Google, Inc.
@@ -126,7 +126,17 @@ class Adsense extends \Google\Service
         'adclients',
         [
           'methods' => [
-            'getAdcode' => [
+            'get' => [
+              'path' => 'v2/{+name}',
+              'httpMethod' => 'GET',
+              'parameters' => [
+                'name' => [
+                  'location' => 'path',
+                  'type' => 'string',
+                  'required' => true,
+                ],
+              ],
+            ],'getAdcode' => [
               'path' => 'v2/{+name}/adcode',
               'httpMethod' => 'GET',
               'parameters' => [
@@ -286,7 +296,17 @@ class Adsense extends \Google\Service
         'urlchannels',
         [
           'methods' => [
-            'list' => [
+            'get' => [
+              'path' => 'v2/{+name}',
+              'httpMethod' => 'GET',
+              'parameters' => [
+                'name' => [
+                  'location' => 'path',
+                  'type' => 'string',
+                  'required' => true,
+                ],
+              ],
+            ],'list' => [
               'path' => 'v2/{+parent}/urlchannels',
               'httpMethod' => 'GET',
               'parameters' => [
@@ -504,6 +524,16 @@ class Adsense extends \Google\Service
                 'startDate.year' => [
                   'location' => 'query',
                   'type' => 'integer',
+                ],
+              ],
+            ],'getSaved' => [
+              'path' => 'v2/{+name}/saved',
+              'httpMethod' => 'GET',
+              'parameters' => [
+                'name' => [
+                  'location' => 'path',
+                  'type' => 'string',
+                  'required' => true,
                 ],
               ],
             ],
