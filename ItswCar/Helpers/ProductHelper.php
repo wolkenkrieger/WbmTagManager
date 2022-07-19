@@ -11,6 +11,7 @@ namespace ItswCar\Helpers;
 
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use ItswCar\Models\ArticleCarLinks;
 use ItswCar\Traits\LoggingTrait;
 use ItswCar\Models\ArticlePrices;
 use Shopware\Components\Model\ModelManager;
@@ -20,6 +21,10 @@ use Shopware\Models\Article\Article as ProductModel;
 class ProductHelper {
 	use LoggingTrait;
 	
+	/** @var int  */
+	protected const MAX_DESCRIPTION_LENGTH = 4850;
+	
+	/** @var \Shopware\Components\Model\ModelManager */
 	public ModelManager $manager;
 	
 	/**
@@ -269,12 +274,12 @@ class ProductHelper {
 	}
 	
 	/**
-	 * @param $description
-	 * @param $articleName
+	 * @param string $description
+	 * @param string $articleName
 	 * @return false|string
 	 * @throws \DOMException
 	 */
-	public function fixDescription($description, $articleName) {
+	public function fixDescription(string $description, string $articleName) {
 		$dom = new \DOMDocument();
 		$dom->loadHTML(mb_convert_encoding($description, 'HTML-ENTITIES', 'UTF-8'));
 		
@@ -315,4 +320,159 @@ class ProductHelper {
 		
 		return $description;
 	}
+	
+	/**
+	 * @param string $description
+	 * @param string $articleName
+	 * @param array  $compatibilityList
+	 * @return string
+	 * @throws \DOMException
+	 */
+	public function fixDescriptionForGoogle(string $description, string $articleName, array $compatibilityList = []): string {
+		$dom = new \DOMDocument();
+		$dom->loadHTML(mb_convert_encoding($description, 'HTML-ENTITIES', 'UTF-8'));
+		
+		$xPath = new \DOMXPath($dom);
+		
+		$listNodes = $xPath->query('//li');
+		$listEntries = $oeNumbers = [];
+		
+		foreach($listNodes as $listNode) {
+			if ($listNode->nodeValue) {
+				$listEntries[] = explode(':', $listNode->nodeValue, 2);
+			}
+		}
+		
+		if ($oeNumbersDiv = $dom->getElementById('description_oe')) {
+			$oeNumbers = explode(':', $oeNumbersDiv->nodeValue);
+			$oeNumbers = explode(',', trim(end($oeNumbers)));
+		}
+		
+		$oeNumbers = array_filter(array_unique($oeNumbers));
+		
+		$oe = FALSE;
+		$length = 0;
+		
+		if (empty($listEntries)) {
+			$listEntries = [$articleName];
+		}
+		
+		$textHelper = Shopware()->Container()->get('itsw.helper.text');
+		
+		$listEntries = array_filter($listEntries, static function ($listEntry) use (&$oe, &$length, $textHelper) {
+			if ((FALSE !== stripos($listEntry[0], 'qualität')) || (FALSE !== stripos($listEntry[0], 'zustand'))) {
+				if (isset($listEntry[1]) && (FALSE !== stripos($listEntry[1], 'erstausrüster'))) {
+					$oe = TRUE;
+				}
+				return FALSE;
+			}
+			
+			$length += $textHelper->getLength($listEntry);
+			return TRUE;
+		});
+		
+		$lastEntry = [
+			'Zustand',
+			sprintf('Neuteil%s', $oe ? ' in Erstausrüsterqualität' : '')
+		];
+		
+		$listEntries[] = $lastEntry;
+		
+		$length += $textHelper->getLength($lastEntry);
+		$oeNumbersString = '';
+		
+		foreach($oeNumbers as $oeNumber) {
+			$oeNumber = str_ireplace([
+				' ',
+				'#',
+				';',
+				'(',
+				')',
+				'[',
+				']'
+			], '', trim($oeNumber));
+			
+			if (($length + $textHelper->getLength([
+						'OE-Vergleichsnummer(n)',
+						sprintf('%s, %s', $oeNumbersString, $oeNumber)
+					])) < self::MAX_DESCRIPTION_LENGTH) {
+				$oeNumbersString = sprintf('%s%s%s', $oeNumbersString, ($oeNumbersString ? ', ' : ''), $oeNumber);
+			} else {
+				break;
+			}
+		}
+		
+		$listEntries[] = [
+			'OE-Vergleichsnummer(n)',
+			$oeNumbersString
+		];
+		
+		print_r($listEntries);die;
+		
+		
+		$contentLength = 0;
+		foreach($nodes as $node) {
+			if (FALSE !== stripos($node->nodeValue, 'qualität:')) {
+				if (FALSE !== stripos($node->nodeValue, 'erstausrüster')) {
+					$oe = TRUE;
+				}
+				$node->parentNode->removeChild($node);
+			}
+			if (FALSE !== stripos($node->nodeValue, 'zustand:')) {
+				$add = FALSE;
+			}
+			
+			if (empty($node->nodeValue)) {
+				if ($nodes->length === 1) {
+					$node->nodeValue = $articleName;
+				} else {
+					$node->parentNode->removeChild($node);
+				}
+			}
+		}
+		
+		if ($add && $nodes->count()) {
+			$nodes->item($nodes->length - 1)->parentNode->appendChild($dom->createElement('li', sprintf('Zustand: Neuteil%s', $oe? ' in Erstausrüsterqualität': '')));
+		}
+		
+		
+		if ((FALSE !== ($html = $dom->saveHTML())) && (FALSE !== ($html = stristr($html, '<ul>'))) && (FALSE !== ($html = stristr($html, '</body>', TRUE)))) {
+			return $html;
+		}
+		
+		return $description;
+	}
+	
+	/**
+	 * @param             $article
+	 * @param string|null $suffix
+	 * @return array
+	 */
+	public function getCompatibilityList($article, ?string $suffix): array {
+		if ($article instanceof ProductModel) {
+			try {
+				$articleDetailsId = $article->getMainDetail()->getId();
+			} catch (\Exception $exception) {
+				$this->error($exception);
+				$articleDetailsId = 0;
+			}
+		} else {
+			$articleDetailsId = $article;
+		}
+		
+		$carLinks = $this->manager->getRepository(ArticleCarLinks::class)->findBy([
+			'articleDetailsId' => $articleDetailsId
+		]);
+		
+		$result = [];
+		
+		foreach ($carLinks as $carLink) {
+			$car = $carLink->getCar();
+			$result[$car->getManufacturer()->getDisplay()][$car->getModel()->getDisplay()][$car->getType()->getDisplay()] = $car->getBuildFromTo($suffix);
+		}
+		
+		return $result;
+	}
+	
+	
 }

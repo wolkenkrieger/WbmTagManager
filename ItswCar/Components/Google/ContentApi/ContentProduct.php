@@ -105,6 +105,8 @@ class ContentProduct {
 			$shippingInfos = [];
 		}
 		
+		$compatibilityList = $this->productHelper->getCompatibilityList($this->product, '->');
+		
 		$productImageUrls = [];
 		
 		foreach($this->product->getImages() as $image) {
@@ -162,19 +164,10 @@ class ContentProduct {
 		//$fakePrice = $productPrice * $this->getPriceFactor();
 		//$fakePrice = $this->product->getMainDetail()->getAttribute()->getFakePrice()?:$productPrice;
 		
-		$description = $this->product->getDescriptionLong();
-
-		$description = str_ireplace([
-			'</ul><br><br><div id="description_oe">',
-			'</div>'
-		], [
-			'<li>',
-			'</li></ul>'
-		],
-			$this->textHelper->filterBadWords($description));
+		$description = $this->textHelper->filterBadWords($this->product->getDescriptionLong());
 		
 		try {
-			$description = $this->productHelper->fixDescription($description, $this->product->getName());
+			$description = $this->productHelper->fixDescriptionForGoogle($description, $this->product->getName(), $compatibilityList);
 		} catch (\Exception $exception) {
 			$this->error($exception);
 		}

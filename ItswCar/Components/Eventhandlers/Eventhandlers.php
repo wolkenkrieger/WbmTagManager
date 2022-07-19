@@ -11,16 +11,12 @@
 namespace ItswCar\Components\Eventhandlers;
 
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\ORMException;
-use Doctrine\ORM\Query\Expr\Join;
-use Google\Exception;
 use InvalidArgumentException;
 use ItswCar\Components\Google\ContentApi\ContentProduct;
 use ItswCar\Components\Google\ContentApi\ContentSession;
 use ItswCar\Components\Services\Services;
 use ItswCar\Models\Car;
 use ItswCar\Models\GoogleMerchantCenterQueue;
-use ItswCar\Models\ArticlePrices as PriceHistory;
 use ItswCar\Traits\LoggingTrait;
 use Shopware\Components\Model\ModelManager;
 use Shopware\Models\Article\Price;
@@ -218,10 +214,8 @@ class Eventhandlers {
 									];
 									$this->sessionHelper->setSessionData($sessionData);
 								}
-							} catch(NonUniqueResultException $nonUniqueResultException) {
-								$this->error($nonUniqueResultException);
-							} catch (\JsonException $jsonException) {
-								$this->error($jsonException);
+							} catch(\Exception $exception) {
+								$this->error($exception);
 							}
 						}
 						break;
@@ -619,7 +613,9 @@ class Eventhandlers {
 						$basketEntity->setAttribute($orderBasketAttributeEntity);
 					}
 					$this->modelManager->flush();
-				} catch (ORMException $exception) {}
+				} catch (\Exception $exception) {
+					$this->error(($exception));
+				}
 			}
 		}
 	}
@@ -635,7 +631,7 @@ class Eventhandlers {
 		
 		try {
 			$customerGroup = $this->shop->getCustomerGroup();
-		} catch (\RuntimeException $exception) {
+		} catch (\Exception $exception) {
 			$customerGroup = $this->modelManager->getRepository(Group::class)
 				->find($userGroupData['id']);
 		}

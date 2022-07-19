@@ -38,7 +38,7 @@ class Car extends ModelEntity {
 	 * @ORM\ManyToOne(targetEntity="ItswCar\Models\Manufacturer", inversedBy="cars")
 	 * @ORM\JoinColumn(name="manufacturer_id", referencedColumnName="id")
 	 */
-	protected $manufacturer;
+	protected Manufacturer $manufacturer;
 	
 	/**
 	 * OWNING SIDE
@@ -48,7 +48,7 @@ class Car extends ModelEntity {
 	 * @ORM\ManyToOne(targetEntity="ItswCar\Models\Model", inversedBy="cars")
 	 * @ORM\JoinColumn(name="model_id", referencedColumnName="id")
 	 */
-	protected $model;
+	protected Model $model;
 	
 	/**
 	 * OWNING SIDE
@@ -58,7 +58,7 @@ class Car extends ModelEntity {
 	 * @ORM\ManyToOne(targetEntity="ItswCar\Models\Type", inversedBy="cars")
 	 * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
 	 */
-	protected $type;
+	protected Type $type;
 	
 	/**
 	 * OWNING SIDE
@@ -68,7 +68,7 @@ class Car extends ModelEntity {
 	 * @ORM\ManyToOne(targetEntity="ItswCar\Models\EbayPlatform", inversedBy="cars")
 	 * @ORM\JoinColumn(name="platform_id", referencedColumnName="id")
 	 */
-	protected $platform;
+	protected EbayPlatform $platform;
 	
 	/**
 	 * @var \Doctrine\Common\Collections\ArrayCollection<\ItswCar\Models\KbaCodes>|null
@@ -141,10 +141,10 @@ class Car extends ModelEntity {
 	protected \DateTimeImmutable $buildFrom;
 	
 	/**
-	 * @var \DateTimeImmutable
+	 * @var ?\DateTimeImmutable
 	 * @ORM\Column(name="build_to", type="datetime_immutable", nullable=true)
 	 */
-	protected \DateTimeImmutable $buildTo;
+	protected ?\DateTimeImmutable $buildTo;
 	
 	/**
 	 * @var int
@@ -462,7 +462,7 @@ class Car extends ModelEntity {
 	 * @return string
 	 */
 	public function getBuildToMonth(): string {
-		$this->buildToMonth = $this->buildTo?$this->buildTo->format("m"):'';
+		$this->buildToMonth = $this->buildTo ? $this->buildTo->format("m") : '';
 		
 		return $this->buildToMonth;
 	}
@@ -471,9 +471,21 @@ class Car extends ModelEntity {
 	 * @return string
 	 */
 	public function getBuildToYear(): string {
-		$this->buildToYear = $this->buildTo?$this->buildTo->format("Y"):'';
+		$this->buildToYear = $this->buildTo ? $this->buildTo->format("Y") : '';
 		
 		return $this->buildToYear;
+	}
+	
+	/**
+	 * @param string|null $suffix
+	 * @return string
+	 */
+	public function getBuildFromTo(?string $suffix): string{
+		if ($this->buildTo) {
+			return (sprintf('%s/%s - %s/%s', $this->getBuildFromMonth(), $this->getBuildFromYear(), $this->getBuildToMonth(), $this->getBuildToYear()));
+		}
+		
+		return (sprintf('%s/%s%s%s', $this->getBuildFromMonth(), $this->getBuildFromYear(), ($suffix? ' ': ''), $suffix));
 	}
 	
 	/**

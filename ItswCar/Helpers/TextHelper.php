@@ -61,4 +61,29 @@ class TextHelper {
 		return $string;
 	}
 	
+	/**
+	 * @param $content
+	 * @return int
+	 */
+	public function getLength($content): int {
+		if (!is_string($content) && ! is_array($content)) {
+			return 0;
+		}
+		
+		if (is_string($content)) {
+			return mb_strlen($content, 'UTF-8');
+		}
+		
+		$length = 0;
+		
+		foreach($content as $value) {
+			if (is_array($value)) {
+				$length += $this->getLength($value);
+			} else {
+				$length += mb_strlen($value, 'UTF-8');
+			}
+		}
+		
+		return $length;
+	}
 }
