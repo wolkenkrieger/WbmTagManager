@@ -22,10 +22,13 @@ class ProductHelper {
 	use LoggingTrait;
 	
 	/** @var int  */
-	protected const MAX_DESCRIPTION_LENGTH = 4850;
+	protected const MAX_DESCRIPTION_LENGTH_GOOGLE = 4850;
 	
 	/** @var int  */
-	protected const MAX_TITLE_LENGTH = 150;
+	protected const MAX_TITLE_LENGTH_GOOGLE = 150;
+	
+	/** @var bool  */
+	protected const TITLE_WITH_CARS = TRUE;
 	
 	/** @var \Shopware\Components\Model\ModelManager */
 	public ModelManager $manager;
@@ -370,9 +373,13 @@ class ProductHelper {
 				unset($listEntries[$key]);
 			}
 			
-			array_walk($listEntry, static function(&$listEntry) {
+			if (is_array($listEntry)) {
+				array_walk($listEntry, static function(&$listEntry) {
+					$listEntry = trim($listEntry);
+				});
+			} else {
 				$listEntry = trim($listEntry);
-			});
+			}
 			
 			$length += $textHelper->getLength($listEntry);
 		});
@@ -390,7 +397,7 @@ class ProductHelper {
 		
 		$length += $textHelper->getLength($lastEntry);
 		
-		if ($length < self::MAX_DESCRIPTION_LENGTH && count($oeNumbers)) {
+		if ($length < self::MAX_DESCRIPTION_LENGTH_GOOGLE && count($oeNumbers)) {
 			$oeNumbersString = '';
 			$lastEntry = [
 				'OE-Vergleichsnummer(n)'
@@ -412,7 +419,7 @@ class ProductHelper {
 				
 				$oeNumberLength = $textHelper->getLength(sprintf('%s%s%s', $oeNumbersString, ($oeNumbersString ? ', ' : ''), $oeNumber));
 				
-				if (($tmpLength + $oeNumberLength) < self::MAX_DESCRIPTION_LENGTH) {
+				if (($tmpLength + $oeNumberLength) < self::MAX_DESCRIPTION_LENGTH_GOOGLE) {
 					$oeNumbersString = sprintf('%s%s%s', $oeNumbersString, ($oeNumbersString ? ', ' : ''), $oeNumber);
 					$length = $tmpLength + $oeNumberLength;
 				} else {
@@ -430,8 +437,8 @@ class ProductHelper {
 			}
 		}
 		
-		if ($length < self::MAX_DESCRIPTION_LENGTH && count($compatibilityList)) {
-			$typeString = $lastEntryString = '';
+		if ($length < self::MAX_DESCRIPTION_LENGTH_GOOGLE && count($compatibilityList)) {
+			$lastEntryString = '';
 			$lastEntry = [
 				'Fahrzeug(e)'
 			];
@@ -453,7 +460,7 @@ class ProductHelper {
 					
 					$lastEntryLength = $textHelper->getLength(sprintf('%s%s', ($lastEntryString ? sprintf('%s ', $lastEntryString) : ''), $typeString));
 					
-					if (($tmpLength + $lastEntryLength) < self::MAX_DESCRIPTION_LENGTH) {
+					if (($tmpLength + $lastEntryLength) < self::MAX_DESCRIPTION_LENGTH_GOOGLE) {
 						$lastEntryString = sprintf('%s%s', ($lastEntryString ? sprintf('%s ', $lastEntryString) : ''), $typeString);
 						$length = $tmpLength + $lastEntryLength;
 						$typeWritten = TRUE;
