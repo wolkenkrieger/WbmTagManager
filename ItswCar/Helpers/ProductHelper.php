@@ -438,6 +438,7 @@ class ProductHelper {
 			
 			$lastEntryLength = $textHelper->getLength($lastEntry);
 			$tmpLength = $length + $lastEntryLength;
+			$typeWritten = FALSE;
 			
 			foreach ($compatibilityList as $manufacturerDisplay => $model) {
 				$lastEntryString = sprintf('%s%s', ($lastEntryString ? sprintf('%s | ', $lastEntryString) : ''), $manufacturerDisplay);
@@ -455,13 +456,17 @@ class ProductHelper {
 					if (($tmpLength + $lastEntryLength) < self::MAX_DESCRIPTION_LENGTH) {
 						$lastEntryString = sprintf('%s%s', ($lastEntryString ? sprintf('%s ', $lastEntryString) : ''), $typeString);
 						$length = $tmpLength + $lastEntryLength;
+						$typeWritten = TRUE;
 					} else {
+						if ($typeWritten) {
+							$lastEntryString = sprintf('%s [...]', $lastEntryString);
+						}
 						break 2;
 					}
 				}
 			}
 			
-			if ($typeString) {
+			if ($typeWritten) {
 				$lastEntry = [
 					'Fahrzeug(e)',
 					$lastEntryString
