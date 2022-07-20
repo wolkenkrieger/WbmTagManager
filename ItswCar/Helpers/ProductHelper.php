@@ -327,6 +327,10 @@ class ProductHelper {
 		return $description;
 	}
 	
+	public function _fixDescription(string $description, string $articleName, array $options = []) {
+	
+	}
+	
 	/**
 	 * @param string $description
 	 * @param string $articleName
@@ -362,6 +366,7 @@ class ProductHelper {
 		if (empty($listEntries)) {
 			$listEntries = [$articleName];
 		}
+		
 		
 		$textHelper = Shopware()->Container()->get('itsw.helper.text');
 		
@@ -486,10 +491,15 @@ class ProductHelper {
 		$descriptionTmp = '';
 		
 		foreach ($listEntries as $listEntry) {
-			$descriptionTmp = sprintf('%s<li>%s</li>', $descriptionTmp, implode(': ', $listEntry));
+			$descriptionTmp = sprintf('%s<li>%s</li>', $descriptionTmp, (is_array($listEntry) ? implode(': ', $listEntry): $listEntry));
 		}
 		
 		return sprintf('<ul>%s</ul>', $descriptionTmp);
+	}
+	
+	public function fixTitle(string $articleName, array $options = []): string {
+		$maxTitleLength = $options['maxLength'] ?? self::MAX_TITLE_LENGTH_GOOGLE;
+		$withCars = $options['withCars'] ?? self::TITLE_WITH_CARS;
 	}
 	
 	/**
