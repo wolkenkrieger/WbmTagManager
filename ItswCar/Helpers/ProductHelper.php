@@ -24,6 +24,9 @@ class ProductHelper {
 	/** @var int  */
 	protected const MAX_DESCRIPTION_LENGTH = 4850;
 	
+	/** @var int  */
+	protected const MAX_TITLE_LENGTH = 150;
+	
 	/** @var \Shopware\Components\Model\ModelManager */
 	public ModelManager $manager;
 	
@@ -359,16 +362,19 @@ class ProductHelper {
 		
 		$textHelper = Shopware()->Container()->get('itsw.helper.text');
 		
-		$listEntries = array_filter($listEntries, static function ($listEntry) use (&$oe, &$length, $textHelper) {
+		array_walk($listEntries, static function (&$listEntry, $key) use (&$listEntries, &$oe, &$length, $textHelper) {
 			if ((FALSE !== stripos($listEntry[0], 'qualität')) || (FALSE !== stripos($listEntry[0], 'zustand'))) {
 				if (isset($listEntry[1]) && (FALSE !== stripos($listEntry[1], 'erstausrüster'))) {
 					$oe = TRUE;
 				}
-				return FALSE;
+				unset($listEntries[$key]);
 			}
 			
+			array_walk($listEntry, static function(&$listEntry) {
+				$listEntry = trim($listEntry);
+			});
+			
 			$length += $textHelper->getLength($listEntry);
-			return TRUE;
 		});
 		
 		$lastEntry = [
@@ -376,71 +382,102 @@ class ProductHelper {
 			sprintf('Neuteil%s', $oe ? ' in Erstausrüsterqualität' : '')
 		];
 		
-		$listEntries[] = $lastEntry;
+		if ($oe) {
+			array_unshift($listEntries, $lastEntry);
+		} else {
+			$listEntries[] = $lastEntry;
+		}
 		
 		$length += $textHelper->getLength($lastEntry);
-		$oeNumbersString = '';
 		
-		foreach($oeNumbers as $oeNumber) {
-			$oeNumber = str_ireplace([
-				' ',
-				'#',
-				';',
-				'(',
-				')',
-				'[',
-				']'
-			], '', trim($oeNumber));
+		if ($length < self::MAX_DESCRIPTION_LENGTH && count($oeNumbers)) {
+			$oeNumbersString = '';
+			$lastEntry = [
+				'OE-Vergleichsnummer(n)'
+			];
 			
-			if (($length + $textHelper->getLength([
-						'OE-Vergleichsnummer(n)',
-						sprintf('%s, %s', $oeNumbersString, $oeNumber)
-					])) < self::MAX_DESCRIPTION_LENGTH) {
-				$oeNumbersString = sprintf('%s%s%s', $oeNumbersString, ($oeNumbersString ? ', ' : ''), $oeNumber);
-			} else {
-				break;
-			}
-		}
-		
-		$listEntries[] = [
-			'OE-Vergleichsnummer(n)',
-			$oeNumbersString
-		];
-		
-		print_r($listEntries);die;
-		
-		
-		$contentLength = 0;
-		foreach($nodes as $node) {
-			if (FALSE !== stripos($node->nodeValue, 'qualität:')) {
-				if (FALSE !== stripos($node->nodeValue, 'erstausrüster')) {
-					$oe = TRUE;
-				}
-				$node->parentNode->removeChild($node);
-			}
-			if (FALSE !== stripos($node->nodeValue, 'zustand:')) {
-				$add = FALSE;
-			}
+			$lastEntryLength = $textHelper->getLength($lastEntry);
+			$tmpLength = $length + $lastEntryLength;
 			
-			if (empty($node->nodeValue)) {
-				if ($nodes->length === 1) {
-					$node->nodeValue = $articleName;
+			foreach($oeNumbers as $oeNumber) {
+				$oeNumber = str_ireplace([
+					' ',
+					'#',
+					';',
+					'(',
+					')',
+					'[',
+					']'
+				], '', trim($oeNumber));
+				
+				$oeNumberLength = $textHelper->getLength(sprintf('%s%s%s', $oeNumbersString, ($oeNumbersString ? ', ' : ''), $oeNumber));
+				
+				if (($tmpLength + $oeNumberLength) < self::MAX_DESCRIPTION_LENGTH) {
+					$oeNumbersString = sprintf('%s%s%s', $oeNumbersString, ($oeNumbersString ? ', ' : ''), $oeNumber);
+					$length = $tmpLength + $oeNumberLength;
 				} else {
-					$node->parentNode->removeChild($node);
+					break;
 				}
+			}
+			
+			if ($oeNumbersString) {
+				$lastEntry = [
+					'OE-Vergleichsnummer(n)',
+					$oeNumbersString
+				];
+				
+				$listEntries[] = $lastEntry;
 			}
 		}
 		
-		if ($add && $nodes->count()) {
-			$nodes->item($nodes->length - 1)->parentNode->appendChild($dom->createElement('li', sprintf('Zustand: Neuteil%s', $oe? ' in Erstausrüsterqualität': '')));
+		if ($length < self::MAX_DESCRIPTION_LENGTH && count($compatibilityList)) {
+			$typeString = $lastEntryString = '';
+			$lastEntry = [
+				'Fahrzeug(e)'
+			];
+			
+			$lastEntryLength = $textHelper->getLength($lastEntry);
+			$tmpLength = $length + $lastEntryLength;
+			
+			foreach ($compatibilityList as $manufacturerDisplay => $model) {
+				$lastEntryString = sprintf('%s%s', ($lastEntryString ? sprintf('%s | ', $lastEntryString) : ''), $manufacturerDisplay);
+				$typeString = '';
+				foreach ($model as $modelDisplay => $type) {
+					$lastEntryString = sprintf('%s%s %s', $lastEntryString, ($typeString ? ';' : ''), $modelDisplay);
+					$typeString = '';
+					
+					foreach ($type as $typeDisplay => $years) {
+						$typeString = sprintf('%s%s', ($typeString ? sprintf('%s, ', $typeString) : ''), $typeDisplay);
+					}
+					
+					$lastEntryLength = $textHelper->getLength(sprintf('%s%s', ($lastEntryString ? sprintf('%s ', $lastEntryString) : ''), $typeString));
+					
+					if (($tmpLength + $lastEntryLength) < self::MAX_DESCRIPTION_LENGTH) {
+						$lastEntryString = sprintf('%s%s', ($lastEntryString ? sprintf('%s ', $lastEntryString) : ''), $typeString);
+						$length = $tmpLength + $lastEntryLength;
+					} else {
+						break 2;
+					}
+				}
+			}
+			
+			if ($typeString) {
+				$lastEntry = [
+					'Fahrzeug(e)',
+					$lastEntryString
+				];
+				
+				$listEntries[] = $lastEntry;
+			}
 		}
 		
+		$descriptionTmp = '';
 		
-		if ((FALSE !== ($html = $dom->saveHTML())) && (FALSE !== ($html = stristr($html, '<ul>'))) && (FALSE !== ($html = stristr($html, '</body>', TRUE)))) {
-			return $html;
+		foreach ($listEntries as $listEntry) {
+			$descriptionTmp = sprintf('%s<li>%s</li>', $descriptionTmp, implode(': ', $listEntry));
 		}
 		
-		return $description;
+		return sprintf('<ul>%s</ul>', $descriptionTmp);
 	}
 	
 	/**
@@ -461,7 +498,10 @@ class ProductHelper {
 		}
 		
 		$carLinks = $this->manager->getRepository(ArticleCarLinks::class)->findBy([
-			'articleDetailsId' => $articleDetailsId
+			'articleDetailsId' => $articleDetailsId,
+			'active' => 1
+		], [
+			'tecdocId' => 'ASC'
 		]);
 		
 		$result = [];

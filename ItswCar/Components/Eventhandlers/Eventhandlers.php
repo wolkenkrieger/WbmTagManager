@@ -657,6 +657,7 @@ class Eventhandlers {
 				->from(GoogleMerchantCenterQueue::class, 'gmcq')
 				->where('gmcq.handled IS NULL')
 				->orWhere('DATE_DIFF(CURRENT_DATE(), gmcq.handled) >= 21')
+				//->where('gmcq.articleId = 76870')
 				->orderBy('gmcq.handled')
 				->setMaxResults($limit)
 				->getQuery();
