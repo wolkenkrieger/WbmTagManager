@@ -181,13 +181,28 @@ class ContentProduct {
 			'atw',
 			'autoteile-wiesel'
 		])) {
-			$product->setTitle($this->product->getSupplier()->getName() . ' ' . $this->textHelper->filterBadWords($this->product->getName()));
+			$title = sprintf('%s %s', $this->product->getSupplier()->getName(), $this->textHelper->filterBadWords($this->product->getName()));
+			if ($fixedTitle = $this->productHelper->getFixedTitle($title, [
+				'withCars' => TRUE,
+				'cars' => $compatibilityList
+			])) {
+				$title = $fixedTitle;
+			}
+			
+			$product->setTitle($title);
 			$product->setBrand($this->product->getSupplier()->getName());
 		} else {
-			$product->setTitle($this->textHelper->filterBadWords($this->product->getName()));
+			$title = $this->textHelper->filterBadWords($this->product->getName());
+			if ($fixedTitle = $this->productHelper->getFixedTitle($title, [
+				'withCars' => TRUE,
+				'cars' => $compatibilityList
+			])) {
+				$title = $fixedTitle;
+			}
+			
+			$product->setTitle($title);
 			$product->setBrand('ATW');
 		}
-		
 		
 		$product->setOfferId($this->product->getMainDetail()->getNumber());
 		$product->setId($this->buildProductId($product->getOfferId()));

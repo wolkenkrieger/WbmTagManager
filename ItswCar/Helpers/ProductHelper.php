@@ -30,6 +30,14 @@ class ProductHelper {
 	/** @var bool  */
 	protected const TITLE_WITH_CARS = TRUE;
 	
+	/** @var string  */
+	protected const FOR_CARS_WORD = 'für';
+	
+	/** @var string[]  */
+	protected const DELETE_WORDS = [
+		'für'
+	];
+	
 	/** @var \Shopware\Components\Model\ModelManager */
 	public ModelManager $manager;
 	
@@ -497,9 +505,94 @@ class ProductHelper {
 		return sprintf('<ul>%s</ul>', $descriptionTmp);
 	}
 	
-	public function fixTitle(string $articleName, array $options = []): string {
+	/**
+	 * @param \Shopware\Models\Article\Article|int|string $article
+	 * @param array                                       $options
+	 * @return string|null
+	 */
+	public function getFixedTitle($article, array $options = []): ?string {
+		if ($article instanceof ProductModel) {
+			try {
+				$articleName = trim($article->getName());
+			} catch (\Exception $exception) {
+				$this->error($exception);
+				return NULL;
+			}
+		} elseif (is_numeric($article)) {
+			try {
+				$article = $this->manager->getRepository(ProductModel::class)->find($article);
+				$articleName = trim($article->getName());
+			} catch (\Exception $exception) {
+				$this->error($exception);
+				return NULL;
+			}
+		} else {
+			$articleName = $article;
+		}
+		
+		if (!$articleName) {
+			return NULL;
+		}
+		
 		$maxTitleLength = $options['maxLength'] ?? self::MAX_TITLE_LENGTH_GOOGLE;
 		$withCars = $options['withCars'] ?? self::TITLE_WITH_CARS;
+		$deleteWords = $options['deleteWords'] ?? self::DELETE_WORDS;
+		$forCarsWord = $options['forCarsWord'] ?? self::FOR_CARS_WORD;
+		
+		if ($withCars) {
+			if (isset($options['cars'])) {
+				$cars = $options['cars'];
+			} else if ($article instanceof ProductModel || is_numeric($article)) {
+				$cars = $this->getCompatibilityList($article);
+			} else {
+				$cars = [];
+			}
+			
+			if (count($cars) > 1) {
+				$cars = array_keys($cars);
+			} else {
+				$cars = array_merge(array_keys($cars), array_keys(reset($cars)));
+			}
+		}
+		
+		array_walk($deleteWords, static function (&$word) {
+			$word = mb_strtolower($word);
+		});
+		
+		if (FALSE === ($titleEntries = explode(' ', $articleName))) {
+			return NULL;
+		}
+		
+		if (!is_array($titleEntries)) {
+			$titleEntries = [$titleEntries];
+		}
+		
+		$titleString = '';
+		$textHelper = Shopware()->Container()->get('itsw.helper.text');
+		$maxLengthReached = FALSE;
+		
+		foreach($titleEntries as $titleEntry) {
+			if (!in_array(mb_strtolower($titleEntry), $deleteWords, TRUE)) {
+				if ($textHelper->getLength(sprintf('%s%s%s', $titleString, ($titleString? ' ' : ''), $titleEntry)) <= $maxTitleLength) {
+					$titleString = sprintf('%s%s%s', $titleString, ($titleString? ' ' : ''), $titleEntry);
+				} else {
+					$maxLengthReached = TRUE;
+					break;
+				}
+			}
+		}
+		
+		if ($withCars && !$maxLengthReached) {
+			foreach($cars as $key => $car) {
+				if ($textHelper->getLength(sprintf('%s%s %s', $titleString, ($key === 0 ? sprintf(' %s', $forCarsWord) : ''), $car)) <= $maxTitleLength) {
+					$titleString = sprintf('%s%s %s', $titleString, ($key === 0 ? sprintf(' %s', $forCarsWord) : ''), $car);
+				} else {
+					break;
+				}
+			}
+		}
+		
+		return $titleString;
 	}
 	
 	/**
@@ -507,7 +600,7 @@ class ProductHelper {
 	 * @param string|null $suffix
 	 * @return array
 	 */
-	public function getCompatibilityList($article, ?string $suffix): array {
+	public function getCompatibilityList($article, string $suffix = NULL): array {
 		if ($article instanceof ProductModel) {
 			try {
 				$articleDetailsId = $article->getMainDetail()->getId();
