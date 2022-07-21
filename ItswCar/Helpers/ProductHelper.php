@@ -548,10 +548,10 @@ class ProductHelper {
 				$cars = [];
 			}
 			
-			if (count($cars) > 1) {
-				$cars = array_keys($cars);
-			} else {
+			if (count($cars) === 1) {
 				$cars = array_merge(array_keys($cars), array_keys(reset($cars)));
+			} elseif (count($cars) > 1) {
+				$cars = array_keys($cars);
 			}
 		}
 		
