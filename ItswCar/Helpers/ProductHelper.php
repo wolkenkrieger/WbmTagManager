@@ -586,7 +586,7 @@ class ProductHelper {
 			$foundWords = [];
 			foreach($cars as $key => $car) {
 				if (FALSE !== ($carPieces = explode(' ', $car))) {
-					array_filter($carPieces, static function($piece) use(&$foundWords) {
+					$carPieces = array_filter($carPieces, static function($piece) use(&$foundWords) {
 						if (in_array($piece, $foundWords, TRUE)) {
 							return FALSE;
 						}
