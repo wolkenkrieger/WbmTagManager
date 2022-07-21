@@ -583,9 +583,28 @@ class ProductHelper {
 		}
 		
 		if ($withCars && !$maxLengthReached) {
+			$foundWords = [];
 			foreach($cars as $key => $car) {
+				if (FALSE !== $carPieces = explode(' ', $car)) {
+					array_filter($carPieces, static function($piece) use(&$foundWords) {
+						if (in_array($piece, $foundWords, TRUE)) {
+							return FALSE;
+						}
+						
+						$foundWords[] = $piece;
+						return TRUE;
+					});
+				}
+				
+				if (!count($carPieces)) {
+					continue;
+				}
+				
+				$car = implode(' ', $carPieces);
+				
 				if ($textHelper->getLength(sprintf('%s%s %s', $titleString, ($key === 0 ? sprintf(' %s', $forCarsWord) : ''), $car)) <= $maxTitleLength) {
 					$titleString = sprintf('%s%s %s', $titleString, ($key === 0 ? sprintf(' %s', $forCarsWord) : ''), $car);
+					$foundWords[] = $car;
 				} else {
 					break;
 				}
