@@ -585,7 +585,7 @@ class ProductHelper {
 		if ($withCars && !$maxLengthReached) {
 			$foundWords = [];
 			foreach($cars as $key => $car) {
-				if (FALSE !== $carPieces = explode(' ', $car)) {
+				if (FALSE !== ($carPieces = explode(' ', $car))) {
 					array_filter($carPieces, static function($piece) use(&$foundWords) {
 						if (in_array($piece, $foundWords, TRUE)) {
 							return FALSE;
