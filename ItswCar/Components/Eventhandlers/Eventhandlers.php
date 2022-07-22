@@ -332,6 +332,11 @@ class Eventhandlers {
 	 */
 	public function onAfterGetArticleById(\Enlight_Hook_HookArgs $hookArgs): void {
 		$article = $hookArgs->getReturn();
+		
+		if (empty($article) || !count($article)) {
+			return;
+		}
+		
 		$sessionData = $this->sessionHelper->getSessionData();
 		
 		try {
