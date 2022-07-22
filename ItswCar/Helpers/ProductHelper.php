@@ -324,7 +324,7 @@ class ProductHelper {
 		}
 		
 		if ($add && $nodes->count()) {
-			$nodes->item($nodes->length - 1)->parentNode->appendChild($dom->createElement('li', sprintf('Zustand: Neuteil%s', $oe? ' in Erstausrüsterqualität': '')));
+			$nodes->item(0)->parentNode->appendChild($dom->createElement('li', sprintf('Zustand: Neuteil%s', $oe? ' in Erstausrüsterqualität': '')));
 		}
 		
 		
