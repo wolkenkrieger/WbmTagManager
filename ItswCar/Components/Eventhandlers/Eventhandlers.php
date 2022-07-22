@@ -303,7 +303,6 @@ class Eventhandlers {
 	
 	/**
 	 * @param \Enlight_Event_EventArgs $eventArgs
-	 * @throws \DOMException
 	 */
 	public function onConvertListProduct(\Enlight_Event_EventArgs $eventArgs): void {
 		$article = $eventArgs->getReturn();
