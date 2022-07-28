@@ -283,6 +283,15 @@ class ItswCar extends Plugin {
 			'custom' => FALSE
 		]);
 		
+		$service->update('s_order_attributes', 'itsw_cookie_set', 'boolean', [
+			'label' => 'Cookie gesetzt?',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'custom' => FALSE
+		], NULL, TRUE, FALSE);
+		
 		if ($service->get('s_order_attributes', 'tecdoc_id')) {
 			$service->delete('s_order_attributes', 'tecdoc_id');
 		}

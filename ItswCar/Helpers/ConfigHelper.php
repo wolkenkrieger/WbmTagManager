@@ -9,6 +9,7 @@
 namespace ItswCar\Helpers;
 
 use Google\Exception;
+use Shopware\Bundle\CookieBundle\Services\CookieHandler;
 use Shopware\Bundle\StoreFrontBundle\Service\ContextServiceInterface;
 use Shopware\Bundle\StoreFrontBundle\Struct\ShopContextInterface;
 use Shopware\Components\ConfigWriter;
@@ -330,5 +331,29 @@ class ConfigHelper {
 	 */
 	public function getRootCategory(): ?Category\Category {
 		return $this->getShop()->getCategory();
+	}
+	
+	/**
+	 * @param $request
+	 * @return bool
+	 * @throws \JsonException
+	 */
+	public function isCookieAllowed($request): bool {
+		$cookieHandler = Shopware()->Container()->get(CookieHandler::class);
+		$preferences = $request->getCookie(CookieHandler::PREFERENCES_COOKIE_NAME);
+		
+		if ($preferences !== NULL) {
+			$preferences = json_decode($preferences, TRUE, 512, JSON_THROW_ON_ERROR);
+			return (bool)$cookieHandler->isCookieAllowedByPreferences($this->getGTMCookieName(), $preferences);
+		}
+		
+		return FALSE;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getGTMCookieName(): string {
+		return $this->getValue('gtm_cookie_name', 'ItswCar');
 	}
 }

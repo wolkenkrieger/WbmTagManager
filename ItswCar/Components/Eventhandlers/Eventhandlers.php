@@ -930,10 +930,14 @@ class Eventhandlers {
 	
 	/**
 	 * @param \Enlight_Event_EventArgs $eventArgs
+	 * @throws \JsonException
 	 */
 	public function onOrderSaveOrderFilterAttributes(\Enlight_Event_EventArgs $eventArgs): void {
 		$attributeData = $eventArgs->getReturn();
+		
 		$attributeData['itsw_pay_until_date'] = $this->configHelper->getPayUntilDate();
+		$attributeData['itsw_cookie_set'] = $this->configHelper->isCookieAllowed(Shopware()->Front()->Request());
+		
 		$eventArgs->setReturn($attributeData);
 	}
 	
@@ -951,6 +955,21 @@ class Eventhandlers {
 		}
 		
 		$eventArgs->setReturn($javascriptFiles);
+	}
+	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 * @return void
+	 */
+	public function onSaveOrderFilterAttributes(\Enlight_Event_EventArgs $eventArgs): void {
+		$orderAttributes = [];
+		
+		if (Shopware()->Front()) {
+			$orderAttributes = $eventArgs->getReturn();
+			
+		}
+		
+		$eventArgs->setReturn($orderAttributes);
 	}
 	
 	

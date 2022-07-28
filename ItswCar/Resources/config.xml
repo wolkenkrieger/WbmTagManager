@@ -203,5 +203,12 @@
 			<value>5</value>
 			<description></description>
 		</element>
+		
+		<element required="true" type="text" scope="shop">
+			<name>gtm_cookie_name</name>
+			<label lang="de">Name des GTM-Cookies</label>
+			<value>wbm_tag_manager</value>
+			<description lang="de"></description>
+		</element>
 	</elements>
 </config>
