@@ -7,31 +7,16 @@
  *}
 {extends file="parent:frontend/index/index.tpl"}
 
-{block name='frontend_index_header_navigation'}
-	<div class="container header--navigation">
+{* Shop navigation *}
+{block name='frontend_index_shop_navigation'}
+	{$smarty.block.parent}
 
-        {* Logo container *}
-        {block name='frontend_index_logo_container'}
-            {include file="frontend/index/logo-container.tpl"}
-        {/block}
-
-        {* Shop navigation *}
-        {block name='frontend_index_shop_navigation'}
-            {include file="frontend/index/shop-navigation.tpl"}
-        {/block}
-
-        {block name='frontend_index_container_ajax_cart'}
-			<div class="container--ajax-cart" data-collapse-cart="true"{if $theme.offcanvasCart} data-displayMode="offcanvas"{/if}></div>
-        {/block}
-
-        {* ITSW CarFinder Widget *}
-        {block name="frontend_index_itsw_carfinder_widget"}
-			{if {controllerAction|lower} !== 'service' && {controllerName|lower} !== 'checkout' && {controllerName|lower} !== 'register'}
-				{action module=widgets controller=carfinder}
-			{/if}
-        {/block}
-	</div>
-    {if $ItswCar.development}
-        {debug}
-    {/if}
+	{* ITSW CarFinder Widget *}
+    {block name="frontend_index_itsw_carfinder_widget"}
+        {if {controllerAction|lower} !== 'service' && {controllerName|lower} !== 'checkout' && {controllerName|lower} !== 'register'}
+            {action module=widgets controller=carfinder}
+        {/if}
+    {/block}
 {/block}
+
+
