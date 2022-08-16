@@ -218,6 +218,16 @@ class ItswCar extends Plugin {
 			'custom' => TRUE
 		]);
 		
+		$service->update('s_articles_attributes', 'oe_numbers_json', 'text', [
+			'label' => 'OE-Nummern (JSON encoded)',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'position' => 107,
+			'custom' => TRUE
+		]);
+		
 		$service->update('s_articles_attributes', 'fake_price', 'float', [
 			'label' => 'Fake Preis',
 			'supportText' => '',

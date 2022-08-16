@@ -30,8 +30,14 @@ class ProductHelper {
 	/** @var bool  */
 	protected const TITLE_WITH_CARS = TRUE;
 	
+	/** @var bool  */
+	protected const TITLE_WITH_OE_NUMBERS = TRUE;
+	
 	/** @var string  */
 	protected const FOR_CARS_WORD = 'für';
+	
+	/** @var string  */
+	protected const FOR_OE_NUMBERS_WORD = '-';
 	
 	/** @var string[]  */
 	protected const DELETE_WORDS = [
@@ -86,6 +92,50 @@ class ProductHelper {
 		}
 		
 		return TRUE;
+	}
+	
+	/**
+	 * @param \Shopware\Models\Article\Article $product
+	 * @param                                  $oeNumbers
+	 * @return void
+	 * @throws \Doctrine\ORM\Exception\ORMException
+	 * @throws \Doctrine\ORM\OptimisticLockException
+	 * @throws \JsonException
+	 */
+	public function setProductOENumbers(ProductModel $product, $oeNumbers = null): void {
+		$attribute = $this->manager->getRepository(Attribute::class)
+			->findOneBy([
+				'articleDetailId' => $product->getMainDetail()->getId()
+			]);
+		
+		if (!$attribute) {
+			$attribute = new Attribute();
+			$attribute->setArticleDetailId($product->getMainDetail()->getId());
+		}
+		
+		if (empty($oeNumbers)) {
+			$oeNumbers = $this->getExtractedOENumbers($product->getDescriptionLong());
+		} elseif (is_string($oeNumbers)) {
+			$oeNumbers = explode(',', str_ireplace(' ', '', trim($oeNumbers)));
+		}
+		
+		if (!empty($oeNumbers)) {
+			$this->manager->persist($attribute);
+			
+			$json = json_encode(array_filter(array_unique($oeNumbers)), JSON_THROW_ON_ERROR);
+			
+			if ($json) {
+				$attribute->setOeNumbersJson($json);
+			}
+			
+			$string = implode(', ', $oeNumbers);
+			
+			if ($string) {
+				$attribute->setOeNumbers($string);
+			}
+			
+			$this->manager->flush($attribute);
+		}
 	}
 	
 	/**
@@ -353,7 +403,7 @@ class ProductHelper {
 		$xPath = new \DOMXPath($dom);
 		
 		$listNodes = $xPath->query('//li');
-		$listEntries = $oeNumbers = [];
+		$listEntries = [];
 		
 		foreach($listNodes as $listNode) {
 			if ($listNode->nodeValue) {
@@ -361,12 +411,7 @@ class ProductHelper {
 			}
 		}
 		
-		if ($oeNumbersDiv = $dom->getElementById('description_oe')) {
-			$oeNumbers = explode(':', $oeNumbersDiv->nodeValue);
-			$oeNumbers = explode(',', trim(end($oeNumbers)));
-		}
-		
-		$oeNumbers = array_filter(array_unique($oeNumbers));
+		$oeNumbers = $this->getExtractedOENumbers($description);
 		
 		$oe = FALSE;
 		$length = 0;
@@ -506,6 +551,24 @@ class ProductHelper {
 	}
 	
 	/**
+	 * @param string $description
+	 * @return array
+	 */
+	public function getExtractedOENumbers(string $description): array {
+		$dom = new \DOMDocument();
+		$dom->loadHTML(mb_convert_encoding($description, 'HTML-ENTITIES', 'UTF-8'));
+		
+		if (($oeNumbersDiv = $dom->getElementById('description_oe')) &&
+			(FALSE !== ($oeNumbers = explode(':', $oeNumbersDiv->nodeValue))) &&
+			!empty($oeNumbers) &&
+			(FALSE !== ($oeNumbers = explode(',', trim(str_ireplace([' ', '-', '#'], '', end($oeNumbers))))))) {
+				return array_filter(array_unique($oeNumbers));
+		}
+		
+		return [];
+	}
+	
+	/**
 	 * @param \Shopware\Models\Article\Article|int|string $article
 	 * @param array                                       $options
 	 * @return string|null
@@ -536,8 +599,12 @@ class ProductHelper {
 		
 		$maxTitleLength = $options['maxLength'] ?? self::MAX_TITLE_LENGTH_GOOGLE;
 		$withCars = $options['withCars'] ?? self::TITLE_WITH_CARS;
+		$withOENumbers = $options['withNumbers'] ?? self::TITLE_WITH_OE_NUMBERS;
 		$deleteWords = $options['deleteWords'] ?? self::DELETE_WORDS;
 		$forCarsWord = $options['forCarsWord'] ?? self::FOR_CARS_WORD;
+		$forOENumbersWord = $options['forOENumbersWord'] ?? self::FOR_OE_NUMBERS_WORD;
+		
+		$withOENumbers = $withOENumbers && isset($options['numbers']) && (!empty($options['numbers']));
 		
 		if ($withCars) {
 			if (isset($options['cars'])) {
@@ -575,6 +642,25 @@ class ProductHelper {
 			if (!in_array(mb_strtolower($titleEntry), $deleteWords, TRUE)) {
 				if ($textHelper->getLength(sprintf('%s%s%s', $titleString, ($titleString? ' ' : ''), $titleEntry)) <= $maxTitleLength) {
 					$titleString = sprintf('%s%s%s', $titleString, ($titleString? ' ' : ''), $titleEntry);
+				} else {
+					$maxLengthReached = TRUE;
+					break;
+				}
+			}
+		}
+		
+		if ($withOENumbers && !$maxLengthReached) {
+			$oeNumbers = $options['numbers'];
+			
+			if (is_string($oeNumbers)) {
+				$oeNumbers = explode(',', str_replace(' ', '', $oeNumbers));
+			} else if (!is_array($oeNumbers)) {
+				$oeNumbers = [$oeNumbers];
+			}
+			
+			foreach($oeNumbers as $key => $oeNumber) {
+				if ($textHelper->getLength(sprintf('%s%s %s', $titleString, ($key === 0 ? sprintf(' %s', $forOENumbersWord) : ''), $oeNumber)) <= $maxTitleLength) {
+					$titleString = sprintf('%s%s %s', $titleString, ($key === 0 ? sprintf(' %s', $forOENumbersWord) : ''), $oeNumber);
 				} else {
 					$maxLengthReached = TRUE;
 					break;

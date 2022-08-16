@@ -96,6 +96,7 @@ class ContentProduct {
 	 * @return \Google_Service_ShoppingContent_Product
 	 * @throws \Doctrine\DBAL\Driver\Exception
 	 * @throws \Doctrine\DBAL\Exception
+	 * @throws \Exception
 	 */
 	private function buildProduct(): Google_Service_ShoppingContent_Product {
 		try {
@@ -166,6 +167,30 @@ class ContentProduct {
 		
 		$description = $this->textHelper->filterBadWords($this->product->getDescriptionLong());
 		
+		$oeNumbers = $this->product->getMainDetail()->getAttribute()->getOeNumbersJson();
+		
+		if (empty($oeNumbers)) {
+			$oeNumbers = $this->productHelper->getExtractedOENumbers($description);
+			
+			if (!empty($oeNumbers)) {
+				try {
+					$this->productHelper->setProductOENumbers($this->product, $oeNumbers);
+				} catch (\Exception $exception) {
+					$this->error($exception);
+				}
+			}
+		} else {
+			try {
+				$oeNumbers = json_decode($oeNumbers, TRUE, 512, JSON_THROW_ON_ERROR);
+			} catch (\Exception $exception) {
+				$this->error($exception);
+				$oeNumbers = [];
+			}
+		}
+		
+		
+		//$this->product->getMainDetail()->getAttribute()->getOeNumbers()
+		
 		try {
 			$description = $this->productHelper->fixDescriptionForGoogle($description, $this->product->getName(), $compatibilityList);
 		} catch (\Exception $exception) {
@@ -173,6 +198,18 @@ class ContentProduct {
 		}
 		
 		$productMpn = $this->product->getMainDetail()->getSupplierNumber()? : 'ATW-'.$this->product->getMainDetail()->getId();
+		
+		$options = [
+			'withNumbers' => TRUE,
+			'numbers' => $oeNumbers
+		];
+		
+		if (empty($oeNumbers) || random_int(0, 1)) {
+			$options = [
+				'withCars' => TRUE,
+				'cars' => $compatibilityList
+			];
+		}
 		
 		$product = new Google_Service_ShoppingContent_Product();
 		
@@ -182,10 +219,8 @@ class ContentProduct {
 			'autoteile-wiesel'
 		])) {
 			$title = sprintf('%s %s', $this->product->getSupplier()->getName(), $this->textHelper->filterBadWords($this->product->getName()));
-			if ($fixedTitle = $this->productHelper->getFixedTitle($title, [
-				'withCars' => TRUE,
-				'cars' => $compatibilityList
-			])) {
+			
+			if ($fixedTitle = $this->productHelper->getFixedTitle($title, $options)) {
 				$title = $fixedTitle;
 			}
 			
@@ -193,10 +228,7 @@ class ContentProduct {
 			$product->setBrand($this->product->getSupplier()->getName());
 		} else {
 			$title = $this->textHelper->filterBadWords($this->product->getName());
-			if ($fixedTitle = $this->productHelper->getFixedTitle($title, [
-				'withCars' => TRUE,
-				'cars' => $compatibilityList
-			])) {
+			if ($fixedTitle = $this->productHelper->getFixedTitle($title, $options)) {
 				$title = $fixedTitle;
 			}
 			
