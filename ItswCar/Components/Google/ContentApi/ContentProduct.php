@@ -199,6 +199,7 @@ class ContentProduct {
 		
 		$productMpn = $this->product->getMainDetail()->getSupplierNumber()? : 'ATW-'.$this->product->getMainDetail()->getId();
 		
+		/*
 		$options = [
 			'withNumbers' => TRUE,
 			'numbers' => $oeNumbers
@@ -208,6 +209,19 @@ class ContentProduct {
 			$options = [
 				'withCars' => TRUE,
 				'cars' => $compatibilityList
+			];
+		}
+		*/
+		
+		$options = [
+			'withCars' => TRUE,
+			'cars' => $compatibilityList
+		];
+		
+		if (empty($compatibilityList) && !empty($oeNumbers)) {
+			$options = [
+				'withNumbers' => TRUE,
+				'numbers' => $oeNumbers
 			];
 		}
 		
