@@ -250,6 +250,8 @@ class ContentProduct {
 			$product->setBrand('ATW');
 		}
 		
+		$product->setIdentifierExists(FALSE);
+		
 		$product->setOfferId($this->product->getMainDetail()->getNumber());
 		$product->setId($this->buildProductId($product->getOfferId()));
 		$product->setDescription($description);
