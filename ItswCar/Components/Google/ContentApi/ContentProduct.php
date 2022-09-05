@@ -267,10 +267,10 @@ class ContentProduct {
 		
 		if ($ean = $this->product->getMainDetail()->getEan()) {
 			$product->setGtin($ean);
-			$product->setIdentifierExists(TRUE);
-		} else {
+			//$product->setIdentifierExists(TRUE);
+		} /*else {
 			$product->setIdentifierExists(FALSE);
-		}
+		}*/
 		
 		/*
 		$price = new Price();
