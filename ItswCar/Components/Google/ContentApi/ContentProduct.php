@@ -199,6 +199,8 @@ class ContentProduct {
 		
 		$productMpn = $this->product->getMainDetail()->getSupplierNumber()? : 'ATW-'.$this->product->getMainDetail()->getId();
 		
+		$ean = $this->product->getMainDetail()->getEan();
+		
 		/*
 		$options = [
 			'withNumbers' => TRUE,
@@ -250,8 +252,6 @@ class ContentProduct {
 			$product->setBrand('ATW');
 		}
 		
-		$product->setIdentifierExists(FALSE);
-		
 		$product->setOfferId($this->product->getMainDetail()->getNumber());
 		$product->setId($this->buildProductId($product->getOfferId()));
 		$product->setDescription($description);
@@ -265,8 +265,9 @@ class ContentProduct {
 		$product->setAvailability($productAvailability);
 		$product->setCondition('neu');
 		$product->setGoogleProductCategory('Fahrzeuge & Teile > Fahrzeugersatzteile & -zubehör');
-		$product->setGtin((string)$this->product->getMainDetail()->getEan());
+		$product->setGtin((string)$ean);
 		$product->setMpn($productMpn);
+		$product->setIdentifierExists((bool)$ean);
 		
 		/*
 		$price = new Price();
