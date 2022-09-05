@@ -187,9 +187,9 @@ class GoogleMerchantCenterQueue extends ModelEntity {
 	}
 	
 	/**
-	 * @return string
+	 * @return string|null
 	 */
-	public function getGoogleProductId(): string {
+	public function getGoogleProductId(): ?string {
 		return $this->googleProductId;
 	}
 	
