@@ -722,6 +722,17 @@ class Eventhandlers {
 				continue;
 			}
 			
+			try {
+				$supplierName = $this->productHelper->getExtractedSupplier($product->getDescriptionLong());
+				
+				if ($supplierName) {
+					$this->productHelper->setProductSupplier($product, $supplierName);
+				}
+			} catch(\Exception $exception) {
+				$this->error($exception);
+			}
+			
+			
 			if (!$product->getActive() || $product->getImages()->isEmpty()) {
 				$item->setJobType('delete');
 			} else if ($item->getGoogleProductId()) {
