@@ -15,6 +15,7 @@ use ItswCar\Models\ArticleCarLinks;
 use ItswCar\Traits\LoggingTrait;
 use ItswCar\Models\ArticlePrices;
 use Shopware\Components\Model\ModelManager;
+use Shopware\Models\Article\Supplier;
 use Shopware\Models\Attribute\Article as Attribute;
 use Shopware\Models\Article\Article as ProductModel;
 
@@ -135,6 +136,30 @@ class ProductHelper {
 			}
 			
 			$this->manager->flush($attribute);
+		}
+	}
+	
+	/**
+	 * @param \Shopware\Models\Article\Article $product
+	 * @param string|null                      $supplierName
+	 * @return void
+	 * @throws \Doctrine\ORM\Exception\ORMException
+	 * @throws \Doctrine\ORM\OptimisticLockException
+	 */
+	public function setProductSupplier(ProductModel $product, ?string $supplierName = NULL): void {
+		if (!$supplierName) {
+			$supplierName = $this->getExtractedSupplier($product->getDescriptionLong());
+		}
+		
+		if ($supplierName && ($supplierName !== $product->getSupplier()->getName())) {
+			$this->manager->persist($product);
+			$supplier = $this->manager->getRepository(Supplier::class)->findOneBy(['name' => $supplierName]);
+			if (!$supplier) {
+				$supplier = new Supplier();
+				$supplier->setName($supplierName);
+			}
+			$product->setSupplier($supplier);
+			$this->manager->flush($product);
 		}
 	}
 	
@@ -314,7 +339,8 @@ class ProductHelper {
 	}
 	
 	/**
-	 * @throws \DOMException
+	 * @param $article
+	 * @return void
 	 */
 	public function fixDescriptions(&$article): void {
 		
@@ -334,7 +360,20 @@ class ProductHelper {
 			$html = $this->fixDescription($article['description_long'], $name);
 			$article['description_long'] = $html?:$article['description_long'];
 		}
-		
+	}
+	
+	/**
+	 * @param $article
+	 * @return void
+	 */
+	public function fixSupplier(&$article): void {
+		if (isset($article['descriptionLong'])) {
+			$supplier = $this->getExtractedSupplier($article['descriptionLong']);
+			
+			if ($supplier && isset($article['supplier']) && ($supplier !== $article['supplier'])) {
+				$article['supplier'] = $supplier;
+			}
+		}
 	}
 	
 	/**
@@ -343,7 +382,7 @@ class ProductHelper {
 	 * @return false|string
 	 * @throws \DOMException
 	 */
-	public function fixDescription(string $description, string $articleName) {
+	public function _fixDescription(string $description, string $articleName) {
 		$dom = new \DOMDocument();
 		$dom->loadHTML(mb_convert_encoding($description, 'HTML-ENTITIES', 'UTF-8'));
 		
@@ -385,8 +424,77 @@ class ProductHelper {
 		return $description;
 	}
 	
-	public function _fixDescription(string $description, string $articleName, array $options = []) {
-	
+	/**
+	 * @param string $description
+	 * @param string $articleName
+	 * @param array  $options
+	 * @return string
+	 */
+	public function fixDescription(string $description, string $articleName, array $options = []): string {
+		$dom = new \DOMDocument();
+		$dom->loadHTML(mb_convert_encoding($description, 'HTML-ENTITIES', 'UTF-8'));
+		
+		$xPath = new \DOMXPath($dom);
+		
+		$listNodes = $xPath->query('//li');
+		
+		if (!$listNodes) {
+			return $description;
+		}
+		
+		$listEntries = [];
+		
+		foreach($listNodes as $listNode) {
+			if ($listNode->nodeValue) {
+				$listEntries[] = explode(':', $listNode->nodeValue, 2);
+			}
+		}
+		
+		$oeNumbers = $this->getExtractedOENumbers($description);
+		
+		$oe = FALSE;
+		
+		if (empty($listEntries)) {
+			$listEntries = [$articleName];
+		}
+		
+		array_walk($listEntries, static function (&$listEntry, $key) use (&$listEntries, &$oe, &$length) {
+			if ((FALSE !== stripos($listEntry[0], 'qualität')) || (FALSE !== stripos($listEntry[0], 'zustand'))) {
+				if (isset($listEntry[1]) && (FALSE !== stripos($listEntry[1], 'erstausrüster'))) {
+					$oe = TRUE;
+				}
+				unset($listEntries[$key]);
+			}
+			
+			if (is_array($listEntry)) {
+				array_walk($listEntry, static function(&$listEntry) {
+					$listEntry = trim($listEntry);
+				});
+			} else {
+				$listEntry = trim($listEntry);
+			}
+		});
+		
+		if ($oe) {
+			$lastEntry = [
+				'Qualitätsprodukt in Erstausrüsterqualität'
+			];
+			array_unshift($listEntries, $lastEntry);
+		} else {
+			$lastEntry = [
+				'Zustand',
+				'Neuteil'
+			];
+			$listEntries[] = $lastEntry;
+		}
+		
+		$descriptionTmp = '';
+		
+		foreach ($listEntries as $index => $listEntry) {
+			$descriptionTmp = sprintf('%s<li%s>%s</li>', $descriptionTmp, ($oe && $index === 0) ? ' class="oe"' : '' ,(is_array($listEntry) ? implode(': ', $listEntry): $listEntry));
+		}
+		
+		return sprintf('<ul>%s</ul>%s', $descriptionTmp, $oeNumbers ? sprintf('<div id="description_oe">OE/OEM Vergleichsnummer(n): %s</div>', implode(', ', $oeNumbers)) : '');
 	}
 	
 	/**
@@ -403,6 +511,11 @@ class ProductHelper {
 		$xPath = new \DOMXPath($dom);
 		
 		$listNodes = $xPath->query('//li');
+		
+		if (!$listNodes) {
+			return $description;
+		}
+		
 		$listEntries = [];
 		
 		foreach($listNodes as $listNode) {
@@ -442,14 +555,16 @@ class ProductHelper {
 			$length += $textHelper->getLength($listEntry);
 		});
 		
-		$lastEntry = [
-			'Zustand',
-			sprintf('Neuteil%s', $oe ? ' in Erstausrüsterqualität' : '')
-		];
-		
 		if ($oe) {
+			$lastEntry = [
+				'Qualitätsprodukt in Erstausrüsterqualität'
+			];
 			array_unshift($listEntries, $lastEntry);
 		} else {
+			$lastEntry = [
+				'Zustand',
+				'Neuteil'
+			];
 			$listEntries[] = $lastEntry;
 		}
 		
@@ -566,6 +681,34 @@ class ProductHelper {
 		}
 		
 		return [];
+	}
+	
+	/**
+	 * @param string $description
+	 * @return string
+	 */
+	public function getExtractedSupplier(string $description): string {
+		$dom = new \DOMDocument();
+		$dom->loadHTML(mb_convert_encoding($description, 'HTML-ENTITIES', 'UTF-8'));
+		
+		$xPath = new \DOMXPath($dom);
+		
+		$listNodes = $xPath->query('//li');
+		
+		if (!$listNodes) {
+			return '';
+		}
+		
+		foreach($listNodes as $listNode) {
+			if ($listNode->nodeValue) {
+				$listEntries = explode(':', $listNode->nodeValue, 2);
+				if (isset($listEntries[1]) && (FALSE !== stripos($listEntries[0], 'hersteller'))) {
+					return trim($listEntries[1]);
+				}
+			}
+		}
+		
+		return '';
 	}
 	
 	/**

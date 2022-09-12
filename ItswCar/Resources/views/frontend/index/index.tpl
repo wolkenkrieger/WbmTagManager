@@ -18,5 +18,3 @@
         {/if}
     {/block}
 {/block}
-
-

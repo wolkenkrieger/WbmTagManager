@@ -319,6 +319,7 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		
 		unset($params['translations'], $params['carLinks'], $params['google_content_api']);
 		
+		$this->productHelper->fixSupplier($params);
 		$params = $this->prepareAssociatedData($params, $product);
 		
 		$this->filterBadWords($params);
@@ -438,6 +439,8 @@ class ExtendedArticle extends Resource implements BatchInterface {
 		$googleContentApi = $params['google_content_api'] ?? TRUE;
 		
 		unset($params['translations'], $params['carLinks'], $params['google_content_api']);
+		
+		$this->productHelper->fixSupplier($params);
 		
 		$params = $this->prepareAssociatedData($params, $product);
 		

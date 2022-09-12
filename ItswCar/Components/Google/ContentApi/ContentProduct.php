@@ -188,6 +188,16 @@ class ContentProduct {
 			}
 		}
 		
+		$supplierName = $this->productHelper->getExtractedSupplier($description);
+		
+		if ($supplierName) {
+			try {
+				$this->productHelper->setProductSupplier($this->product, $supplierName);
+			} catch (\Exception $exception) {
+				$this->error($exception);
+			}
+		}
+		
 		
 		//$this->product->getMainDetail()->getAttribute()->getOeNumbers()
 		
