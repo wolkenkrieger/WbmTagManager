@@ -580,16 +580,6 @@ class ProductHelper {
 			$tmpLength = $length + $lastEntryLength;
 			
 			foreach($oeNumbers as $oeNumber) {
-				$oeNumber = str_ireplace([
-					' ',
-					'#',
-					';',
-					'(',
-					')',
-					'[',
-					']'
-				], '', trim($oeNumber));
-				
 				$oeNumberLength = $textHelper->getLength(sprintf('%s%s%s', $oeNumbersString, ($oeNumbersString ? ', ' : ''), $oeNumber));
 				
 				if (($tmpLength + $oeNumberLength) < self::MAX_DESCRIPTION_LENGTH_GOOGLE) {
@@ -676,7 +666,7 @@ class ProductHelper {
 		if (($oeNumbersDiv = $dom->getElementById('description_oe')) &&
 			(FALSE !== ($oeNumbers = explode(':', $oeNumbersDiv->nodeValue))) &&
 			!empty($oeNumbers) &&
-			(FALSE !== ($oeNumbers = explode(',', trim(str_ireplace([' ', '-', '#'], '', end($oeNumbers))))))) {
+			(FALSE !== ($oeNumbers = explode(',', trim(str_ireplace([' ', '-', '#', '(', ')', ';', '[', ']'], '', end($oeNumbers))))))) {
 				return array_filter(array_unique($oeNumbers));
 		}
 		
