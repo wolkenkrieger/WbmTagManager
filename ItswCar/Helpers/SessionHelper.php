@@ -35,6 +35,7 @@ class SessionHelper {
 			'shortTitle'    => NULL,
 			'url'           => NULL,
 			'uuid'          => NULL,
+			'preselected'   => FALSE
 		];
 		
 		$session = $container->get('session');
@@ -118,12 +119,14 @@ class SessionHelper {
 			'shortTitle'    => NULL,
 			'url'           => NULL,
 			'uuid'          => NULL,
+			'preselected'	=> FALSE
 		];
 		
 		$session = $container->get('session');
 		
 		if ($session->has('itsw-car-session-data')) {
 			$sessionData = array_merge($sessionData, $session->get('itsw-car-session-data'));
+			$this->setSessionData($sessionData);
 		} else if ($cookieData = Shopware()->Front()->Request()->getCookie('itsw-car-session-data')) {
 			try {
 				$cookieSessionData = json_decode($cookieData, TRUE, 512, JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_IGNORE);

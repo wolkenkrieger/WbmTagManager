@@ -137,6 +137,7 @@ class Eventhandlers {
 	 */
 	public function onPreDispatchFrontend(\Enlight_Controller_ActionEventArgs $actionEventArgs): void {
 		$subject = $actionEventArgs->getSubject();
+		
 		$this->debug(__METHOD__, $subject->View()->getAssign());
 	}
 	
@@ -210,7 +211,8 @@ class Eventhandlers {
 										'manufacturer' => $car['manufacturerId'],
 										'model' => $car['modelId'],
 										'type' => $car['typeId'],
-										'car' => $car['tecdocId']
+										'car' => $car['tecdocId'],
+										'preselected' => TRUE
 									];
 									$this->sessionHelper->setSessionData($sessionData);
 								}
@@ -1074,7 +1076,8 @@ class Eventhandlers {
 			'/checkout',
 			'/api',
 			'/carmap',
-			'/oncoamazonpay'
+			'/oncoamazonpay',
+			'/faq'
 		];
 		
 		foreach($stopWords as $stopWord) {
