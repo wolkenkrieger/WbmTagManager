@@ -18,3 +18,26 @@
         {/if}
     {/block}
 {/block}
+
+{block name="frontend_index_javascript_async_ready"}
+    {if $ItswCar.google.cookieallowed && $ItswCar.google.showbadge}
+        <script src="https://apis.google.com/js/platform.js?onload=renderBadge" async defer></script>
+        {literal}
+            <script>
+                document.asyncReady(function () {
+                    window.renderBadge = function() {
+                        var ratingBadgeContainer = document.createElement("div");
+                        document.body.appendChild(ratingBadgeContainer);
+                        window.gapi.load('ratingbadge', function() {
+                            window.gapi.ratingbadge.render(ratingBadgeContainer, {
+                                "merchant_id": {/literal}{$ItswCar.google.merchantId}{literal},
+                                "position": "{/literal}{$ItswCar.google.badgeposition}{literal}"
+                            });
+                        });
+                    }
+                });
+            </script>
+        {/literal}
+    {/if}
+    {$smarty.block.parent}
+{/block}
