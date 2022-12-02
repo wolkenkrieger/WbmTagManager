@@ -24,23 +24,23 @@
         <script>
             document.asyncReady(function () {
                 if ($.getCookiePreference('wbm_tag_manager')) {
+                    window.renderBadge = function() {
+                        console.log('function renderBadge');
+                        var ratingBadgeContainer = document.createElement("div");
+                        document.body.appendChild(ratingBadgeContainer);
+                        window.gapi.load('ratingbadge', function() {
+                            window.gapi.ratingbadge.render(ratingBadgeContainer, {
+                                "merchant_id": {$ItswCar.google.merchantId},
+                                "position": "{$ItswCar.google.badgeposition}"
+                            });
+                        });
+                    };
                     $.getScript("https://apis.google.com/js/platform.js?onload=renderBadge")
                             .done( function() {
-                                console.log('renderBadge');
-                                window.renderBadge = function() {
-                                    console.log('function renderBadge');
-                                    var ratingBadgeContainer = document.createElement("div");
-                                    document.body.appendChild(ratingBadgeContainer);
-                                    window.gapi.load('ratingbadge', function() {
-                                        window.gapi.ratingbadge.render(ratingBadgeContainer, {
-                                            "merchant_id": {$ItswCar.google.merchantId},
-                                            "position": "{$ItswCar.google.badgeposition}"
-                                        });
-                                    });
-                                };
+
                             })
                             .fail( function () {
-                              console.log('fail');
+                              console.log('loading renderBafge script');
                             });
                 }
 
