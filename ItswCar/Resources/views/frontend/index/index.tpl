@@ -35,29 +35,25 @@
                             });
                         });
                     };
-                    $.getScript("https://apis.google.com/js/platform.js?onload=renderBadge")
-                            .done( function() {
 
-                            })
-                            .fail( function () {
-                              console.log('loading renderBafge script');
-                            });
+                    $.getScript("https://apis.google.com/js/platform.js?onload=renderBadge");
                 }
 
                 $.subscribe('plugin/swCookieConsentManager/onBuildCookiePreferences', function (event, plugin, preferences) {
                     if ($.getCookiePreference('wbm_tag_manager')) {
-                        $.getScript("https://apis.google.com/js/platform.js?onload=renderBadge").done( function() {
-                            window.renderBadge = function() {
-                                var ratingBadgeContainer = document.createElement("div");
-                                document.body.appendChild(ratingBadgeContainer);
-                                window.gapi.load('ratingbadge', function() {
-                                    window.gapi.ratingbadge.render(ratingBadgeContainer, {
-                                        "merchant_id": {$ItswCar.google.merchantId},
-                                        "position": "{$ItswCar.google.badgeposition}"
-                                    });
+                        window.renderBadge = function() {
+                            console.log('function renderBadge');
+                            var ratingBadgeContainer = document.createElement("div");
+                            document.body.appendChild(ratingBadgeContainer);
+                            window.gapi.load('ratingbadge', function() {
+                                window.gapi.ratingbadge.render(ratingBadgeContainer, {
+                                    "merchant_id": {$ItswCar.google.merchantId},
+                                    "position": "{$ItswCar.google.badgeposition}"
                                 });
-                            };
-                        });
+                            });
+                        };
+
+                        $.getScript("https://apis.google.com/js/platform.js?onload=renderBadge");
                     }
                 });
             });
