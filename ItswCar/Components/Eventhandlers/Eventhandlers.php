@@ -539,7 +539,8 @@ class Eventhandlers {
 		return array_merge($merchantInfo, $accountInfo, [
 			'showbadge' => $this->configHelper->getValue('google_show_badge', 'ItswCar'),
 			'badgeposition' => $this->configHelper->getValue('google_badge_position', 'ItswCar'),
-			'surveyoptinstyle' => $this->configHelper->getValue('google_survey_opt_in_style', 'ItswCar')
+			'surveyoptinstyle' => $this->configHelper->getValue('google_survey_opt_in_style', 'ItswCar'),
+			'cookieallowed' => $this->configHelper->isCookieAllowed(Shopware()->Front()->Request())
 		]);
 	}
 	

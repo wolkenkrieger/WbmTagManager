@@ -565,4 +565,8 @@ class Shopware_Controllers_Widgets_Carfinder extends Enlight_Controller_Action {
 		
 		return TRUE;
 	}
+	
+	public function acceptPreselectedAction() {
+		$sessionData = $this->sessionHelper->getSessionData();
+	}
 }

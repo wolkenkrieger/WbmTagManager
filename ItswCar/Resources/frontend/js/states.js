@@ -21,7 +21,6 @@
     ;
     
     $(function($) {
-        
         function unsetCar() {
             var basePath = $('.itsw #manufacturers').attr('data-itsw-car-basepath');
             var baseUrl = '/widgets/carfinder';

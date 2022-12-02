@@ -21,16 +21,6 @@ function triggerCarFinder() {
     }
 }
 
-function acceptPreselected() {
-    let cookie = $.getCookie('itsw-car-session-data');
-    let cookieContent;
-    cookieContent.preselected = undefined;
-    
-    if (cookie && (cookieContent = JSON.parse(cookie)) && cookieContent.preselected) {
-        
-    }
-}
-
 function readCookie(name) {
     name += '=';
     for (let ca = document.cookie.split(/;\s*/), i = ca.length - 1; i >= 0; i--) {
@@ -45,6 +35,5 @@ function readCookie(name) {
 $(document).ready(function () {
     makeConsole();
     triggerCarFinder();
-    /* acceptPreselected(); */
 });
 
