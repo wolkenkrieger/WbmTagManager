@@ -24,25 +24,30 @@
         <script>
             document.asyncReady(function () {
                 if ($.getCookiePreference('wbm_tag_manager')) {
-                    $.getScript("https://apis.google.com/js/platform.js?onload=renderBadge").done( function() {
-                        window.renderBadge = function() {
-                            let ratingBadgeContainer = document.createElement("div");
-                            document.body.appendChild(ratingBadgeContainer);
-                            window.gapi.load('ratingbadge', function() {
-                                window.gapi.ratingbadge.render(ratingBadgeContainer, {
-                                    "merchant_id": {$ItswCar.google.merchantId},
-                                    "position": "{$ItswCar.google.badgeposition}"
-                                });
+                    $.getScript("https://apis.google.com/js/platform.js?onload=renderBadge")
+                            .done( function() {
+                                window.renderBadge = function() {
+                                    console.log('renderBadge');
+                                    var ratingBadgeContainer = document.createElement("div");
+                                    document.body.appendChild(ratingBadgeContainer);
+                                    window.gapi.load('ratingbadge', function() {
+                                        window.gapi.ratingbadge.render(ratingBadgeContainer, {
+                                            "merchant_id": {$ItswCar.google.merchantId},
+                                            "position": "{$ItswCar.google.badgeposition}"
+                                        });
+                                    });
+                                };
+                            })
+                            .fail( function () {
+                              console.log('fail');
                             });
-                        };
-                    });
                 }
 
                 $.subscribe('plugin/swCookieConsentManager/onBuildCookiePreferences', function (event, plugin, preferences) {
                     if ($.getCookiePreference('wbm_tag_manager')) {
                         $.getScript("https://apis.google.com/js/platform.js?onload=renderBadge").done( function() {
                             window.renderBadge = function() {
-                                let ratingBadgeContainer = document.createElement("div");
+                                var ratingBadgeContainer = document.createElement("div");
                                 document.body.appendChild(ratingBadgeContainer);
                                 window.gapi.load('ratingbadge', function() {
                                     window.gapi.ratingbadge.render(ratingBadgeContainer, {
