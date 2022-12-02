@@ -26,8 +26,9 @@
                 if ($.getCookiePreference('wbm_tag_manager')) {
                     $.getScript("https://apis.google.com/js/platform.js?onload=renderBadge")
                             .done( function() {
+                                console.log('renderBadge');
                                 window.renderBadge = function() {
-                                    console.log('renderBadge');
+                                    console.log('function renderBadge');
                                     var ratingBadgeContainer = document.createElement("div");
                                     document.body.appendChild(ratingBadgeContainer);
                                     window.gapi.load('ratingbadge', function() {
