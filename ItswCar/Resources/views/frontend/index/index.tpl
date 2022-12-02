@@ -21,7 +21,7 @@
 
 {block name="frontend_index_header_javascript_jquery"}
     {$smarty.block.parent}
-    {if $ItswCar.google.cookieallowed}
+    {if $ItswCar.google.cookieallowed && $ItswCar.google.showbadge}
         <script src="https://apis.google.com/js/platform.js?onload=renderBadge" async defer></script>
         {literal}
             <script>
