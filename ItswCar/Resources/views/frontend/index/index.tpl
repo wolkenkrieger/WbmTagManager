@@ -21,7 +21,6 @@
 
 {block name="frontend_index_javascript_async_ready"}
     {if {config name='google_show_badge'}}
-        {literal}
         <script>
             document.asyncReady(function () {
                 if ($.getCookiePreference('wbm_tag_manager')) {
@@ -31,8 +30,8 @@
                             document.body.appendChild(ratingBadgeContainer);
                             window.gapi.load('ratingbadge', function() {
                                 window.gapi.ratingbadge.render(ratingBadgeContainer, {
-                                    "merchant_id": {/literal}{$ItswCar.google.merchantId}{literal},
-                                    "position": "{/literal}{$ItswCar.google.badgeposition}{literal}"
+                                    "merchant_id": {$ItswCar.google.merchantId},
+                                    "position": "{$ItswCar.google.badgeposition}"
                                 });
                             });
                         };
@@ -47,8 +46,8 @@
                                 document.body.appendChild(ratingBadgeContainer);
                                 window.gapi.load('ratingbadge', function() {
                                     window.gapi.ratingbadge.render(ratingBadgeContainer, {
-                                        "merchant_id": {/literal}{$ItswCar.google.merchantId}{literal},
-                                        "position": "{/literal}{$ItswCar.google.badgeposition}{literal}"
+                                        "merchant_id": {$ItswCar.google.merchantId},
+                                        "position": "{$ItswCar.google.badgeposition}"
                                     });
                                 });
                             };
@@ -57,7 +56,6 @@
                 });
             });
         </script>
-        {/literal}
     {/if}
     {$smarty.block.parent}
 {/block}
