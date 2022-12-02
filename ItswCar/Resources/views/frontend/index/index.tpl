@@ -25,7 +25,6 @@
             document.asyncReady(function () {
                 if ($.getCookiePreference('wbm_tag_manager')) {
                     window.renderBadge = function() {
-                        console.log('function renderBadge');
                         var ratingBadgeContainer = document.createElement("div");
                         document.body.appendChild(ratingBadgeContainer);
                         window.gapi.load('ratingbadge', function() {
@@ -42,7 +41,6 @@
                 $.subscribe('plugin/swCookieConsentManager/onBuildCookiePreferences', function (event, plugin, preferences) {
                     if ($.getCookiePreference('wbm_tag_manager')) {
                         window.renderBadge = function() {
-                            console.log('function renderBadge');
                             var ratingBadgeContainer = document.createElement("div");
                             document.body.appendChild(ratingBadgeContainer);
                             window.gapi.load('ratingbadge', function() {
