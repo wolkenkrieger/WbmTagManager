@@ -19,23 +19,45 @@
     {/block}
 {/block}
 
-{block name="frontend_index_header_javascript_jquery"}
-    {$smarty.block.parent}
-    {if $ItswCar.google.cookieallowed && $ItswCar.google.showbadge}
-        <script src="https://apis.google.com/js/platform.js?onload=renderBadge" async defer></script>
+{block name="frontend_index_javascript_async_ready"}
+    {if {config name='google_show_badge'}}
         {literal}
-            <script>
-                window.renderBadge = function() {
-                    var ratingBadgeContainer = document.createElement("div");
-                    document.body.appendChild(ratingBadgeContainer);
-                    window.gapi.load('ratingbadge', function() {
-                        window.gapi.ratingbadge.render(ratingBadgeContainer, {
-                            "merchant_id": {/literal}{$ItswCar.google.merchantId}{literal},
-                            "position": "{/literal}{$ItswCar.google.badgeposition}{literal}"
-                        });
+        <script>
+            document.asyncReady(function () {
+                if ($.getCookiePreference('wbm_tag_manager')) {
+                    $.getScript("https://apis.google.com/js/platform.js?onload=renderBadge").done( function() {
+                        window.renderBadge = function() {
+                            let ratingBadgeContainer = document.createElement("div");
+                            document.body.appendChild(ratingBadgeContainer);
+                            window.gapi.load('ratingbadge', function() {
+                                window.gapi.ratingbadge.render(ratingBadgeContainer, {
+                                    "merchant_id": {/literal}{$ItswCar.google.merchantId}{literal},
+                                    "position": "{/literal}{$ItswCar.google.badgeposition}{literal}"
+                                });
+                            });
+                        };
                     });
                 }
-            </script>
+
+                $.subscribe('plugin/swCookieConsentManager/onBuildCookiePreferences', function (event, plugin, preferences) {
+                    if ($.getCookiePreference('wbm_tag_manager')) {
+                        $.getScript("https://apis.google.com/js/platform.js?onload=renderBadge").done( function() {
+                            window.renderBadge = function() {
+                                let ratingBadgeContainer = document.createElement("div");
+                                document.body.appendChild(ratingBadgeContainer);
+                                window.gapi.load('ratingbadge', function() {
+                                    window.gapi.ratingbadge.render(ratingBadgeContainer, {
+                                        "merchant_id": {/literal}{$ItswCar.google.merchantId}{literal},
+                                        "position": "{/literal}{$ItswCar.google.badgeposition}{literal}"
+                                    });
+                                });
+                            };
+                        });
+                    }
+                });
+            });
+        </script>
         {/literal}
     {/if}
+    {$smarty.block.parent}
 {/block}
