@@ -44,18 +44,29 @@ class Shopware_Controllers_Widgets_Restrictions extends Enlight_Controller_Actio
 		$articleDetailsId = (int)$this->Request()->getParam('id', 0);
 		$viewData = [];
 		
-		$articleCarLinks = $this->entityManager
+		$articleCarLinksQuery = $this->entityManager
 			->getRepository(ArticleCarLinks::class)
-			->getCarLinksQuery([
+			->getCarLinksQueryBuilder([
 				'select' => [
 					'articleCarLinks'
 				],
 				'conditions' => [
-					'articleCarLinks.articleDetailsId' => $articleDetailsId,
-					($tecdocId? 'articleCarLinks.tecdocId = ' . $tecdocId : NULL)
+					'articleCarLinks.articleDetailsId' => $articleDetailsId
 				]
-			])
-			->getArrayResult();
+			]);
+		
+		$articleCarLinks = $articleCarLinksQuery->getQuery()->getArrayResult();
+		$fitsForCar = TRUE;
+		
+		if ($tecdocId && count($articleCarLinks)) {
+			$foo = $articleCarLinksQuery
+				->andWhere('articleCarLinks.tecdocId = :tecdocId')
+				->setParameter('tecdocId', $tecdocId)
+				->getQuery()
+				->getArrayResult();
+			
+			$fitsForCar = (bool)count($foo);
+		}
 		
 		foreach($articleCarLinks as $articleCarLink) {
 			if ($car = $this->entityManager
@@ -90,12 +101,16 @@ class Shopware_Controllers_Widgets_Restrictions extends Enlight_Controller_Actio
 					'ps' => $car->ps,
 					'buildFrom' => $car->getBuildFrom()->format('m/Y'),
 					'buildTo' => $car->getBuildTo()?$car->getBuildTo()->format('m/Y') : '---',
-					'restriction' => $articleCarLink['restriction']
+					'restriction' => $articleCarLink['restriction'],
+					'title' => sprintf('%s %s %s', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay())
 				];
 			}
 		}
 		
+		usort($viewData, static fn($a, $b) => $a['title'] <=> $b['title']);
+		
 		$this->View()->assign('restrictionData', $viewData);
+		$this->View()->assign('fitsForCar', $fitsForCar);
 		
 		$this->debug(__METHOD__, $this->View()->getAssign());
 	}

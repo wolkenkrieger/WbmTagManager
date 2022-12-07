@@ -39,10 +39,16 @@ class Eventhandlers {
 	protected Container $container;
 	protected Shop $shop;
 	
-	/** @var \ItswCar\Helpers\ConfigHelper|mixed|object|\Symfony\Component\DependencyInjection\Container|null  */
+	/** @var \ItswCar\Helpers\ConfigHelper */
 	protected $configHelper;
+	
+	/** @var \ItswCar\Helpers\SessionHelper */
 	protected $sessionHelper;
+	
+	/** @var \ItswCar\Helpers\SeoHelper */
 	protected $seoHelper;
+	
+	/** @var \ItswCar\Helpers\ProductHelper */
 	protected $productHelper;
 	public bool $isFrontEnd = FALSE;
 	
