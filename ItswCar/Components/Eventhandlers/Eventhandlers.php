@@ -117,11 +117,11 @@ class Eventhandlers {
 		
 		$sessionData = $this->sessionHelper->getSessionData();
 		
-		$url = $this->seoHelper->getCarSeoUrl($sessionData['manufacturer'], $sessionData['model'], $sessionData['car']);
-		$url = $this->seoHelper->completeUrl($url);
+		//$url = $this->seoHelper->getCarSeoUrl($sessionData['manufacturer'], $sessionData['model'], $sessionData['car']);
+		//$url = $this->seoHelper->completeUrl($url);
 		
-		$viewVars = $subject->View()->getAssign('sCategoryContent');
-		$categoryCanonical = (isset($viewVars['link']) && $viewVars['link'])? $this->seoHelper->completeUrl($viewVars['link']) : '';
+		//$viewVars = $subject->View()->getAssign('sCategoryContent');
+		//$categoryCanonical = (isset($viewVars['link']) && $viewVars['link'])? $this->seoHelper->completeUrl($viewVars['link']) : '';
 		
 		$templateVars = [
 			'session' => $sessionData,
@@ -129,8 +129,10 @@ class Eventhandlers {
 			'google' => $this->getGoogleConfigOptions(),
 			'maintenance' => $this->configHelper ? $this->configHelper->isMaintenanceMode() : FALSE,
 			'development' => $this->configHelper ? $this->configHelper->isDevelopmentMode() : FALSE,
-			'rootUrl' => $url,
-			'categoryCanonical' => $categoryCanonical,
+			//'rootUrl' => $url,
+			//'categoryCanonical' => $categoryCanonical,
+			'rootUrl' => NULL,
+			'categoryCanonical' => NULL,
 		];
 		
 		$subject->View()->assign('ItswCar', $templateVars, TRUE);

@@ -11,14 +11,14 @@
 namespace ItswCar\Components\Services;
 
 use ItswCar\Traits\LoggingTrait;
-use Shopware\Components\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Shopware\Components\Model\ModelManager;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class Services {
 	use LoggingTrait;
 	
-	public Container $container;
+	public ContainerInterface $container;
 	public ModelManager $modelManager;
 	public $front;
 	public $cache;
@@ -27,10 +27,10 @@ class Services {
 	
 	/**
 	 * Services constructor.
-	 * @param \Shopware\Components\DependencyInjection\Container $container
+	 * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
 	 * @param \Shopware\Components\Model\ModelManager            $modelManager
 	 */
-	public function __construct(Container $container, ModelManager $modelManager) {
+	public function __construct(ContainerInterface $container, ModelManager $modelManager) {
 		$this->container = $container;
 		$this->modelManager = $modelManager;
 		$this->cache = $this->container->get('shopware.cache_manager');
@@ -42,9 +42,9 @@ class Services {
 	
 	
 	/**
-	 * @return \Shopware\Components\DependencyInjection\Container
+	 * @return \Symfony\Component\DependencyInjection\ContainerInterface
 	 */
-	public function getContainer(): Container {
+	public function getContainer(): ContainerInterface {
 		return $this->container;
 	}
 	

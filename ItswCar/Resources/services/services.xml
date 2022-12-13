@@ -19,11 +19,11 @@
 			<argument type="service" id="models" />
         </service>
 		
-		<service id="shopware_storefront.category_service_decorator"
+		<service id="itswcar.category_service_decorator"
 				 class="%itswcar.category_service.class%"
 				 decorates="shopware_storefront.category_service"
 				 public="false">
-			<argument type="service" id="shopware_storefront.category_service_decorator.inner"/>
+			<argument type="service" id="itswcar.category_service_decorator.inner"/>
 			<argument type="service" id="itswcar.services"/>
 		</service>
 		
