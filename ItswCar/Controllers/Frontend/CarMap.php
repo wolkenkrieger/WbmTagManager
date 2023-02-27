@@ -173,6 +173,12 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 		])
 			->getResult();
 		
+		if (!count($types)) {
+			$this->Request()->setParam('redirect', 0);
+			$this->forward('index');
+			return;
+		}
+		
 		$typeIds = [];
 		
 		foreach($types as $type) {
