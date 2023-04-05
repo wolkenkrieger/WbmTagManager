@@ -235,12 +235,22 @@ class ItswCar extends Plugin {
 		]);
 		
 		$service->update('s_articles_attributes', 'google_produkt_id', 'string', [
-			'label' => ' Google Merchant Center Produkt-ID',
+			'label' => 'Google Merchant Center Produkt-ID',
 			'supportText' => '',
 			'helpText' => '',
 			'translatable' => FALSE,
 			'displayInBackend' => TRUE,
 			'position' => 109,
+			'custom' => FALSE
+		]);
+		
+		$service->update('s_articles_attributes', 'afterbuy_level', 'float', [
+			'label' => 'Afterbuy Level',
+			'supportText' => '',
+			'helpText' => '',
+			'translatable' => FALSE,
+			'displayInBackend' => TRUE,
+			'position' => 110,
 			'custom' => FALSE
 		]);
 		
