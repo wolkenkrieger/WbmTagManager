@@ -123,6 +123,16 @@ class Eventhandlers {
 		//$viewVars = $subject->View()->getAssign('sCategoryContent');
 		//$categoryCanonical = (isset($viewVars['link']) && $viewVars['link'])? $this->seoHelper->completeUrl($viewVars['link']) : '';
 		
+		try {
+			$indexUrl = Shopware()->Front()->Router()->assemble([
+				'controller' => 'index'
+			]);
+		} catch (\Exception $exception) {
+			$this->error($exception);
+			$indexUrl = NULL;
+		}
+		
+		
 		$templateVars = [
 			'session' => $sessionData,
 			'basketdata' => $basketData,
@@ -131,7 +141,7 @@ class Eventhandlers {
 			'development' => $this->configHelper ? $this->configHelper->isDevelopmentMode() : FALSE,
 			//'rootUrl' => $url,
 			//'categoryCanonical' => $categoryCanonical,
-			'rootUrl' => NULL,
+			'rootUrl' => $indexUrl,
 			'categoryCanonical' => NULL,
 		];
 		
