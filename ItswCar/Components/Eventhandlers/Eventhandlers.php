@@ -637,6 +637,62 @@ class Eventhandlers {
 	
 	/**
 	 * @param \Enlight_Event_EventArgs $eventArgs
+	 * @return void
+	 * @throws \Exception
+	 */
+	public function onBasketAddArticleAdded(\Enlight_Event_EventArgs $eventArgs) {
+		if ($basketId = (int)$eventArgs['id']) {
+			$sessionData = $this->sessionHelper->getSessionData();
+			
+			if (empty($sessionData) || is_null($sessionData['car'])) {
+				return;
+			}
+			
+			$query = $this->modelManager->getRepository(Car::class)->getCarsQuery([
+				'select' => 'cars',
+				'conditions' => [
+					'cars.tecdocId' => $sessionData['car']
+				]
+			]);
+			
+			$query->useQueryCache(TRUE);
+			$query->setMaxResults(1);
+			
+			if (is_null($car = $query->getOneOrNullResult())) {
+				return;
+			}
+			
+			$carDisplay = sprintf('%s %s %s (%d/%d - %d/%d)', $car->getManufacturer()->getDisplay(), $car->getModel()->getDisplay(), $car->getType()->getDisplay(), $car->getBuildFromMonth(), $car->getBuildFromYear(), $car->getBuildToMonth(), $car->getBuildToYear());
+			
+			if (is_object($basketEntity = $this->modelManager->getRepository(Basket::class)->find($basketId))) {
+				
+				try {
+					$orderBasketAttributeEntity = $this->modelManager->getRepository(OrderBasket::class)->findOneBy([
+						'orderBasketId' => $basketEntity->getId()
+					]);
+					
+					if (is_object($orderBasketAttributeEntity)) {
+						$orderBasketAttributeEntity->setTecdocId($sessionData['car']);
+						$orderBasketAttributeEntity->setCarDisplay($carDisplay);
+						$this->modelManager->persist($orderBasketAttributeEntity);
+					} else {
+						$orderBasketAttributeEntity = new OrderBasket();
+						$orderBasketAttributeEntity->setOrderBasketId($basketEntity->getId());
+						$orderBasketAttributeEntity->setTecdocId($sessionData['car']);
+						$orderBasketAttributeEntity->setCarDisplay($carDisplay);
+						$this->modelManager->persist($orderBasketAttributeEntity);
+						$basketEntity->setAttribute($orderBasketAttributeEntity);
+					}
+					$this->modelManager->flush();
+				} catch (\Exception $exception) {
+					$this->error(($exception));
+				}
+			}
+		}
+	}
+	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
 	 */
 	public function onBasketAddUpdateArticleStart(\Enlight_Event_EventArgs $eventArgs): void {
 		$userGroupData = $this->container->get('system')->sUSERGROUPDATA;

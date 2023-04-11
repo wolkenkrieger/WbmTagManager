@@ -53,10 +53,10 @@ class Subscribers implements SubscriberInterface {
 			'sArticles::sGetArticlesByCategory::after'                      => 'onAfterGetArticleByCategory',
 			'sArticles::sGetArticleById::after'                             => 'onAfterGetArticleById',
 			
-			'Shopware_Modules_Basket_UpdateCartItems_Updated'               => 'onBasketUpdateCartItemsUpdated',
 			'Shopware_Modules_Basket_AddArticle_Start'                      => 'onBasketAddUpdateArticleStart',
 			'Shopware_Modules_Basket_UpdateArticle_Start'                   => 'onBasketAddUpdateArticleStart',
 			'Shopware_Modules_Order_SaveOrder_FilterAttributes'             => 'onOrderSaveOrderFilterAttributes',
+			'Shopware_Modules_Basket_AddArticle_Added'                      => 'onBasketAddArticleAdded',
 			
 			'Shopware_CronJob_ItswHandleGoogleMerchantCenterQueue'          => 'onCronHandleGoogleMerchantCenterQueue',
 			'Shopware_CronJob_ItswCheckPrepaymentOrdersPaymentStatus'       => 'onCronHandleOrdersPaymentStatus',
@@ -67,6 +67,7 @@ class Subscribers implements SubscriberInterface {
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Detail'  => 'onPostDispatchSecureFrontendDetail',
 			//'Enlight_Controller_Action_PostDispatchSecure_Frontend_Listing' => 'onPostDispatchSecureFrontendListing',
 			//'Shopware_Modules_Basket_UpdateArticle_FilterSqlDefaultParameters'=> 'onBasketUpdateArticleFilterSqlDefaultParameters',
+			//'Shopware_Modules_Basket_UpdateCartItems_Updated'               => 'onBasketUpdateCartItemsUpdated',
 		];
 	}
 	
@@ -180,8 +181,7 @@ class Subscribers implements SubscriberInterface {
 	 * @param \Enlight_Event_EventArgs $eventArgs
 	 */
 	public function onBasketUpdateCartItemsUpdated(\Enlight_Event_EventArgs $eventArgs): void {
-		$eventHandler = new Eventhandler($this->pluginDir);
-		$eventHandler->onBasketUpdateCartItemsUpdated($eventArgs);
+		(new Eventhandler($this->pluginDir))->onBasketUpdateCartItemsUpdated($eventArgs);
 	}
 	
 	/**
@@ -191,8 +191,12 @@ class Subscribers implements SubscriberInterface {
 		(new Eventhandler($this->pluginDir))->onBasketAddUpdateArticleStart($eventArgs);
 	}
 	
-	public function onBasketUpdateArticleFilterSqlDefaultParameters(\Enlight_Event_EventArgs $eventArgs) {
-	
+	/**
+	 * @param \Enlight_Event_EventArgs $eventArgs
+	 * @return void
+	 */
+	public function onBasketAddArticleAdded(\Enlight_Event_EventArgs $eventArgs): void {
+		(new Eventhandler($this->pluginDir))->onBasketAddArticleAdded($eventArgs);
 	}
 	
 	/**
