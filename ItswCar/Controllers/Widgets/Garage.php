@@ -31,6 +31,7 @@ class Shopware_Controllers_Widgets_Garage extends Enlight_Controller_Action {
 	 *
 	 */
 	public function preDispatch(): void {
+		parent::preDispatch();
 		$this->Response()->setHeader('x-robots-tag', 'noindex');
 	}
 	

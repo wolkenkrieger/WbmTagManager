@@ -31,6 +31,14 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 	/**
 	 * @return void
 	 */
+	public function preDispatch(): void {
+		parent::preDispatch();
+		$this->Response()->setHeader('X-Robots-Tag', 'noindex');
+	}
+	
+	/**
+	 * @return void
+	 */
 	public function indexAction(): void {
 		$topBrandsViewData = $viewData = [];
 		
@@ -86,7 +94,6 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 			
 		}
 		
-		//$this->Response()->setHeader('X-Robots-Tag', 'noindex');
 		$this->View()->assign('viewData', $viewData);
 		$this->View()->assign('topBrandsViewData', $topBrandsViewData);
 	}
@@ -142,7 +149,6 @@ class Shopware_Controllers_Frontend_CarMap extends Enlight_Controller_Action {
 		])
 			->getResult();
 		
-		//$this->Response()->setHeader('X-Robots-Tag', 'noindex');
 		$this->View()->assign('models', $models);
 	}
 	
