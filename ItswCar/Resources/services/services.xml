@@ -33,6 +33,7 @@
 			<tag name="condition_handler_dbal" />
 		</service>
 	
+		<!--
 		<service id="itswcar.service.sitemap_writer"
 				 class="%itswcar.sitemap_writer_service.class%"
 				 decorates="shopware_bundle_sitemap.service.sitemap_writer"
@@ -55,7 +56,7 @@
 			
 			<tag name="sitemap_url_provider" />
 		</service>
-		
+		-->
 		
 		<service id="itswcar.service.debug_logger" class="Shopware\Components\Logger" public="true">
 			<argument>itsw_car_debug</argument>
