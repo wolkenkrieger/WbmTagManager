@@ -1,0 +1,64 @@
+.carmap {
+  &.is--border,
+  .is--border {
+    border: 1px solid @border-color;
+  }
+
+  &.manufacturer,
+  &.model {
+    a {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+      .unitize(padding-bottom, 15);
+      .is--text-color;
+      .is--small-text;
+
+      &:last-child {
+        padding-bottom: 0;
+      }
+
+      .link--name {
+        color: @link-color;
+        .unitize(font-size, @font-size-base);
+      }
+
+      @media screen and (min-width: @tabletViewportWidth) {
+        .unitize(padding-bottom, 5);
+      }
+    }
+  }
+
+  &.type {
+    a {
+      white-space: normal;
+    }
+
+    .panel {
+      .unitize-margin(0, 0, 5, 0);
+    }
+
+    @media screen and (min-width: @tabletLandscapeViewportWidth) {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: stretch;
+      height: 100%;
+
+      .panel {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        width: ~"calc(50% - 3px)";
+        .unitize-margin(0, 3, 3, 0);
+
+        &:nth-child(2n) {
+          .unitize-margin(0, 0, 3, 3);
+        }
+      }
+    }
+  }
+}

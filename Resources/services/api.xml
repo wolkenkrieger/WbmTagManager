@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+		   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		   xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+	
+	<services>
+		<defaults public="true"/>
+		
+		<service id="itswcar.api.resource.extendedarticle" class="ItswCar\Components\Api\Resource\ExtendedArticle">
+			<tag name="shopware.api_resource"/>
+		</service>
+		
+        <service id="itswcar.api.extendedarticles" class="Shopware_Controllers_Api_ExtendedArticles">
+			<argument type="service" id="itswcar.api.resource.extendedarticle"/>
+        </service>
+		
+		<!--service id="itswcar.api.resource.extendedcategory" class="ItswCar\Components\Api\Resource\ExtendedCategory">
+			<argument type="service" id="itswcar.api.resource.extendedcategory.inner" />
+			<tag name="shopware.api_resource"/>
+		</service>
+		
+		<service id="itswcar.api.extendedcategories" class="Shopware_Controllers_Api_ExtendedCategories">
+			<argument type="service" id="itswcar.api.resource.extendedcategory"/>
+			
+			<tag name="shopware.controller" module="api" controller="categories"/>
+		</service-->
+    </services>
+</container>

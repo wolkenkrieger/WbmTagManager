@@ -1,0 +1,36 @@
+/**
+ * Projekt: ITSW Car
+ * Autor:   Rico Wunglück <development@itsw.dev>
+ * Datum:   16.12.2020
+ * Zeit:    22:27
+ * Datei:   all.less
+ * @package 
+ */
+@widget--categories-border-color: #F1F1F1;
+@widget--categories-headline-color: #000000;
+
+.itsw {
+  @import 'dimensions';
+  @import 'tables';
+  @import 'containers';
+  @import 'images';
+  @import 'boxes';
+  @import 'carfinder';
+  @import 'restrictions';
+  @import "garage";
+  @import "carmap";
+
+  .is--text-color {
+    color: @text-color;
+  }
+
+  .is--small-text {
+    @x: @font-size-base - 1;
+    .unitize(font-size, @x)
+  }
+
+
+}
+
+@import "tweaks";
+@import "forms";

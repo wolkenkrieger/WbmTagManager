@@ -1,0 +1,153 @@
+/**
+ * Projekt: ITSW Car
+ * Autor:   Rico Wunglück <development@itsw.dev>
+ * Datum:   19.06.2021
+ * Zeit:    10:16
+ * Datei:   carfinder.less
+ */
+
+/*
+@phoneLandscapeViewportWidth: 30em;     // 480px
+@tabletViewportWidth: 48em;             // 768px
+@tabletLandscapeViewportWidth: 64em;    // 1024px
+@desktopViewportWidth: 78.75em;         // 1260px
+*/
+@input-height: 32;
+@select2-default-height: 28;
+@input-line-height: @input-height - 2;
+@info-line-height: 40;
+
+.carfinder {
+  @media screen and (min-width: @tabletViewportWidth) {
+    .unitize-min-height(140);
+    .unitize(margin-top, 10);
+    background-color: rgba(0, 0, 0, 0.45);
+    color: #FFFFFF;
+
+    label {
+      color: #FFFFFF;
+    }
+  }
+
+  label {
+    .unitize-min-width(100);
+    .unitize-width(100);
+    display: inline-block;
+  }
+
+  select {
+    width: calc(~'100% - 105px');
+    /*width: 100%;*/
+    display: inline-block;
+    .unitize-height(@input-height);
+    .unitize(line-height, @input-line-height);
+  }
+
+  .select2-container {
+    & .select2-selection--single,
+    & .select2-selection--single .select2-selection__rendered {
+      .unitize-height(@input-height);
+      .unitize(line-height, @input-line-height);
+    }
+
+    & .select2-selection--single .select2-selection__arrow {
+      .unitize-height(@input-height);
+    }
+
+    & .select2-selection--single .select2-selection__clear {
+      .unitize-height(@select2-default-height);
+      .unitize(line-height, @select2-default-height);
+    }
+  }
+
+  .table {
+    /*border: 1px solid red;*/
+    &--caption {
+      .unitize-padding(0, 0, 5, 0);
+    }
+  }
+
+  .table--cell {
+    /*border: 1px solid green;*/
+    float: left;
+  }
+
+  .hsn-tsn--container {
+    width: 100%;
+    .unitize-padding(5, 10, 5, 10);
+
+    input[type=text] {
+      width: 100%;
+      .unitize-height(35);
+      .unitize-padding(2);
+      display: inline-block;
+    }
+
+    @media only screen and (min-width: @tabletViewportWidth) {
+      width: 35%;
+      .unitize-padding(5, 15, 5, 10);
+    }
+
+    @media only screen and (min-width: @tabletLandscapeViewportWidth) {
+      width: 25%;
+    }
+
+    @media only screen and (min-width: @desktopViewportWidth) {
+      width: 25%;
+    }
+  }
+
+  .select--container {
+    width: 100%;
+    .unitize-padding(5, 10, 5, 10);
+
+    @media only screen and (min-width: @tabletViewportWidth) {
+      width: 65%;
+      .unitize-padding(5, 10, 5, 15);
+    }
+
+    @media only screen and (min-width: @tabletLandscapeViewportWidth) {
+      width: 50%;
+    }
+
+    @media only screen and (min-width: @desktopViewportWidth) {
+      width: 50%;
+      .unitize-padding(5, 15, 0, 15);
+    }
+  }
+
+  .selected_car--container {
+    width: 100%;
+    .unitize-padding(5, 10, 5, 10);
+
+    @media only screen and (min-width: @tabletLandscapeViewportWidth) {
+      width: 75%;
+    }
+
+    @media only screen and (min-width: @desktopViewportWidth) {
+      .unitize-padding(5, 15, 5, 15);
+    }
+  }
+
+  .info--container {
+    span {
+      display: block;
+
+      &.h2, &.h3, &.h4 {
+        .unitize(line-height, @input-line-height);
+      }
+
+      &.h4 {
+        .unitize(font-size, 13);
+      }
+    }
+
+    display: none;
+
+    @media only screen and (min-width: @tabletLandscapeViewportWidth) {
+      display: table-cell;
+      width: 25%;
+      .unitize-padding(5, 10, 0, 10);
+    }
+  }
+}

@@ -1,0 +1,205 @@
+/**
+ * Projekt: ITSW Car
+ * Autor:   Rico Wunglück <development@itsw.dev>
+ * Datum:   03.05.2021
+ * Zeit:    18:06
+ * Datei:   boxes.less
+ */
+
+.h2 {
+  .unitize(@font-size-h2, 16, font-size);
+
+  &.headline {
+    .unitize(@font-size-h2 * 2, 16, line-height);
+    display: block;
+  }
+}
+
+.h3 {
+  .unitize(@font-size-h3, 16, font-size);
+
+  &.headline {
+    .unitize(@font-size-h3 * 2, 16, line-height);
+    display: block;
+  }
+}
+
+.bold {
+  font-weight: @font-bold-weight;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.pull-right {
+  float: right;
+}
+
+.pull-left {
+  float: left;
+}
+
+.pull-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.width--100 {
+  width: 100%;
+}
+
+.width--50 {
+  width: 50%;
+}
+
+.height--100 {
+  height: 100%;
+}
+
+.margin {
+  &-none {
+    margin: 0;
+  }
+
+  &-top-20 {
+    .unitize(margin-top, 20);
+  }
+
+  &-top-10 {
+    .unitize(margin-top, 10);
+  }
+
+  &-right-20 {
+    .unitize(margin-right, 20);
+  }
+
+  &-right-10 {
+    .unitize(margin-right, 10);
+  }
+
+  &-bottom-20 {
+    .unitize(margin-bottom, 20);
+  }
+
+  &-bottom-10 {
+    .unitize(margin-bottom, 10);
+  }
+
+  &-left-20 {
+    .unitize(margin-left, 20);
+  }
+
+  &-left-10 {
+    .unitize(margin-left, 10);
+  }
+}
+
+.padding {
+  &-none {
+    padding: 0;
+  }
+
+  &-top-20 {
+    .unitize(padding-top, 20);
+  }
+
+  &-top-10 {
+    .unitize(padding-top, 10);
+  }
+
+  &-right-20 {
+    .unitize(padding-right, 20);
+  }
+
+  &-right-10 {
+    .unitize(padding-right, 10);
+  }
+
+  &-bottom-20 {
+    .unitize(padding-bottom, 20);
+  }
+
+  &-bottom-10 {
+    .unitize(padding-bottom, 10);
+  }
+
+  &-left-20 {
+    .unitize(padding-left, 20);
+  }
+
+  &-left-10 {
+    .unitize(padding-left, 10);
+  }
+}
+
+
+.widget {
+  &.categories {
+     ul {
+      overflow: hidden;
+      list-style: none;
+
+      li {
+        float: left;
+        .unitize(width, 176);
+        /*.unitize(min-height, 200);*/
+        .unitize(margin-bottom, 20);
+        .unitize(margin-left, 15);
+        border: 1px solid @widget--categories-border-color;
+        .unitize(padding-top, 15);
+        .unitize(padding-bottom, 15);
+        .unitize(padding-left, 0);
+        .unitize(padding-right, 0);
+
+        &:hover {
+          border-color: darken(@widget--categories-border-color, 8%);
+        }
+
+        ul > li {
+          border: none;
+          width: 100%;
+          min-height: 0;
+          margin: 0;
+          padding: 0;
+          .unitize(padding-left, 5);
+          .unitize(padding-right, 5);
+        }
+
+        .image {
+          text-align: center;
+
+          img {
+            margin: 0 auto;
+            display: block;
+            .unitize(height, 110);
+            filter: grayscale(100%);
+            -webkit-filter: grayscale(100%);
+
+            &:hover {
+              filter: none;
+              -webkit-filter: grayscale(0%);
+            }
+          }
+
+          .headline {
+            background-color: darken(@widget--categories-border-color, 8%);
+            color: @widget--categories-headline-color;
+
+            a {
+              color: @widget--categories-headline-color;
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+.navigation--entry.entry--garage {
+  display: none;
+
+  @media screen and(min-width: @tabletViewportWidth) {
+    display: inherit;
+  }
+}
+
+.navigation--entry .icon--house {
+  .unitize(font-size, 18);
+  vertical-align: middle;
+}
+
+.navigation--entry .garage--quantity {
+  .unitize(-4, 16, top);
+  .unitize(left, 23);
+  position: absolute;
+  margin: 0;
+}
+
+.garage {
+  &--item {
+    border-top: 1px solid @border-color;
+    .unitize-padding(15,0);
+
+    &:first-child {
+      border: none;
+    }
+
+    .table--cell:last-child {
+      .unitize-min-width(100);
+    }
+  }
+}
+
+@media screen and(min-width: @tabletViewportWidth) {
+  .garage--overview .panel--table {
+    .unitize-padding(0, 20);
+    border: 1px solid @border-color;
+  }
+}

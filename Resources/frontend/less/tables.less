@@ -1,0 +1,91 @@
+/**
+ * Projekt: ITSW Car
+ * Autor:   Rico Wunglück <development@itsw.dev>
+ * Datum:   16.12.2020
+ * Zeit:    23:09
+ * Datei:   tables.less
+ * @package 
+ */
+.table {
+  box-sizing: border-box;
+  display: table;
+  width: 100%;
+
+  &.header--navigation {
+    width: @table-header--navigation-width;
+    margin: auto;
+  }
+
+  &.toggle {
+      .table--row:nth-child(odd) {
+        background-color: @table-row-highlight-bg;
+      }
+  }
+
+  &.flex {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+
+    .table--cell {
+      .unitize(padding, 20);
+      flex-basis: 0x;
+      flex-grow: 1;
+      flex-shrink: 1;
+    }
+  }
+
+  &--header {
+    width: 100%;
+    display: table-header-group;
+    background-color: @table-header-bg;
+    color: @table-header-color;
+    .unitize(padding, @table--header-padding);
+
+    .table--cell {
+      .unitize(padding, @table--header-padding);
+    }
+  }
+
+  &--row {
+    width: 100%;
+    display: table-row;
+    background-color: @table-row-bg;
+    color: @table-row-color;
+  }
+
+  &--caption {
+    display: table-caption;
+    caption-side: top;
+  }
+
+  &--content {
+    width: 100%;
+    display: table-row-group;
+  }
+
+  &--cell {
+    display: table-cell;
+    .unitize(padding, @table--cell-padding);
+    vertical-align: top;
+
+    &.is--right {
+      text-align: right;
+    }
+
+    &.min-width--80 {
+      .unitize(min-width, 80);
+    }
+
+    .widget--select-container {
+      /*.unitize-width(@widget--select-container-width);*/
+      width: 100%;
+      select {
+        width: 100%;
+      }
+    }
+  }
+}
