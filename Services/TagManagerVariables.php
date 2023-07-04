@@ -164,16 +164,18 @@ class TagManagerVariables implements TagManagerVariablesInterface
 
         return json_decode($dataLayer, true);
     }
-
-    /**
-     * @param $source
-     * @param bool $prettyPrint
-     *
-     * @return string
-     */
-    public function prependDataLayer($source, $prettyPrint = false)
+	
+	/**
+	 * @param      $source
+	 * @param bool $prettyPrint
+	 * @return string
+	 * @throws \JsonException
+	 */
+	public function prependDataLayer($source, $prettyPrint = false)
     {
         $variables = $this->getVariables();
+		
+		$nullString = ['ecommerce' => NULL];
 		
         array_walk_recursive($variables, static function (&$item) {
 			if (is_string($item)) {
@@ -184,13 +186,12 @@ class TagManagerVariables implements TagManagerVariablesInterface
         return sprintf(
             '%s%s%s%s%s',
             '<script>',
-			'windows.dataLayer.push({ ecommerce: null });',
+			sprintf(
+				'windows.dataLayer.push(%s);',
+				json_encode($nullString, JSON_THROW_ON_ERROR | (($prettyPrint) ? JSON_PRETTY_PRINT : NULL))),
             sprintf(
                 'window.dataLayer.push(%s);',
-                    json_encode(
-                        $variables,
-                        ($prettyPrint) ? JSON_PRETTY_PRINT : null
-                    )
+	            json_encode($variables, JSON_THROW_ON_ERROR | (($prettyPrint) ? JSON_PRETTY_PRINT : NULL))
             ),
             '</script>',
             $source
