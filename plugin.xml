@@ -1,187 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
-<plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/5.2/engine/Shopware/Components/Plugin/schema/plugin.xsd">
-	
-	<label lang="de">ITSW Car</label>
-	
-	<version>2.8.4</version>
-	<copyright>(c) by IT Service Wunglück</copyright>
-	<license>MIT</license>
-	<link>https://www.itsw.dev</link>
-	<author>IT Service Wunglück</author>
-	<compatibility minVersion="5.6.0" maxVersion="5.99.99"/>
-	
-	<description lang="de">.</description>
-	<changelog version="2.8.4">
-		<changes lang="de">Bug-Fix: index-Link (Headerlogo) berichtigt</changes>
-	</changelog>
-	<changelog version="2.8.3">
-		<changes lang="de">Bug-Fix: pro Warenkorb-Position wird jetzt das aktuell gewählte Fahrzeug hinterlegt</changes>
-	</changelog>
-	<changelog version="2.8.2">
-		<changes lang="de">Artikelattribute um Afterbuy-Level erweitert</changes>
-	</changelog>
-	<changelog version="2.8.1">
-		<changes lang="de">Artikelattribute um JSON-kodierte OE-Nummern erweitert</changes>
-	</changelog>
-	
-	<changelog version="2.8.0">
-		<changes lang="de">Erlaubnis/Verbot zum Setzen des Trackingcookies wird bei der Bestellung erfasst</changes>
-	</changelog>
-	
-	<changelog version="2.7.0">
-		<changes lang="de">Artikelbeschreibung aufarbeiten für Google : Maximale Länge (5000 Zeichen) beachtet, Fahrzeuge hinzugefügt</changes>
-	</changelog>
-	
-	<changelog version="2.6.0">
-		<changes lang="de">Artikelbeschreibungen filtern nach "Qualität"</changes>
-	</changelog>
-	
-	<changelog version="2.5.0">
-		<changes lang="de">Neues Konsolen-Kommando eingeführt: itsw:media:delete:bychecksum</changes>
-	</changelog>
-	
-	<changelog version="2.4.1">
-		<changes lang="de">Artikelpreise werden als History gespeichert</changes>
-	</changelog>
-	
-	<changelog version="2.3.1">
-		<changes lang="de">Modifizierter flatpickr hinzugefügt (passiver Listener)</changes>
-	</changelog>
-	
-	<changelog version="2.3.0">
-		<changes lang="de">Fahrzeugliste/Schnellwahl hinzugefügt</changes>
-	</changelog>
-	
-	<changelog version="2.2.6">
-		<changes lang="de">Google Shopping Versandländer hinzugefügt</changes>
-	</changelog>
-	
-	<changelog version="2.2.0">
-		<changes lang="de">Garage hinzugefügt</changes>
-	</changelog>
-	
-	<changelog version="2.1.3">
-		<changes lang="de">Zahlungsfrist für Vorkassebestellungen</changes>
-	</changelog>
-	
-	<changelog version="2.1">
-		<changes lang="de">Bugfixes; Sitemap generiert Fahrzeug-URLs</changes>
-	</changelog>
-	
-	<changelog version="2.0.2">
-		<changes lang="de">URL-Handling verbessert</changes>
-	</changelog>
-	
-	<changelog version="2.0">
-		<changes lang="de">Komplettes rebase des Code</changes>
-	</changelog>
-	
-	<changelog version="1.4.1">
-		<changes lang="de">Cronjob zum Übermitteln der Produktfeeds an das Google Merchant Center</changes>
-	</changelog>
-	
-	<changelog version="1.4.0">
-		<changes lang="de">SEO-freundliche URLs bei gewählten Fahrzeugen</changes>
-	</changelog>
-	
-	<changelog version="1.3.2">
-		<changes lang="de">SEO bei Detailview</changes>
-	</changelog>
-	
-	<changelog version="1.3.0">
-		<changes lang="de">Gewähltes Fahrzeug wird im Warenkorb/bei der Bestellung gespeichert</changes>
-	</changelog>
-	
-	<changelog version="1.2.2">
-		<changes lang="de">Bugfixes / Attribute "position_x" entfernt</changes>
-	</changelog>
-	
-	<changelog version="1.2.1">
-		<changes lang="de">Fake Preis eingeführt</changes>
-	</changelog>
-	
-	<changelog version="1.2.0">
-		<changes lang="de">Google Kundenrezension eingeführt</changes>
-	</changelog>
-	
-	<changelog version="1.1.1">
-		<changes lang="de">Konfigurationsoptionen im Backend eingeführt</changes>
-	</changelog>
-	
-	<changelog version="1.1.0">
-		<changes lang="de">Google Content API eingebunden</changes>
-	</changelog>
-	
-	<changelog version="1.0.17">
-		<changes lang="de">Google Indexing API angebunden</changes>
-	</changelog>
-	
-	<changelog version="1.0.16">
-		<changes lang="de">Bugfixing</changes>
-	</changelog>
-	
-	<changelog version="1.0.15">
-		<changes lang="de">Bugfixing</changes>
-	</changelog>
-	
-	<changelog version="1.0.14">
-		<changes lang="de">Neues Artikel-Attribut "OE-Nummern"</changes>
-	</changelog>
-	
-	<changelog version="1.0.13">
-		<changes lang="de">BasePath unterdrückt im FrontRouter</changes>
-	</changelog>
-	
-	<changelog version="1.0.12">
-		<changes lang="de">Fehler in CarFinder behoben</changes>
-	</changelog>
-	
-	<changelog version="1.0.11">
-		<changes lang="de">Nicht vorhandene TecdocIds werden beim Anlegen der Artikel-Links ignoriert und führen nicht mehr zum Abbruch der Operation</changes>
-	</changelog>
-	
-	<changelog version="1.0.10">
-		<changes lang="de">Texte geändert</changes>
-	</changelog>
-	
-	<changelog version="1.0.9">
-		<changes lang="de">Bug in CustomerGroupConditionHandler behoben</changes>
-	</changelog>
-	
-	<changelog version="1.0.8">
-		<changes lang="de">API Endpoint ExtendedArticles::getList um Preise erweitert</changes>
-	</changelog>
-	
-	<changelog version="1.0.7">
-		<changes lang="de">Kontaktformular erweitert</changes>
-	</changelog>
-	
-	<changelog version="1.0.6">
-		<changes lang="de">neues URL-Handling</changes>
-	</changelog>
-	
-	<changelog version="1.0.5">
-		<changes lang="de">Bugfixing</changes>
-	</changelog>
-	
-	<changelog version="1.0.4">
-		<changes lang="de">Rabattpreis eingeführt</changes>
-	</changelog>
-	
-	<changelog version="1.0.3">
-		<changes lang="de">Neues Feld "top_brand" in Herstellertabelle</changes>
-	</changelog>
-	
-	<changelog version="1.0.2">
-		<changes lang="de">Update auf select2 4.1.0-rc.0</changes>
-	</changelog>
-	
-	<changelog version="1.0.1">
-		<changes lang="de">Artikelattribute Position 1 - 4 hinzugefügt</changes>
-	</changelog>
-	
-	<changelog version="1.0.0">
-		<changes lang="de">Initialisierung / Erstveröffentlichung</changes>
-	</changelog>
-	
+<plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../engine/Shopware/Components/Plugin/schema/plugin.xsd">
+    <label lang="de">Tag Manager</label>
+    <label lang="en">Tag Manager</label>
+
+
+    <version>3.5.6</version>
+    <copyright>Webmatch GmbH</copyright>
+    <license>proprietary</license>
+    <link>http://www.webmatch.de</link>
+    <description lang="en">Google Tag Manager + Enhanced E-Commerce Tracking for Shopware</description>
+    <description lang="de">Google Tag Manager + Enhanced E-Commerce Tracking für Shopware</description>
+    <author>Webmatch GmbH</author>
+    <compatibility minVersion="5.6.3" />
+
+    <changelog version="3.5.6">
+        <changes lang="de">Hinzufügen der optionalen Pagespeed-Optimierung</changes>
+        <changes lang="en">Adding optional Pagespeed Optimisation</changes>
+    </changelog>
+
+    <changelog version="3.5.5">
+        <changes lang="de">Behebt fehlendes Tracking für removeFromCart auf der Warenkorb-Seite, die Daten sind nicht konfigurierbar im Backend</changes>
+        <changes lang="en">Fix missing removeFromCart tracking on the cart page, data is not configurable in the backend</changes>
+    </changelog>
+
+    <changelog version="3.5.4">
+        <changes lang="de">Behebt einen Null-Pointer Exception beim tracken der Produktklicks (Danke an @nicoanders)</changes>
+        <changes lang="en">Fix null pointer exception for tracking of product clicks (thanks to @nicoanders)</changes>
+    </changelog>
+
+    <changelog version="3.5.3">
+        <changes lang="de">Hinzufügen der Kompatibilität für Shopware 5.7</changes>
+        <changes lang="en">Add compatibility for Shopware 5.7</changes>
+    </changelog>
+
+    <changelog version="3.5.2">
+        <changes lang="de">Verschiebt das Google Tag Manager Skript in den head</changes>
+        <changes lang="en">Move tag manager script to the head</changes>
+    </changelog>
+
+    <changelog version="3.5.1">
+        <changes lang="de">Behebt XSS Sicherheitslücke über den Suchbegriff auf der Suchseite</changes>
+        <changes lang="en">Fix XSS security breach over site search term</changes>
+    </changelog>
+
+    <changelog version="3.5.0">
+        <changes lang="de">Hinzufügen der Möglichkeit des tracken von Produktklicks</changes>
+        <changes lang="en">Add possibility to track product clicks</changes>
+    </changelog>
+
+    <changelog version="3.4.0">
+        <changes lang="de">Hinzufügen der Möglichkeit das Script Tag und die Tag Manager URL zu erweitern</changes>
+        <changes lang="en">Add possibility to extend script tag and tag manager URL</changes>
+    </changelog>
+
+    <changelog version="3.3.0">
+        <changes lang="de">Hinzufügen des Supports für den Shopware Cookie Consent Manager</changes>
+        <changes lang="en">Add support for shopware cookie consent manager</changes>
+    </changelog>
+
+    <changelog version="3.2.4">
+        <changes lang="de">Update für Ace Code-Editor ab Shopware 5.6</changes>
+        <changes lang="en">Update for Ace code editor in Shopware 5.6</changes>
+    </changelog>
+
+    <changelog version="3.2.3">
+        <changes lang="de">Cast boolean property values properly, type hinted interfaces for service decoration</changes>
+        <changes lang="en">Typumwandlung boolescher Werte in Eigenschaften, typed hinted Interfaces zur Service Decoration</changes>
+    </changelog>
+
+    <changelog version="3.2.2">
+        <changes lang="de">Json encodierte Smarty-Syntax wird demaskiert. Erlaubt bspw jetzt die Verwendung von doppelten Anführungszeichen: |cat:"foo"</changes>
+        <changes lang="en">Json encoded Smarty-Syntax is being unescaped. Now allows the use double quotes e.g. |cat:"foo"</changes>
+    </changelog>
+
+    <changelog version="3.2.1">
+        <changes lang="de">Nutze Secure Events zur Injektion von Variablen nach Forward-Requests</changes>
+        <changes lang="en">Use PostDispatchSecure events for controller forwards</changes>
+    </changelog>
+
+    <changelog version="3.2.0">
+        <changes lang="de">Support für dataLayer auf Basis von Widget Modulen</changes>
+        <changes lang="en">Added dataLayer support for widget views through custom modules</changes>
+    </changelog>
+
+    <changelog version="3.1.0">
+        <changes lang="de">Neues Feature: GET Parameters für dataLayer in der Session zwischenspeichern</changes>
+        <changes lang="en">New feature: Temporary save GET parameters in session for use in dataLayer</changes>
+    </changelog>
+
+    <changelog version="3.0.2">
+        <changes lang="de">Geringfügige Anpassung der Backend-Oberfläche</changes>
+        <changes lang="en">Minor changes to the backend interface</changes>
+    </changelog>
+
+    <changelog version="3.0.1">
+        <changes lang="de">Stellt das Tracking der ersten Seite der Suchergebnisse wieder her</changes>
+        <changes lang="en">Fixed tracking of first page search results</changes>
+    </changelog>
+
+    <changelog version="3.0.0">
+        <changes lang="de">Erweiterte Backend-App zur Bearbeitung von Modulen, Handling von Syntax-Fehlern, Smarty-Funktion zur Datenbankabfrage</changes>
+        <changes lang="en">Extended backend app for editing modules, syntax error handling, smarty function to query the database</changes>
+    </changelog>
+
+    <changelog version="2.1.9">
+        <changes lang="de">Die Werte für Felder im DataLayer können nun größer als 255 Zeichen sein</changes>
+        <changes lang="en">Values for fields in datalayer may now be longer than 255 characters</changes>
+    </changelog>
+
+    <changelog version="2.1.8">
+        <changes lang="de">Bugfix für mehrfache Array Iterationen</changes>
+        <changes lang="en">Bugfix for multiple array iterations</changes>
+    </changelog>
+
+    <changelog version="2.1.7">
+        <changes lang="de">Setzt noscript Inhalte in existierendes Element zur Vermeidung von RegEx Konflikten</changes>
+        <changes lang="en">Use existing elements for noscript content to avoid regex mishaps in body</changes>
+    </changelog>
+
+    <changelog version="2.1.6">
+        <changes lang="de">Behebt ein Problem bei gleichzeitiger Verwendung von Advanced Shopping Cart (thanks @akkushopJK)</changes>
+        <changes lang="en">Fixes issues in combination with use of Shopware Advanced Cart (thanks @akkushopJK)</changes>
+    </changelog>
+
+    <changelog version="2.1.5">
+        <changes lang="de">Unterstützung für AddToCart Event bei deaktiviertem Off-Canvas Warenkorb</changes>
+        <changes lang="en">Support AddToCart Event for deactivated off-canvas basket</changes>
+    </changelog>
+
+    <changelog version="2.1.4">
+        <changes lang="de">Option zur Deaktivierung der Integration auf Subshop-Ebene</changes>
+        <changes lang="en">Option to deactive the integration by subshop</changes>
+    </changelog>
+
+    <changelog version="2.1.3">
+        <changes lang="de">Behebt einen Fehler in Verbindung mit Conexco Bootstrap Filtern bzw ganzseitigen Ajax Requests</changes>
+        <changes lang="en">Fixes a bug with the conexco bootstrap theme's ajax filter and full page ajax requests</changes>
+    </changelog>
+
+    <changelog version="2.1.2">
+        <changes lang="de">Anpassung e-Commerce Tracking AddTo/removeFrom Warenkorb Events</changes>
+        <changes lang="en">Adjusted AddTo/removeFrom basket events for e-commerce tracking</changes>
+    </changelog>
+
+    <changelog version="2.1.1">
+        <changes lang="de">Prüfe auf eingetragene Container ID vor dataLayer Abfrage</changes>
+        <changes lang="en">Check for set Container ID before dataLayer query</changes>
+    </changelog>
+
+    <changelog version="2.1.0">
+        <changes lang="de">Refaktoriert für Shopware 5.3</changes>
+        <changes lang="en">Refactored for Shopware 5.3</changes>
+    </changelog>
+
+    <changelog version="2.0.4">
+        <changes lang="de">dataLayer Struktur für Bestellabschluss angepasst</changes>
+        <changes lang="en">Fixed dataLayer structure for purchase tracking</changes>
+    </changelog>
+
+    <changelog version="2.0.3">
+        <changes lang="de">dataLayer Struktur für Impressionen auf der Detailseite angepasst</changes>
+        <changes lang="en">Fixed dataLayer structure for detail product impressions</changes>
+    </changelog>
+
+    <changelog version="2.0.2">
+        <changes lang="de">Placed dataLayer declaration before GTM script in header</changes>
+        <changes lang="en">dataLayer Initialisierung vor GTM Script in Header</changes>
+    </changelog>
+
+    <changelog version="2.0.1">
+        <changes lang="de">Nutze erlaubte Modifier ab 5.2.25 in Standardkonfiguration</changes>
+        <changes lang="en">Use allowed modifier only since 5.2.25 in default config</changes>
+    </changelog>
+
+    <changelog version="2.0.0">
+        <changes lang="de">Veröffentlichung Open-Source</changes>
+        <changes lang="en">Release Open-Source</changes>
+    </changelog>
 </plugin>

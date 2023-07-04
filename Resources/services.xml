@@ -1,15 +1,64 @@
 <?xml version="1.0" ?>
 
 <container xmlns="http://symfony.com/schema/dic/services"
-		   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		   xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
-	
-	<imports>
-		<import resource="services/commands.xml" />
-		<import resource="services/services.xml" />
-		<import resource="services/subscribers.xml" />
-		<import resource="services/api.xml" />
-		<import resource="services/helpers.xml" />
-	</imports>
-	
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <defaults public="true" />
+        <service id="wbm_tag_manager.repository.property" class="Shopware\Components\Model\ModelRepository">
+            <factory service="models" method="getRepository"/>
+            <argument type="string">WbmTagManager\Models\Property</argument>
+        </service>
+
+        <service id="wbm_tag_manager.modules" class="Shopware\Components\Model\ModelRepository">
+            <factory service="wbm_tag_manager.repository.property" method="getModules"/>
+        </service>
+
+        <service id="wbm_tag_manager.smarty_plugins" class="WbmTagManager\Services\TagManagerSmarty">
+            <argument id="dbal_connection" type="service"/>
+            <argument id="front" type="service"/>
+        </service>
+
+        <service id="wbm_tag_manager.variables" class="WbmTagManager\Services\TagManagerVariables">
+            <argument id="wbm_tag_manager.repository.property" type="service"/>
+            <argument id="template" type="service" />
+            <argument id="wbm_tag_manager.smarty_plugins" type="service" />
+        </service>
+
+        <service id="wbm_tag_manager.subscriber.backend.template_extension" class="WbmTagManager\Subscriber\Backend\TemplateExtension">
+            <argument id="template" type="service" />
+            <argument>%wbm_tag_manager.plugin_dir%</argument>
+            <tag name="shopware.event_subscriber" />
+        </service>
+
+        <service id="wbm_tag_manager.subscriber.frontend.theme"
+                 class="WbmTagManager\Subscriber\Frontend\ThemeSubscriber">
+            <tag name="shopware.event_subscriber"/>
+            <argument>%wbm_tag_manager.plugin_dir%</argument>
+        </service>
+
+        <service id="wbm_tag_manager.subscriber.frontend.dispatch" class="WbmTagManager\Subscriber\Frontend\Dispatch">
+            <argument type="service" id="wbm_tag_manager.variables" />
+            <argument type="service" id="config" />
+            <argument type="service" id="wbm_tag_manager.modules" />
+            <argument type="service" id="session" />
+            <tag name="shopware.event_subscriber" />
+        </service>
+
+        <service id="wbm_tag_manager.subscriber.frontend.filter_render" class="WbmTagManager\Subscriber\Frontend\FilterRender">
+            <argument type="service" id="wbm_tag_manager.variables" />
+            <argument type="service" id="config" />
+            <argument type="service" id="front" />
+            <argument>%wbm_tag_manager.plugin_dir%</argument>
+            <tag name="shopware.event_subscriber" />
+        </service>
+
+        <service id="WbmTagManager\Subscriber\Frontend\CookieConsent">
+            <argument type="service" id="config" />
+            <argument type="service" id="snippets" />
+            <argument>%wbm_tag_manager.plugin_dir%</argument>
+            <tag name="shopware.event_subscriber" />
+        </service>
+    </services>
 </container>

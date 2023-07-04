@@ -1,5 +1,16 @@
 {
+  "name": "webmatch/wbm-tag-manager",
+  "keywords": ["datalayer", "datalayer-configuration", "google-tag-manager", "shopware", "shopware-plugin"],
+  "description": "GTM integration and dataLayer configuration for Shopware",
+  "license": "GPL-3.0-or-later",
+  "type": "shopware-plugin",
+  "extra": {
+    "installer-name": "WbmTagManager"
+  },
   "require": {
-	"google/apiclient": "^2.10"
+    "composer/installers": "~1.0"
+  },
+  "scripts": {
+    "test": "phpunit -c tests"
   }
 }
