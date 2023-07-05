@@ -175,6 +175,10 @@ class TagManagerVariables implements TagManagerVariablesInterface
     {
         $variables = $this->getVariables();
 		
+		$ecommerceNull = [
+			'ecommerce' => NULL
+		];
+		
         array_walk_recursive($variables, static function (&$item) {
 			if (is_string($item)) {
 				$item = htmlspecialchars($item);
@@ -182,8 +186,12 @@ class TagManagerVariables implements TagManagerVariablesInterface
         });
 	    
 	    return sprintf(
-		    '%s%s%s%s',
+		    "%s%s\n%s%s%s",
 		    '<script>',
+		    sprintf(
+			    'window.dataLayer.push(%s);',
+			    json_encode($ecommerceNull, JSON_THROW_ON_ERROR | (($prettyPrint) ? JSON_PRETTY_PRINT : NULL))
+		    ),
 		    sprintf(
 			    'window.dataLayer.push(%s);',
 			    json_encode($variables, JSON_THROW_ON_ERROR | (($prettyPrint) ? JSON_PRETTY_PRINT : NULL))
