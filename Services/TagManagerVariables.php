@@ -174,6 +174,7 @@ class TagManagerVariables implements TagManagerVariablesInterface
 	public function prependDataLayer($source, $prettyPrint = false)
     {
         $variables = $this->getVariables();
+		$variables = unserialize(str_replace(['NAN;', 'INF;'], '0;', serialize($variables)), ['allow_classes' => TRUE]);
 		
 		$ecommerceNull = [
 			'ecommerce' => NULL
