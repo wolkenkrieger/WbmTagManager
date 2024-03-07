@@ -202,7 +202,7 @@ class TagManagerVariables implements TagManagerVariablesInterface
 		    '<script>',
 		    sprintf(
 			    'window.dataLayer.push(%s);',
-			    json_encode($ecommerceNull, JSON_THROW_ON_ERROR | (($prettyPrint) ? JSON_PRETTY_PRINT : NULL))
+			    json_encode($conentDefault, JSON_THROW_ON_ERROR | (($prettyPrint) ? JSON_PRETTY_PRINT : NULL))
 		    ),
 		    sprintf(
 			    'window.dataLayer.push(%s);',
