@@ -180,14 +180,14 @@ class TagManagerVariables implements TagManagerVariablesInterface
 			'ecommerce' => NULL
 		];
 		
-		$conentDefault = [
+		$contentDefault = [
 			'consent',
 			'default',
 			[
-				'ad_storage' => 'denied',
-				'ad_user_data' => 'denied',
-				'ad_personalization' => 'denied',
-				'analytics_storage' => 'denied',
+				'ad_storage' => 'granted',
+				'ad_user_data' => 'granted',
+				'ad_personalization' => 'granted',
+				'analytics_storage' => 'granted',
 			]
 		];
 		
@@ -202,7 +202,7 @@ class TagManagerVariables implements TagManagerVariablesInterface
 		    '<script>',
 		    sprintf(
 			    'window.dataLayer.push(%s);',
-			    json_encode($conentDefault, JSON_THROW_ON_ERROR | (($prettyPrint) ? JSON_PRETTY_PRINT : NULL))
+			    json_encode($contentDefault, JSON_THROW_ON_ERROR | (($prettyPrint) ? JSON_PRETTY_PRINT : NULL))
 		    ),
 		    sprintf(
 			    'window.dataLayer.push(%s);',
