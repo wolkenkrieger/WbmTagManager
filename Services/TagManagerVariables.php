@@ -183,10 +183,10 @@ class TagManagerVariables implements TagManagerVariablesInterface
 		$gtagCode = "
 		function gtag(){dataLayer.push(arguments);}\n
 		gtag('consent', 'default', {
-            'ad_storage': 'denied',
-            'ad_user_data': 'denied',
-            'ad_personalization': 'denied',
-            'analytics_storage': 'denied'
+            'ad_storage': 'granted',
+            'ad_user_data': 'granted',
+            'ad_personalization': 'granted',
+            'analytics_storage': 'granted'
         });
 		";
 		
