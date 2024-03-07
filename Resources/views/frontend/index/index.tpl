@@ -6,11 +6,23 @@
             document.asyncReady(function () {
                 if ($.getCookiePreference('wbm_tag_manager')) {
                     googleTag(window,document,'script','dataLayer','{"{config name='wbmTagManagerContainer'}"|escape:'javascript'}');
+                    googleTag('consent', 'default', {
+                        'ad_storage': 'denied',
+                        'ad_user_data': 'denied',
+                        'ad_personalization': 'denied',
+                        'analytics_storage': 'denied'
+                    });
                     googleTag = function () { };
                 }
                 $.subscribe('plugin/swCookieConsentManager/onBuildCookiePreferences', function (event, plugin, preferences) {
                     if ($.getCookiePreference('wbm_tag_manager')) {
                         googleTag(window,document,'script','dataLayer','{"{config name='wbmTagManagerContainer'}"|escape:'javascript'}');
+                        googleTag('consent', 'default', {
+                            'ad_storage': 'denied',
+                            'ad_user_data': 'denied',
+                            'ad_personalization': 'denied',
+                            'analytics_storage': 'denied'
+                        });
                         googleTag = function () { };
                     }
                 });
