@@ -180,6 +180,17 @@ class TagManagerVariables implements TagManagerVariablesInterface
 			'ecommerce' => NULL
 		];
 		
+		$conentDefault = [
+			'consent',
+			'default',
+			[
+				'ad_storage' => 'denied',
+				'ad_user_data' => 'denied',
+				'ad_personalization' => 'denied',
+				'analytics_storage' => 'denied',
+			]
+		];
+		
         array_walk_recursive($variables, static function (&$item) {
 			if (is_string($item)) {
 				$item = htmlspecialchars($item);
@@ -187,8 +198,12 @@ class TagManagerVariables implements TagManagerVariablesInterface
         });
 	    
 	    return sprintf(
-		    "%s%s\n%s%s%s",
+		    "%s\n%s\n%s\n%s\n%s\n%s",
 		    '<script>',
+		    sprintf(
+			    'window.dataLayer.push(%s);',
+			    json_encode($ecommerceNull, JSON_THROW_ON_ERROR | (($prettyPrint) ? JSON_PRETTY_PRINT : NULL))
+		    ),
 		    sprintf(
 			    'window.dataLayer.push(%s);',
 			    json_encode($ecommerceNull, JSON_THROW_ON_ERROR | (($prettyPrint) ? JSON_PRETTY_PRINT : NULL))
