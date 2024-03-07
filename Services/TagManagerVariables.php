@@ -180,7 +180,15 @@ class TagManagerVariables implements TagManagerVariablesInterface
 			'ecommerce' => NULL
 		];
 		
-		$gtagCode = 'function gtag(){dataLayer.push(arguments);}';
+		$gtagCode = "
+		function gtag(){dataLayer.push(arguments);}\n
+		gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'denied'
+        });
+		";
 		
         array_walk_recursive($variables, static function (&$item) {
 			if (is_string($item)) {
