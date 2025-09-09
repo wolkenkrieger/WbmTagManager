@@ -3,7 +3,7 @@
 {block name="frontend_index_javascript_async_ready"}
     {if {config name='wbmTagManagerCookieConsent'}}
         <script>
-            document.asyncReady(function () {
+            $(document).ready(function () {
                 if ($.getCookiePreference('wbm_tag_manager')) {
                     googleTag(window,document,'script','dataLayer','{"{config name='wbmTagManagerContainer'}"|escape:'javascript'}');
                     googleTag = function () { };
