@@ -7,6 +7,9 @@
                 if ($.getCookiePreference('wbm_tag_manager')) {
                     googleTag(window,document,'script','dataLayer','{"{config name='wbmTagManagerContainer'}"|escape:'javascript'}');
                     /* googleTag = function () { }; */
+                    console.log('TagManager allowed');
+                } else {
+                    console.log('TagManager not allowed');
                 }
                 $.subscribe('plugin/swCookieConsentManager/onBuildCookiePreferences', function (event, plugin, preferences) {
                     if ($.getCookiePreference('wbm_tag_manager')) {
