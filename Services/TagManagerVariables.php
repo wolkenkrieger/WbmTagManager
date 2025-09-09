@@ -180,6 +180,16 @@ class TagManagerVariables implements TagManagerVariablesInterface
 			'ecommerce' => NULL
 		];
 		
+		$gtagCode = "
+		function gtag(){dataLayer.push(arguments);}\n
+		gtag('consent', 'default', {
+            'ad_storage': 'granted',
+            'ad_user_data': 'granted',
+            'ad_personalization': 'granted',
+            'analytics_storage': 'granted'
+        });
+		";
+		
         array_walk_recursive($variables, static function (&$item) {
 			if (is_string($item)) {
 				$item = htmlspecialchars($item);
@@ -187,8 +197,9 @@ class TagManagerVariables implements TagManagerVariablesInterface
         });
 	    
 	    return sprintf(
-		    "%s%s\n%s%s%s",
+		    "%s\n%s\n%s\n%s\n%s\n%s",
 		    '<script>',
+		    $gtagCode,
 		    sprintf(
 			    'window.dataLayer.push(%s);',
 			    json_encode($ecommerceNull, JSON_THROW_ON_ERROR | (($prettyPrint) ? JSON_PRETTY_PRINT : NULL))
