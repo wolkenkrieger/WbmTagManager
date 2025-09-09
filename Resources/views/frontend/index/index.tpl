@@ -3,7 +3,8 @@
 {block name="frontend_index_javascript_async_ready"}
     {if {config name='wbmTagManagerCookieConsent'}}
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+
+            document.asyncReady(function () {
                 if ($.getCookiePreference('wbm_tag_manager')) {
                     googleTag(window,document,'script','dataLayer','{"{config name='wbmTagManagerContainer'}"|escape:'javascript'}');
                     googleTag = function () { };
@@ -14,7 +15,7 @@
                         googleTag = function () { };
                     }
                 });
-            }, false);
+            });
         </script>
     {/if}
     {$smarty.block.parent}
