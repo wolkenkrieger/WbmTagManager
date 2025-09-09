@@ -13,6 +13,7 @@
                 j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl + '{/literal}{config name='wbmExtendedURLParameter'}{literal}';
                 f.parentNode.insertBefore(j, f);
             };
+            console.log(j);
             {/literal}
         </script>
     {/if}
